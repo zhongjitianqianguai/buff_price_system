@@ -297,7 +297,7 @@ def get_all(urls):
                         print(f'{time_get} :{url} 超时')
                         driver.refresh()
                         start_time = time.time()
-                time.sleep(sleep_time)
+                time.sleep(5)
 
             except WebDriverException as e:
                 crash_time = 0
@@ -380,4 +380,4 @@ for file in files:
 
 for thread in threads:
     thread.join()
-    time.sleep(3)
+    time.sleep(5)
