@@ -371,13 +371,13 @@ urls = []
 mail = {}
 files = os.listdir('../source')
 for file in files:
-    with open('source/' + file) as f:
+    with open('../source/' + file) as f:
         urls = f.readlines()
     f.close()
     thread = threading.Thread(target=get_all, args=([urls]))
+    time.sleep(5)
     threads.append(thread)
     thread.start()
 
 for thread in threads:
     thread.join()
-    time.sleep(5)
