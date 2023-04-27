@@ -31,12 +31,12 @@ def day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, 
             day_prices += float(day)
         day_price = day_prices / len(one_day_price)
         daily_change = round((price - day_price) / day_price, 2)
-        if daily_change > 0.2:
+        if daily_change >= 0.2:
             print(mail.get(url))
             if mail.get(url) is None:
                 mail[url] = price
                 send_mail(name_elements.text.splitlines()[
-                              2] + '价格在一天内上涨20% the lowest price in record is' + str(
+                              2] + '价格在一天内上涨超20% 具体涨幅为'+str(daily_change)+' the lowest price in record is' + str(
                     lowest_price_in_txt),
                           lowest_price.text,
                           'https://buff.163.com/goods/' + url)
@@ -45,7 +45,7 @@ def day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, 
             else:
                 mail[url] = price
                 send_mail(name_elements.text.splitlines()[
-                              2] + '价格在一天内上涨20% the lowest price in record is' + str(
+                              2] + '价格在一天内上涨超20% 具体涨幅为'+str(daily_change)+'the lowest price in record is' + str(
                     lowest_price_in_txt),
                           lowest_price.text,
                           'https://buff.163.com/goods/' + url)
@@ -53,7 +53,7 @@ def day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, 
             if mail.get(url) is None:
                 mail[url] = price
                 send_mail(name_elements.text.splitlines()[
-                              2] + '价格在一天内下降20% the lowest price in record is' + str(
+                              2] + '价格在一天内下降超20% 具体涨幅为'+str(daily_change)+'the lowest price in record is' + str(
                     lowest_price_in_txt),
                           lowest_price.text,
                           'https://buff.163.com/goods/' + url)
@@ -62,7 +62,7 @@ def day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, 
             else:
                 mail[url] = price
                 send_mail(name_elements.text.splitlines()[
-                              2] + '价格在一天内下降20% the lowest price in record is' + str(
+                              2] + '价格在一天内下降超20% 具体涨幅为'+str(daily_change)+'the lowest price in record is' + str(
                     lowest_price_in_txt),
                           lowest_price.text,
                           'https://buff.163.com/goods/' + url)
@@ -79,7 +79,7 @@ def three_day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, p
             if mail.get(url) is None:
                 mail[url] = price
                 send_mail(name_elements.text.splitlines()[
-                              2] + '价格在三天内上涨30% the lowest price in record is' + str(
+                              2] + '价格在三天内上涨30% 具体涨幅为'+str(three_day_change)+' the lowest price in record is' + str(
                     lowest_price_in_txt),
                           lowest_price.text,
                           'https://buff.163.com/goods/' + url)
@@ -88,7 +88,7 @@ def three_day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, p
             else:
                 mail[url] = price
                 send_mail(name_elements.text.splitlines()[
-                              2] + '价格在三天内上涨30% the lowest price in record is' + str(
+                              2] + '价格在三天内上涨30% 具体涨幅为'+str(three_day_change)+'the lowest price in record is' + str(
                     lowest_price_in_txt),
                           lowest_price.text,
                           'https://buff.163.com/goods/' + url)
@@ -97,7 +97,7 @@ def three_day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, p
             if mail.get(url) is None:
                 mail[url] = price
                 send_mail(name_elements.text.splitlines()[
-                              2] + '价格在三天内下降30% the lowest price in record is' + str(
+                              2] + '价格在三天内下降30% 具体涨幅为'+str(three_day_change)+'the lowest price in record is' + str(
                     lowest_price_in_txt),
                           lowest_price.text,
                           'https://buff.163.com/goods/' + url)
@@ -106,7 +106,7 @@ def three_day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, p
             else:
                 mail[url] = price
                 send_mail(name_elements.text.splitlines()[
-                              2] + '价格在三天内下降30% the lowest price in record is' + str(
+                              2] + '价格在三天内下降30% 具体涨幅为'+str(three_day_change)+'the lowest price in record is' + str(
                     lowest_price_in_txt),
                           lowest_price.text,
                           'https://buff.163.com/goods/' + url)
@@ -125,7 +125,7 @@ def week_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price,
             if mail.get(url) is None:
                 mail[url] = price
                 send_mail(name_elements.text.splitlines()[
-                              2] + '价格在一周内上涨40% the lowest price in record is' + str(
+                              2] + '价格在一周内上涨40% 具体涨幅为'+str(week_change)+' the lowest price in record is' + str(
                     lowest_price_in_txt),
                           lowest_price.text,
                           'https://buff.163.com/goods/' + url)
@@ -134,7 +134,7 @@ def week_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price,
             else:
                 mail[url] = price
                 send_mail(name_elements.text.splitlines()[
-                              2] + '价格在一周内上涨40% the lowest price in record is' + str(
+                              2] + '价格在一周内上涨40% 具体涨幅为'+str(week_change)+' the lowest price in record is' + str(
                     lowest_price_in_txt),
                           lowest_price.text,
                           'https://buff.163.com/goods/' + url)
@@ -143,7 +143,7 @@ def week_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price,
             if mail.get(url) is None:
                 mail[url] = price
                 send_mail(name_elements.text.splitlines()[
-                              2] + '价格在一周内下降40% the lowest price in record is' + str(
+                              2] + '价格在一周内下降40% 具体涨幅为'+str(week_change)+' the lowest price in record is' + str(
                     lowest_price_in_txt),
                           lowest_price.text,
                           'https://buff.163.com/goods/' + url)
@@ -152,7 +152,7 @@ def week_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price,
             else:
                 mail[url] = price
                 send_mail(name_elements.text.splitlines()[
-                              2] + '价格在一周内下降40% the lowest price in record is' + str(
+                              2] + '价格在一周内下降40% 具体涨幅为'+str(week_change)+' the lowest price in record is' + str(
                     lowest_price_in_txt),
                           lowest_price.text,
                           'https://buff.163.com/goods/' + url)
@@ -170,7 +170,7 @@ def month_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price
             if mail.get(url) is None:
                 mail[url] = price
                 send_mail(name_elements.text.splitlines()[
-                              2] + '价格在一个月内上涨50% the lowest price in record is' + str(
+                              2] + '价格在一个月内上涨50% 具体涨幅为'+str(month_change)+' the lowest price in record is' + str(
                     lowest_price_in_txt),
                           lowest_price.text,
                           'https://buff.163.com/goods/' + url)
@@ -179,7 +179,7 @@ def month_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price
             else:
                 mail[url] = price
                 send_mail(name_elements.text.splitlines()[
-                              2] + '价格在一个月内上涨50% the lowest price in record is' + str(
+                              2] + '价格在一个月内上涨50%  具体涨幅为'+str(month_change)+'the lowest price in record is' + str(
                     lowest_price_in_txt),
                           lowest_price.text,
                           'https://buff.163.com/goods/' + url)
@@ -188,7 +188,7 @@ def month_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price
             if mail.get(url) is None:
                 mail[url] = price
                 send_mail(name_elements.text.splitlines()[
-                              2] + '价格在一个月内上涨50% the lowest price in record is' + str(
+                              2] + '价格在一个月内上涨50%  具体涨幅为'+str(month_change)+'the lowest price in record is' + str(
                     lowest_price_in_txt),
                           lowest_price.text,
                           'https://buff.163.com/goods/' + url)
@@ -197,7 +197,7 @@ def month_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price
             else:
                 mail[url] = price
                 send_mail(name_elements.text.splitlines()[
-                              2] + '价格在一个月内下降50% the lowest price in record is' + str(
+                              2] + '价格在一个月内下降50% 具体涨幅为'+str(month_change)+' the lowest price in record is' + str(
                     lowest_price_in_txt),
                           lowest_price.text,
                           'https://buff.163.com/goods/' + url)
