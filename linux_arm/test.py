@@ -208,7 +208,7 @@ def get_all(urls):
                               desired_capabilities=cap)
     while True:
         for url in urls:
-            sleep_time = random.randint(5, 15)
+            sleep_time = 6
             try:
                 driver.get('https://buff.163.com/goods/' + url)
                 start_time = time.time()
@@ -297,7 +297,7 @@ def get_all(urls):
                         print(f'{time_get} :{url} 超时')
                         driver.refresh()
                         start_time = time.time()
-                time.sleep(5)
+                time.sleep(sleep_time)
 
             except WebDriverException as e:
                 crash_time = 0
@@ -312,6 +312,7 @@ def get_all(urls):
                         driver = webdriver.Chrome(chrome_options=chrome_options,
                                                   executable_path="/usr/bin/chromedriver")
                         driver.get('https://buff.163.com/goods/' + url)
+                        sleep_time = random.randint(5, 15)
                         break
                     except:
                         crash_time += 1
@@ -375,8 +376,8 @@ for file in files:
         urls = f.readlines()
     f.close()
     thread = threading.Thread(target=get_all, args=([urls]))
-    time.sleep(5)
     threads.append(thread)
+    time.sleep(5)
     thread.start()
 
 for thread in threads:
