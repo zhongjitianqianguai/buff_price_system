@@ -66,7 +66,48 @@ def day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, 
                     lowest_price_in_txt),
                           lowest_price.text,
                           'https://buff.163.com/goods/' + url)
+def three_day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, one_day_price):
+    if len(three_day_price) > 0:
+        three_prices = 0
+        for three_day in three_day_price:
+            three_prices += float(three_day)
+        three_price = three_prices / len(three_day_price)
+        three_day_change = round((price - three_price) / three_price, 2)
+        if three_day_change > 0.3:
+            if mail.get(url) is None:
+                mail[url] = price
+                send_mail(name_elements.text.splitlines()[
+                              2] + '价格在三天内上涨30% the lowest price in record is' + str(
+                    lowest_price_in_txt),
+                          lowest_price.text,
+                          'https://buff.163.com/goods/' + url)
+            elif mail.get(url) == price:
+                pass
+            else:
+                mail[url] = price
+                send_mail(name_elements.text.splitlines()[
+                              2] + '价格在三天内上涨30% the lowest price in record is' + str(
+                    lowest_price_in_txt),
+                          lowest_price.text,
+                          'https://buff.163.com/goods/' + url)
 
+        elif three_day_change < -0.3:
+            if mail.get(url) is None:
+                mail[url] = price
+                send_mail(name_elements.text.splitlines()[
+                              2] + '价格在三天内下降30% the lowest price in record is' + str(
+                    lowest_price_in_txt),
+                          lowest_price.text,
+                          'https://buff.163.com/goods/' + url)
+            elif mail.get(url) == price:
+                pass
+            else:
+                mail[url] = price
+                send_mail(name_elements.text.splitlines()[
+                              2] + '价格在三天内下降30% the lowest price in record is' + str(
+                    lowest_price_in_txt),
+                          lowest_price.text,
+                          'https://buff.163.com/goods/' + url)
 
 def get_all(urls):
     driver = webdriver.Chrome(chrome_options=chrome_options, executable_path="/usr/bin/chromedriver",
@@ -426,87 +467,6 @@ def get_all(urls):
 
 
 
-                                elif len(three_day_price) > 0:
-                                    day_prices = 0
-                                    if len(one_day_price) > 0:
-                                        for day in one_day_price:
-                                            day_prices += float(day)
-                                        day_price = day_prices / len(one_day_price)
-                                    three_prices = 0
-                                    for three_day in three_day_price:
-                                        three_prices += float(three_day)
-                                    three_price = three_prices / len(three_day_price)
-                                    daily_change = round((price - day_price) / day_price, 2)
-                                    three_day_change = round((price - three_price) / three_price, 2)
-                                    if daily_change > 0.2:
-                                        if mail.get(url) is None:
-                                            mail[url] = price
-                                            send_mail(name_elements.text.splitlines()[
-                                                          2] + '价格在一天内上涨20% the lowest price in record is' + str(
-                                                lowest_price_in_txt),
-                                                      lowest_price.text,
-                                                      'https://buff.163.com/goods/' + url)
-                                        elif mail.get(url) == price:
-                                            pass
-                                        else:
-                                            mail[url] = price
-                                            send_mail(name_elements.text.splitlines()[
-                                                          2] + '价格在一天内上涨20% the lowest price in record is' + str(
-                                                lowest_price_in_txt),
-                                                      lowest_price.text,
-                                                      'https://buff.163.com/goods/' + url)
-                                    elif daily_change < -0.2:
-                                        if mail.get(url) is None:
-                                            mail[url] = price
-                                            send_mail(name_elements.text.splitlines()[
-                                                          2] + '价格在一天内下降20% the lowest price in record is' + str(
-                                                lowest_price_in_txt),
-                                                      lowest_price.text,
-                                                      'https://buff.163.com/goods/' + url)
-                                        elif mail.get(url) == price:
-                                            pass
-                                        else:
-                                            mail[url] = price
-                                            send_mail(name_elements.text.splitlines()[
-                                                          2] + '价格在一天内下降20% the lowest price in record is' + str(
-                                                lowest_price_in_txt),
-                                                      lowest_price.text,
-                                                      'https://buff.163.com/goods/' + url)
-                                    if three_day_change > 0.3:
-                                        if mail.get(url) is None:
-                                            mail[url] = price
-                                            send_mail(name_elements.text.splitlines()[
-                                                          2] + '价格在三天内上涨30% the lowest price in record is' + str(
-                                                lowest_price_in_txt),
-                                                      lowest_price.text,
-                                                      'https://buff.163.com/goods/' + url)
-                                        elif mail.get(url) == price:
-                                            pass
-                                        else:
-                                            mail[url] = price
-                                            send_mail(name_elements.text.splitlines()[
-                                                          2] + '价格在三天内上涨30% the lowest price in record is' + str(
-                                                lowest_price_in_txt),
-                                                      lowest_price.text,
-                                                      'https://buff.163.com/goods/' + url)
-
-                                    elif three_day_change < -0.3:
-                                        if mail.get(url) is None:
-                                            mail[url] = price
-                                            send_mail(name_elements.text.splitlines()[
-                                                          2] + '价格在三天内下降30% the lowest price in record is' + str(
-                                                lowest_price_in_txt),
-                                                      lowest_price.text,
-                                                      'https://buff.163.com/goods/' + url)
-                                        elif mail.get(url) == price:
-                                            pass
-                                        else:
-                                            mail[url] = price
-                                            send_mail(name_elements.text.splitlines()[
-                                                          2] + '价格在三天内下降30% the lowest price in record is' + str(
-                                                lowest_price_in_txt),
-                                                      lowest_price.text,
-                                                      'https://buff.163.com/goods/' + url)
 
                                 if price <= float(expect_price) and lowest_price_in_txt > 0:
                                     print(
