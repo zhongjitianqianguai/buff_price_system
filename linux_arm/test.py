@@ -206,6 +206,7 @@ def month_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price
 def get_all(urls):
     driver = webdriver.Chrome(chrome_options=chrome_options, executable_path="/usr/bin/chromedriver",
                               desired_capabilities=cap)
+    driver.implicitly_wait(10)
     while True:
         for url in urls:
             sleep_time = 6
