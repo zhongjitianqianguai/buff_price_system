@@ -13,12 +13,12 @@ difference = {}
 need_price = 200
 get_200 = {}
 for url in urls:
-    try:
-        driver.get('https://buff.163.com/goods/' + url)
-        start_time = datetime.datetime.utcnow()
 
-        time.sleep(4)
-        while True:
+    driver.get('https://buff.163.com/goods/' + url)
+    start_time = datetime.datetime.utcnow()
+    time.sleep(4)
+    while True:
+        try:
             price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
             on_sale_count = driver.find_element(By.CLASS_NAME, "new-tab").text.split("在售")[1].split(")")[0].replace(
                 "(", "").replace("+", "")
@@ -46,11 +46,21 @@ for url in urls:
                 get_200[url] = need_buff_price
                 print(url + ":" + str(different))
                 break
-    except Exception as e:
-        print(e)
-        time.sleep(10)
-        driver.refresh()
-        continue
+        except Exception as e:
+            print(e)
+            time.sleep(10)
+            try:
+                driver.refresh()
+            except Exception as e:
+                print(e)
+                driver = webdriver.Chrome(service=Service(r'webdriver\chromedriver.exe'))
+                driver.implicitly_wait(60)
+                driver.get('https://buff.163.com/goods/' + url)
+                start_time = datetime.datetime.utcnow()
+                time.sleep(4)
+                continue
+        finally:
+            continue
 the_best_url = ''
 price_difference = 0
 for di in difference:
