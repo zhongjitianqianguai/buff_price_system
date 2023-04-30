@@ -1,3 +1,4 @@
+import datetime
 import time
 
 from selenium import webdriver
@@ -14,11 +15,18 @@ get_200 = {}
 for url in urls:
     try:
         driver.get('https://buff.163.com/goods/' + url)
-        time.sleep(3)
+        start_time = datetime.datetime.utcnow()
+
+        time.sleep(4)
         while True:
             price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
             on_sale_count = driver.find_element(By.CLASS_NAME, "new-tab").text.split("在售")[1].split(")")[0].replace(
                 "(", "").replace("+", "")
+            now_time = datetime.datetime.utcnow()
+            if (now_time - start_time).seconds > 30:
+                print("超时")
+                driver.refresh()
+                continue
             if int(on_sale_count) < 100:
                 break
             if len(price_elements) > 1:
