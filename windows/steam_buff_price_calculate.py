@@ -6,34 +6,54 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 
 driver = webdriver.Chrome(service=Service(r'webdriver\chromedriver.exe'))
-driver.implicitly_wait(60)
+driver.implicitly_wait(100)
 with open('../all.txt') as f:
     urls = f.readlines()
 difference = {}
 need_price = 200
 get_200 = {}
 for url in urls:
-
     driver.get('https://buff.163.com/goods/' + url)
-    start_time = datetime.datetime.utcnow()
-    time.sleep(4)
-    while True:
+    time.sleep(5)
+    try:
+        price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
+        print(price_elements[1].text)
+        on_sale_count = driver.find_element(By.CLASS_NAME, "new-tab").text.split("在售")[1].split(")")[0].replace(
+            "(", "").replace("+", "")
+        if int(on_sale_count) < 100:
+            continue
+        if len(price_elements) > 1:
+            steam_price = price_elements[0]
+            lowest_price = price_elements[1]
+            if float(lowest_price.text.replace("¥ ", "")) > 100:
+                continue
+            steam = float(steam_price.text.replace("¥ ", "").split("(")[0])
+            different = steam + steam * 0.15 - float(lowest_price.text.replace("¥ ", ""))
+            difference[url] = different
+            amount = need_price / (steam - steam * 0.15)
+            if not isinstance(amount, int):
+                amount = int(amount) + 1
+            print("需要在steam售出：" + str(amount))
+            need_buff_price = amount * float(lowest_price.text.replace("¥ ", ""))
+            print("在buff上购买此数量需要价格：" + str(need_buff_price))
+            get_200[url] = need_buff_price
+            print(url + ":" + str(different))
+    except Exception as e:
+        print(e)
+        time.sleep(10)
         try:
+            driver.refresh()
             price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
+            print(price_elements[1].text)
             on_sale_count = driver.find_element(By.CLASS_NAME, "new-tab").text.split("在售")[1].split(")")[0].replace(
                 "(", "").replace("+", "")
-            now_time = datetime.datetime.utcnow()
-            if (now_time - start_time).seconds > 30:
-                print("超时")
-                driver.refresh()
-                continue
             if int(on_sale_count) < 100:
-                break
+                continue
             if len(price_elements) > 1:
                 steam_price = price_elements[0]
                 lowest_price = price_elements[1]
                 if float(lowest_price.text.replace("¥ ", "")) > 100:
-                    break
+                    continue
                 steam = float(steam_price.text.replace("¥ ", "").split("(")[0])
                 different = steam + steam * 0.15 - float(lowest_price.text.replace("¥ ", ""))
                 difference[url] = different
@@ -45,22 +65,37 @@ for url in urls:
                 print("在buff上购买此数量需要价格：" + str(need_buff_price))
                 get_200[url] = need_buff_price
                 print(url + ":" + str(different))
-                break
+                continue
         except Exception as e:
             print(e)
-            time.sleep(10)
-            try:
-                driver.refresh()
-            except Exception as e:
-                print(e)
-                driver = webdriver.Chrome(service=Service(r'webdriver\chromedriver.exe'))
-                driver.implicitly_wait(60)
-                driver.get('https://buff.163.com/goods/' + url)
-                start_time = datetime.datetime.utcnow()
-                time.sleep(4)
+            driver = webdriver.Chrome(service=Service(r'webdriver\chromedriver.exe'))
+            driver.implicitly_wait(60)
+            driver.get('https://buff.163.com/goods/' + url)
+            price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
+            print(price_elements[1].text)
+            on_sale_count = driver.find_element(By.CLASS_NAME, "new-tab").text.split("在售")[1].split(")")[0].replace(
+                "(", "").replace("+", "")
+            if int(on_sale_count) < 100:
                 continue
-        finally:
+            if len(price_elements) > 1:
+                steam_price = price_elements[0]
+                lowest_price = price_elements[1]
+                if float(lowest_price.text.replace("¥ ", "")) > 100:
+                    continue
+                steam = float(steam_price.text.replace("¥ ", "").split("(")[0])
+                different = steam + steam * 0.15 - float(lowest_price.text.replace("¥ ", ""))
+                difference[url] = different
+                amount = need_price / (steam - steam * 0.15)
+                if not isinstance(amount, int):
+                    amount = int(amount) + 1
+                print("需要在steam售出：" + str(amount))
+                need_buff_price = amount * float(lowest_price.text.replace("¥ ", ""))
+                print("在buff上购买此数量需要价格：" + str(need_buff_price))
+                get_200[url] = need_buff_price
+                print(url + ":" + str(different))
             continue
+    finally:
+        continue
 the_best_url = ''
 price_difference = 0
 for di in difference:
