@@ -15,6 +15,7 @@ get_200 = {}
 for url in urls:
     driver.get('https://buff.163.com/goods/' + url)
     time.sleep(5)
+
     try:
         price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
         print(price_elements[1].text)
@@ -94,8 +95,6 @@ for url in urls:
                 get_200[url] = need_buff_price
                 print(url + ":" + str(different))
             continue
-    finally:
-        continue
 the_best_url = ''
 price_difference = 0
 for di in difference:
