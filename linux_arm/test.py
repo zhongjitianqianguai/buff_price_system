@@ -238,10 +238,11 @@ def get_all(urls):
 
                 time_get = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
                 price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
+                name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
                 while len(price_elements) <= 1:
                     price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
                     now_time = time.time()
-
+                    name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
                     if now_time - start_time > 20:
                         print(f'{time_get} :{url} 超时')
                         driver.refresh()
@@ -250,6 +251,8 @@ def get_all(urls):
                 # price = float(lowest_price.replace("¥ ", ""))
                 try:
                     price = float(price_elements[1].text.replace("¥ ", ""))
+                    name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
+                    name=name_elements.text
                 except StaleElementReferenceException as e:
                     print("try to handle element is not attached to the page document ")
                     try:
@@ -264,18 +267,22 @@ def get_all(urls):
                 goods_id = driver.current_url.split('/')[-1]
                 if not os.path.exists('txt/' + str(goods_id) + '.txt'):
                     f = open('txt/' + str(goods_id) + '.txt', 'w', encoding='utf-8')
-                    f.write(f'{time_get};{name_elements.text.splitlines()[2]} ¥ {price}\n')
+                    f.write(f'{time_get};{name.splitlines()[2]} ¥ {price}\n')
                     f.close()
                 with open('txt/' + str(goods_id) + '.txt', 'a+', encoding='utf-8') as f:
 
-                    name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
                     f.seek(0)
                     lines = f.readlines()
                     if not lines:
                         f.write(str(goods_id) + ':' + str(price / 2) + '\n')
+                        f.write(f'{time_get};{name_elements.text.splitlines()[2]} ¥ {price}\n')
+                        continue
                     else:
                         first_line = lines[0]
                         expect_price = first_line.split(':')[1]
+                        if len(lines)==1:
+                            f.write(f'{time_get};{name_elements.text.splitlines()[2]} ¥ {price}\n')
+                            continue
                         last_price = float(lines[-1].split('¥')[1].replace(" ", "").replace("\n", ""))
                         one_day_price = []
                         three_day_price = []
@@ -319,17 +326,17 @@ def get_all(urls):
 
                         if price <= float(expect_price) and lowest_price_in_txt > 0:
                             print(
-                                f'{goods_id}:{time_get} :{name_elements.text.splitlines()[2]} 的最低价格达到期望值, 当前价格是: {price} the lowest price in record is:{lowest_price_in_txt}')
+                                f'{goods_id}:{time_get} :{name.splitlines()[2]} 的最低价格达到期望值, 当前价格是: {price} the lowest price in record is:{lowest_price_in_txt}')
                             send_mail(
                                 name_elements.text.splitlines()[2] + '\nthe lowest price in record is' + str(
                                     lowest_price_in_txt), price,
                                 'https://buff.163.com/goods/' + url)
                         else:
                             print(
-                                f'{goods_id}:{time_get} :{name_elements.text.splitlines()[2]} 的最低价格未达到期望值, 当前价格是: {price}')
+                                f'{goods_id}:{time_get} :{name.splitlines()[2]} 的最低价格未达到期望值, 当前价格是: {price}')
                         if last_price == price:
                             continue
-                        f.write(f'{time_get};{name_elements.text.splitlines()[2]} ¥ {price}\n')
+                        f.write(f'{time_get};{name.splitlines()[2]} ¥ {price}\n')
                         f.close()
 
                         if time.localtime(time.time()).tm_hour.real < 1 or time.localtime(time.time()).tm_hour.real > 7:
