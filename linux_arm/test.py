@@ -5,8 +5,10 @@ import smtplib
 import threading
 from email.header import Header
 from email.mime.text import MIMEText
+
+import pymysql
 from selenium import webdriver
-from selenium.common import WebDriverException, StaleElementReferenceException
+from selenium.common import WebDriverException, StaleElementReferenceException, NoSuchElementException
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
@@ -37,8 +39,7 @@ def day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, 
             print(mail.get(url))
             if mail.get(url) is None:
                 mail[url] = price
-                send_mail(name_elements.text.splitlines()[
-                              2] + '价格在一天内上涨超20% 具体涨幅为' + str(
+                send_mail(name_elements + '价格在一天内上涨超20% 具体涨幅为' + str(
                     daily_change) + ' the lowest price in record is' + str(
                     lowest_price_in_txt),
                           lowest_price,
@@ -47,8 +48,7 @@ def day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, 
                 pass
             else:
                 mail[url] = price
-                send_mail(name_elements.text.splitlines()[
-                              2] + '价格在一天内上涨超20% 具体涨幅为' + str(
+                send_mail(name_elements + '价格在一天内上涨超20% 具体涨幅为' + str(
                     daily_change) + 'the lowest price in record is' + str(
                     lowest_price_in_txt),
                           lowest_price,
@@ -56,8 +56,7 @@ def day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, 
         elif daily_change < -0.2:
             if mail.get(url) is None:
                 mail[url] = price
-                send_mail(name_elements.text.splitlines()[
-                              2] + '价格在一天内下降超20% 具体涨幅为' + str(
+                send_mail(name_elements + '价格在一天内下降超20% 具体涨幅为' + str(
                     daily_change) + 'the lowest price in record is' + str(
                     lowest_price_in_txt),
                           lowest_price,
@@ -66,8 +65,7 @@ def day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, 
                 print("与上次发送邮件时的价格相同，不再发送邮件")
             else:
                 mail[url] = price
-                send_mail(name_elements.text.splitlines()[
-                              2] + '价格在一天内下降超20% 具体涨幅为' + str(
+                send_mail(name_elements + '价格在一天内下降超20% 具体涨幅为' + str(
                     daily_change) + 'the lowest price in record is' + str(
                     lowest_price_in_txt),
                           lowest_price,
@@ -84,8 +82,7 @@ def three_day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, p
         if three_day_change > 0.3:
             if mail.get(url) is None:
                 mail[url] = price
-                send_mail(name_elements.text.splitlines()[
-                              2] + '价格在三天内上涨30% 具体涨幅为' + str(
+                send_mail(name_elements + '价格在三天内上涨30% 具体涨幅为' + str(
                     three_day_change) + ' the lowest price in record is' + str(
                     lowest_price_in_txt),
                           lowest_price,
@@ -94,8 +91,7 @@ def three_day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, p
                 pass
             else:
                 mail[url] = price
-                send_mail(name_elements.text.splitlines()[
-                              2] + '价格在三天内上涨30% 具体涨幅为' + str(
+                send_mail(name_elements + '价格在三天内上涨30% 具体涨幅为' + str(
                     three_day_change) + 'the lowest price in record is' + str(
                     lowest_price_in_txt),
                           lowest_price,
@@ -104,8 +100,7 @@ def three_day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, p
         elif three_day_change < -0.3:
             if mail.get(url) is None:
                 mail[url] = price
-                send_mail(name_elements.text.splitlines()[
-                              2] + '价格在三天内下降30% 具体涨幅为' + str(
+                send_mail(name_elements + '价格在三天内下降30% 具体涨幅为' + str(
                     three_day_change) + 'the lowest price in record is' + str(
                     lowest_price_in_txt),
                           lowest_price,
@@ -114,8 +109,7 @@ def three_day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, p
                 pass
             else:
                 mail[url] = price
-                send_mail(name_elements.text.splitlines()[
-                              2] + '价格在三天内下降30% 具体涨幅为' + str(
+                send_mail(name_elements + '价格在三天内下降30% 具体涨幅为' + str(
                     three_day_change) + 'the lowest price in record is' + str(
                     lowest_price_in_txt),
                           lowest_price,
@@ -134,8 +128,7 @@ def week_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price,
         if week_change > 0.4:
             if mail.get(url) is None:
                 mail[url] = price
-                send_mail(name_elements.text.splitlines()[
-                              2] + '价格在一周内上涨40% 具体涨幅为' + str(
+                send_mail(name_elements + '价格在一周内上涨40% 具体涨幅为' + str(
                     week_change) + ' the lowest price in record is' + str(
                     lowest_price_in_txt),
                           lowest_price,
@@ -144,8 +137,7 @@ def week_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price,
                 pass
             else:
                 mail[url] = price
-                send_mail(name_elements.text.splitlines()[
-                              2] + '价格在一周内上涨40% 具体涨幅为' + str(
+                send_mail(name_elements + '价格在一周内上涨40% 具体涨幅为' + str(
                     week_change) + ' the lowest price in record is' + str(
                     lowest_price_in_txt),
                           lowest_price,
@@ -154,8 +146,7 @@ def week_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price,
         elif week_change < -0.4:
             if mail.get(url) is None:
                 mail[url] = price
-                send_mail(name_elements.text.splitlines()[
-                              2] + '价格在一周内下降40% 具体涨幅为' + str(
+                send_mail(name_elements + '价格在一周内下降40% 具体涨幅为' + str(
                     week_change) + ' the lowest price in record is' + str(
                     lowest_price_in_txt),
                           lowest_price,
@@ -164,8 +155,7 @@ def week_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price,
                 pass
             else:
                 mail[url] = price
-                send_mail(name_elements.text.splitlines()[
-                              2] + '价格在一周内下降40% 具体涨幅为' + str(
+                send_mail(name_elements + '价格在一周内下降40% 具体涨幅为' + str(
                     week_change) + ' the lowest price in record is' + str(
                     lowest_price_in_txt),
                           lowest_price,
@@ -221,6 +211,45 @@ def month_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price
                           'https://buff.163.com/goods/' + url)
 
 
+def write_record(cursor, record_time, goods_id, price):
+    try:
+        sql = """Insert into buff_record(time,goods_id,price) value(%s,%s,%s)"""
+        cursor.execute(sql, (record_time, goods_id, price))  # 添加参数
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("插入记录失败:", e)
+        conn = pymysql.connect(
+            host="120.25.145.148",
+            port=3306,
+            user="homework",
+            passwd="root",
+            db="homework",
+            charset='utf8',
+            autocommit=True
+        )
+        cursor = conn.cursor()
+        sql = """Insert into buff_record(time,goods_id,price) value(%s,%s,%s)"""
+        cursor.execute(sql, (record_time, goods_id, price))  # 添加参数
+
+def add_new_good(cursor, name, goods_id, category, except_price):
+    try:
+        sql = """Insert into buff_goods(name,goods_id,category,expected_price) value(%s,%s,%s,%s)"""
+        cursor.execute(sql, (name, goods_id, category, except_price))  # 添加参数
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("插入新商品失败失败:", e)
+        conn = pymysql.connect(
+            host="120.25.145.148",
+            port=3306,
+            user="homework",
+            passwd="root",
+            db="homework",
+            charset='utf8',
+            autocommit=True
+        )
+        cursor = conn.cursor()
+        sql = """Insert into buff_goods(name,goods_id,category,expected_price) value(%s,%s,%s,%s)"""
+        cursor.execute(sql, (name, goods_id, category, except_price))  # 添加参数
 def get_all(urls):
     driver = webdriver.Chrome(chrome_options=chrome_options, executable_path="/usr/bin/chromedriver",
                               desired_capabilities=cap)
@@ -232,13 +261,14 @@ def get_all(urls):
                 driver.get('https://buff.163.com/goods/' + url)
                 start_time = time.time()
                 lowest_price_in_txt = 0
-
-                # wait = WebDriverWait(driver, 10)
-                # wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'pager list-pager light-theme simple-pagination')))
-
                 time_get = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+                if "429 Too Many Requests" in driver.find_element(By.TAG_NAME, "title").text:
+                    print("超时")
+                    time.sleep(2)
+                    driver.refresh()
                 price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
                 name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
+
                 while len(price_elements) <= 1:
                     price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
                     now_time = time.time()
@@ -252,7 +282,8 @@ def get_all(urls):
                 try:
                     price = float(price_elements[1].text.replace("¥ ", ""))
                     name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
-                    name=name_elements.text
+                    name = name_elements.text.splitlines()[2]
+                    category = name_elements.text.split("类型 |")[1].split("\n")[0]
                 except StaleElementReferenceException as e:
                     print("try to handle element is not attached to the page document ")
                     try:
@@ -261,9 +292,12 @@ def get_all(urls):
                             while len(price_elements) <= 1:
                                 price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
                             price = float(price_elements[1].text.replace("¥ ", ""))
+                            name = name_elements.text.splitlines()[2]
+                            category = name_elements.text.split("类型 |")[1].split("\n")[0]
                             break
                     except:
                         pass
+
                 goods_id = driver.current_url.split('/')[-1]
                 if not os.path.exists('txt/' + str(goods_id) + '.txt'):
                     f = open('txt/' + str(goods_id) + '.txt', 'w', encoding='utf-8')
@@ -273,13 +307,15 @@ def get_all(urls):
                     lines = f.readlines()
                     if not lines:
                         f.write(str(goods_id) + ':' + str(price / 2) + '\n')
-                        f.write(f'{time_get};{name_elements.text.splitlines()[2]} ¥ {price}\n')
+                        f.write(f'{time_get};{name} ¥ {price}\n')
+                        add_new_good(cursor, name, str(goods_id), category, str(price / 2))
+                        write_record(cursor, time_get, str(goods_id), str(price))
                         continue
                     else:
                         first_line = lines[0]
                         expect_price = first_line.split(':')[1]
-                        if len(lines)==1:
-                            f.write(f'{time_get};{name_elements.text.splitlines()[2]} ¥ {price}\n')
+                        if len(lines) == 1:
+                            f.write(f'{time_get};{name} ¥ {price}\n')
                             continue
                         last_price = float(lines[-1].split('¥')[1].replace(" ", "").replace("\n", ""))
                         one_day_price = []
@@ -324,27 +360,28 @@ def get_all(urls):
 
                         if price <= float(expect_price) and lowest_price_in_txt > 0:
                             print(
-                                f'{goods_id}:{time_get} :{name.splitlines()[2]} 的最低价格达到期望值, 当前价格是: {price} the lowest price in record is:{lowest_price_in_txt}')
+                                f'{goods_id}:{time_get} :{name} 的最低价格达到期望值, 当前价格是: {price} the lowest price in record is:{lowest_price_in_txt}')
                             send_mail(
-                                name_elements.text.splitlines()[2] + '\nthe lowest price in record is' + str(
+                                name + '\nthe lowest price in record is' + str(
                                     lowest_price_in_txt), price,
                                 'https://buff.163.com/goods/' + url)
                         else:
                             print(
-                                f'{goods_id}:{time_get} :{name.splitlines()[2]} 的最低价格未达到期望值, 当前价格是: {price}')
+                                f'{goods_id}:{time_get} :{name} 的最低价格未达到期望值, 当前价格是: {price}')
                         if last_price == price:
                             continue
-                        f.write(f'{time_get};{name.splitlines()[2]} ¥ {price}\n')
+                        f.write(f'{time_get};{name} ¥ {price}\n')
+                        write_record(cursor, time_get, str(goods_id), str(price))
                         f.close()
 
                         if time.localtime(time.time()).tm_hour.real < 1 or time.localtime(time.time()).tm_hour.real > 7:
-                            day_send_mail(price, lowest_price_in_txt, name_elements, url, price,
+                            day_send_mail(price, lowest_price_in_txt, name, url, price,
                                           one_day_price)
-                            three_day_send_mail(price, lowest_price_in_txt, name_elements, url, price,
+                            three_day_send_mail(price, lowest_price_in_txt, name, url, price,
                                                 three_day_price)
-                            week_send_mail(price, lowest_price_in_txt, name_elements, url, price,
+                            week_send_mail(price, lowest_price_in_txt, name, url, price,
                                            week_day_price)
-                            month_send_mail(price, lowest_price_in_txt, name_elements, url, price,
+                            month_send_mail(price, lowest_price_in_txt, name, url, price,
                                             month_price)
             except StaleElementReferenceException as e:
                 print("try to handle element is not attached to the page document in out loop")
@@ -358,6 +395,10 @@ def get_all(urls):
                 #         break
                 # except:
                 #     pass
+            except NoSuchElementException as e:
+                print("超时" + e.msg)
+                time.sleep(2)
+                continue
             except WebDriverException as e:
                 crash_time = 0
                 print(e)
@@ -389,7 +430,7 @@ def get_all(urls):
                     except:
                         pass
             finally:
-                time.sleep(5)
+                time.sleep(sleep_time)
 
         time.sleep(10)
 
@@ -435,6 +476,16 @@ threads = []
 urls = []
 mail = {}
 files = os.listdir('../source')
+conn = pymysql.connect(
+    host="120.25.145.148",
+    port=3306,
+    user="homework",
+    passwd="root",
+    db="homework",
+    charset='utf8',
+    autocommit=True
+)
+cursor = conn.cursor()
 for file in files:
     with open('../source/' + file) as f:
         urls = f.readlines()
