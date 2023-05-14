@@ -267,10 +267,8 @@ def get_all(urls):
                 goods_id = driver.current_url.split('/')[-1]
                 if not os.path.exists('txt/' + str(goods_id) + '.txt'):
                     f = open('txt/' + str(goods_id) + '.txt', 'w', encoding='utf-8')
-                    f.write(f'{time_get};{name.splitlines()[2]} ¥ {price}\n')
                     f.close()
                 with open('txt/' + str(goods_id) + '.txt', 'a+', encoding='utf-8') as f:
-
                     f.seek(0)
                     lines = f.readlines()
                     if not lines:
