@@ -251,6 +251,7 @@ def get_all(urls):
                 try:
                     price = float(price_elements[1].text.replace("¥ ", ""))
                 except StaleElementReferenceException as e:
+                    print("try to handle element is not attached to the page document ")
                     try:
                         while True:
                             price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
@@ -318,14 +319,14 @@ def get_all(urls):
 
                         if price <= float(expect_price) and lowest_price_in_txt > 0:
                             print(
-                                f'{time_get} :{name_elements.text.splitlines()[2]} 的最低价格达到期望值, 当前价格是: {price} the lowest price in record is:{lowest_price_in_txt}')
+                                f'{goods_id}:{time_get} :{name_elements.text.splitlines()[2]} 的最低价格达到期望值, 当前价格是: {price} the lowest price in record is:{lowest_price_in_txt}')
                             send_mail(
                                 name_elements.text.splitlines()[2] + '\nthe lowest price in record is' + str(
                                     lowest_price_in_txt), price,
                                 'https://buff.163.com/goods/' + url)
                         else:
                             print(
-                                f'{time_get} :{name_elements.text.splitlines()[2]} 的最低价格未达到期望值, 当前价格是: {price}')
+                                f'{goods_id}:{time_get} :{name_elements.text.splitlines()[2]} 的最低价格未达到期望值, 当前价格是: {price}')
                         if last_price == price:
                             continue
                         f.write(f'{time_get};{name_elements.text.splitlines()[2]} ¥ {price}\n')
@@ -340,14 +341,27 @@ def get_all(urls):
                                            week_day_price)
                             month_send_mail(price, lowest_price_in_txt, name_elements, url, price,
                                             month_price)
+            except StaleElementReferenceException as e:
+                print("try to handle element is not attached to the page document in out loop")
+                continue
+                # try:
+                #     while True:
+                #         price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
+                #         while len(price_elements) <= 1:
+                #             price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
+                #         price = float(price_elements[1].text.replace("¥ ", ""))
+                #         break
+                # except:
+                #     pass
             except WebDriverException as e:
                 crash_time = 0
                 print(e)
-                send_mail("need to reboot chroot container", 0, '111')
                 while True:
                     try:
                         if crash_time == 2:
                             time.sleep(600)
+                            send_mail("need to reboot chroot container", 0, '111')
+
                         else:
                             time.sleep(20)
                         driver = webdriver.Chrome(chrome_options=chrome_options,
@@ -370,10 +384,9 @@ def get_all(urls):
                     except:
                         pass
             finally:
-                time.sleep(sleep_time)
+                time.sleep(5)
 
-
-        time.sleep(20)
+        time.sleep(10)
 
 
 def send_mail(name, price, url):
