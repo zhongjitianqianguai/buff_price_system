@@ -211,9 +211,10 @@ def month_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price
                           'https://buff.163.com/goods/' + url)
 
 
-def write_record(cursor, record_time, goods_id, price):
+def write_record(conn,cursor, record_time, goods_id, price):
     try:
         sql = """Insert into buff_record(time,goods_id,price) value(%s,%s,%s)"""
+        conn.ping(reconnect=True)
         cursor.execute(sql, (record_time, goods_id, price))  # 添加参数
     except Exception as e:
         print("错误类型:", type(e))
@@ -232,11 +233,13 @@ def write_record(cursor, record_time, goods_id, price):
         cursor.execute(sql, (record_time, goods_id, price))  # 添加参数
 
 
-def get_all_goods(cursor):
+def get_all_goods(conn,cursor):
     try:
         sql = """Select * from  buff_goods;"""
+        conn.ping(reconnect=True)
         cursor.execute(sql)  # 添加参数
         return cursor.fetchall()
+
     except Exception as e:
         print("错误类型:", type(e))
         print("插入新商品失败失败:", e)
@@ -255,9 +258,10 @@ def get_all_goods(cursor):
         return cursor.fetchall()
 
 
-def add_new_good(cursor, name, goods_id, category, except_price,img_url):
+def add_new_good(conn,cursor, name, goods_id, category, except_price,img_url):
     try:
         sql = """Insert into buff_goods(name,goods_id,category,expected_price,img_url) value(%s,%s,%s,%s,%s);"""
+        conn.ping(reconnect=True)
         cursor.execute(sql, (name, goods_id, category, except_price,img_url))  # 添加参数
     except Exception as e:
         print("错误类型:", type(e))
@@ -334,8 +338,9 @@ def get_all(urls):
                     if not lines:
                         f.write(str(goods_id) + ':' + str(price / 2) + '\n')
                         f.write(f'{time_get};{name} ¥ {price}\n')
-                        add_new_good(cursor, name, str(goods_id), category, str(price / 2))
-                        write_record(cursor, time_get, str(goods_id), str(price))
+                        add_new_good(conn,cursor, name, str(goods_id), category, str(price / 2))
+                        goods_id_in_sql.append(goods_id)
+                        write_record(conn,cursor, time_get, str(goods_id), str(price))
                         continue
                     else:
                         first_line = lines[0]
@@ -406,7 +411,7 @@ def get_all(urls):
                         if last_price == price:
                             continue
                         f.write(f'{time_get};{name} ¥ {price}\n')
-                        write_record(cursor, time_get, str(goods_id), str(price))
+                        write_record(conn,cursor, time_get, str(goods_id), str(price))
                         f.close()
 
                         if time.localtime(time.time()).tm_hour.real < 1 or time.localtime(time.time()).tm_hour.real > 7:
@@ -531,7 +536,7 @@ conn = pymysql.connect(
 )
 cursor = conn.cursor()
 goods_id_in_sql = []
-all_goods_from_sql = get_all_goods(cursor)
+all_goods_from_sql = get_all_goods(conn,cursor)
 for goods in all_goods_from_sql:
     goods_id_in_sql.append(goods[0])
 for file in files:
