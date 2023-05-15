@@ -15,7 +15,8 @@ from selenium.webdriver.common.by import By
 import time
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
-import  pymysql
+import pymysql
+
 chrome_options = Options()
 # chrome_options.add_argument('--headless')
 chrome_options.add_argument('--disable-gpu')
@@ -227,13 +228,37 @@ def write_record(cursor, record_time, goods_id, price):
             autocommit=True
         )
         cursor = conn.cursor()
-        sql = """Insert into buff_record(time,goods_id,price) value(%s,%s,%s)"""
+        sql = """Insert into buff_record(time,goods_id,price) value(%s,%s,%s);"""
         cursor.execute(sql, (record_time, goods_id, price))  # 添加参数
 
-def add_new_good(cursor, name, goods_id, category, except_price):
+
+def get_all_goods(cursor):
     try:
-        sql = """Insert into buff_goods(name,goods_id,category,expected_price) value(%s,%s,%s,%s)"""
-        cursor.execute(sql, (name, goods_id, category, except_price))  # 添加参数
+        sql = """Select * from  buff_goods;"""
+        cursor.execute(sql)  # 添加参数
+        return cursor.fetchall()
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("插入新商品失败失败:", e)
+        conn = pymysql.connect(
+            host="192.168.6.169",
+            port=3306,
+            user="root",
+            passwd="root",
+            db="buff_price",
+            charset='utf8',
+            autocommit=True
+        )
+        cursor = conn.cursor()
+        sql = """Select * from  buff_goods;"""
+        cursor.execute(sql)  # 添加参数
+        return cursor.fetchall()
+
+
+def add_new_good(cursor, name, goods_id, category, except_price,img_url):
+    try:
+        sql = """Insert into buff_goods(name,goods_id,category,expected_price,img_url) value(%s,%s,%s,%s,%s);"""
+        cursor.execute(sql, (name, goods_id, category, except_price,img_url))  # 添加参数
     except Exception as e:
         print("错误类型:", type(e))
         print("插入新商品失败失败:", e)
@@ -249,6 +274,8 @@ def add_new_good(cursor, name, goods_id, category, except_price):
         cursor = conn.cursor()
         sql = """Insert into buff_goods(name,goods_id,category,expected_price) value(%s,%s,%s,%s)"""
         cursor.execute(sql, (name, goods_id, category, except_price))  # 添加参数
+
+
 def get_all(urls):
     driver = webdriver.Chrome(chrome_options=chrome_options, executable_path="/usr/bin/chromedriver",
                               desired_capabilities=cap)
@@ -267,7 +294,7 @@ def get_all(urls):
                 #     driver.refresh()
                 price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
                 name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
-
+                img_url = driver.find_element(By.CLASS_NAME, "detail-pic").find_element(By.CLASS_NAME, "t_Center").find_element(By.TAG_NAME,"img").get_attribute("src")
                 while len(price_elements) <= 1:
                     price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
                     now_time = time.time()
@@ -292,7 +319,7 @@ def get_all(urls):
                                 price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
                             price = float(price_elements[1].text.replace("¥ ", ""))
                             name = name_elements.text.splitlines()[2]
-                            category = name_elements.text.split("类型 |")[1].split("\n")[0]
+                            # category = name_elements.text.split("类型 |")[1].split("\n")[0]
                             break
                     except:
                         pass
@@ -316,6 +343,15 @@ def get_all(urls):
                         if len(lines) == 1:
                             f.write(f'{time_get};{name} ¥ {price}\n')
                             continue
+                        if goods_id not in goods_id_in_sql:
+                            if "金色" in name:
+                                category = "金色"
+                            elif "全息" in name:
+                                category = "全息"
+                            elif "胶囊" in name:
+                                category = "胶囊"
+                            add_new_good(cursor, name, str(goods_id), category, str(price / 2),img_url)
+
                         last_price = float(lines[-1].split('¥')[1].replace(" ", "").replace("\n", ""))
                         one_day_price = []
                         three_day_price = []
@@ -494,6 +530,10 @@ conn = pymysql.connect(
     autocommit=True
 )
 cursor = conn.cursor()
+goods_id_in_sql = []
+all_goods_from_sql = get_all_goods(cursor)
+for goods in all_goods_from_sql:
+    goods_id_in_sql.append(goods[0])
 for file in files:
     with open('../source/' + file) as f:
         urls = f.readlines()
