@@ -6,7 +6,6 @@ import threading
 from email.header import Header
 from email.mime.text import MIMEText
 
-import pymysql
 from selenium import webdriver
 from selenium.common import WebDriverException, StaleElementReferenceException, NoSuchElementException
 from selenium.webdriver import DesiredCapabilities
@@ -16,7 +15,7 @@ from selenium.webdriver.common.by import By
 import time
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
-
+import  pymysql
 chrome_options = Options()
 # chrome_options.add_argument('--headless')
 chrome_options.add_argument('--disable-gpu')
@@ -218,18 +217,18 @@ def write_record(cursor, record_time, goods_id, price):
     except Exception as e:
         print("错误类型:", type(e))
         print("插入记录失败:", e)
-        conn = pymysql.connect(
-            host="120.25.145.148",
-            port=3306,
-            user="homework",
-            passwd="root",
-            db="homework",
-            charset='utf8',
-            autocommit=True
-        )
-        cursor = conn.cursor()
-        sql = """Insert into buff_record(time,goods_id,price) value(%s,%s,%s)"""
-        cursor.execute(sql, (record_time, goods_id, price))  # 添加参数
+        # conn = pymysql.connect(
+        #     host="120.25.145.148",
+        #     port=3306,
+        #     user="homework",
+        #     passwd="root",
+        #     db="homework",
+        #     charset='utf8',
+        #     autocommit=True
+        # )
+        # cursor = conn.cursor()
+        # sql = """Insert into buff_record(time,goods_id,price) value(%s,%s,%s)"""
+        # cursor.execute(sql, (record_time, goods_id, price))  # 添加参数
 
 def add_new_good(cursor, name, goods_id, category, except_price):
     try:
@@ -238,18 +237,18 @@ def add_new_good(cursor, name, goods_id, category, except_price):
     except Exception as e:
         print("错误类型:", type(e))
         print("插入新商品失败失败:", e)
-        conn = pymysql.connect(
-            host="120.25.145.148",
-            port=3306,
-            user="homework",
-            passwd="root",
-            db="homework",
-            charset='utf8',
-            autocommit=True
-        )
-        cursor = conn.cursor()
-        sql = """Insert into buff_goods(name,goods_id,category,expected_price) value(%s,%s,%s,%s)"""
-        cursor.execute(sql, (name, goods_id, category, except_price))  # 添加参数
+        # conn = pymysql.connect(
+        #     host="120.25.145.148",
+        #     port=3306,
+        #     user="homework",
+        #     passwd="root",
+        #     db="homework",
+        #     charset='utf8',
+        #     autocommit=True
+        # )
+        # cursor = conn.cursor()
+        # sql = """Insert into buff_goods(name,goods_id,category,expected_price) value(%s,%s,%s,%s)"""
+        # cursor.execute(sql, (name, goods_id, category, except_price))  # 添加参数
 def get_all(urls):
     driver = webdriver.Chrome(chrome_options=chrome_options, executable_path="/usr/bin/chromedriver",
                               desired_capabilities=cap)
@@ -262,10 +261,10 @@ def get_all(urls):
                 start_time = time.time()
                 lowest_price_in_txt = 0
                 time_get = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-                if "429 Too Many Requests" in driver.find_element(By.TAG_NAME, "title").text:
-                    print("超时")
-                    time.sleep(2)
-                    driver.refresh()
+                # if "429 Too Many Requests" in driver.find_element(By.TAG_NAME, "title").text:
+                #     print("超时")
+                #     time.sleep(2)
+                #     driver.refresh()
                 price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
                 name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
 
@@ -308,8 +307,8 @@ def get_all(urls):
                     if not lines:
                         f.write(str(goods_id) + ':' + str(price / 2) + '\n')
                         f.write(f'{time_get};{name} ¥ {price}\n')
-                        add_new_good(cursor, name, str(goods_id), category, str(price / 2))
-                        write_record(cursor, time_get, str(goods_id), str(price))
+                        # add_new_good(cursor, name, str(goods_id), category, str(price / 2))
+                        # write_record(cursor, time_get, str(goods_id), str(price))
                         continue
                     else:
                         first_line = lines[0]
@@ -476,12 +475,21 @@ threads = []
 urls = []
 mail = {}
 files = os.listdir('../source')
+# conn = pymysql.connect(
+#     host="120.25.145.148",
+#     port=3306,
+#     user="homework",
+#     passwd="root",
+#     db="homework",
+#     charset='utf8',
+#     autocommit=True
+# )
 conn = pymysql.connect(
-    host="120.25.145.148",
+    host="192.168.6.169",
     port=3306,
-    user="homework",
+    user="root",
     passwd="root",
-    db="homework",
+    db="buff_price",
     charset='utf8',
     autocommit=True
 )

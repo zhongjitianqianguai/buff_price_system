@@ -5,3 +5,5 @@
 2023-05-14 18:16:26;印花 | Ninjas in Pyjamas（金色）| 2020 RMR ¥ 14.36
 2023-05-14 20:03:29;印花 | Ninjas in Pyjamas（金色）| 2020 RMR ¥ 14.05
 2023-05-14 20:45:11;印花 | Ninjas in Pyjamas（金色）| 2020 RMR ¥ 13.85
+2023-05-14 22:06:18;印花 | Ninjas in Pyjamas（金色）| 2020 RMR ¥ 13.95
+2023-05-15 09:08:34;印花 | Ninjas in Pyjamas（金色）| 2020 RMR ¥ 13.54
