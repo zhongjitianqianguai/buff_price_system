@@ -211,7 +211,7 @@ def month_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price
                           'https://buff.163.com/goods/' + url)
 
 
-def write_record(conn,cursor, record_time, goods_id, price):
+def write_record(conn, cursor, record_time, goods_id, price):
     try:
         sql = """Insert into buff_record(time,goods_id,price) value(%s,%s,%s)"""
         conn.ping(reconnect=True)
@@ -233,7 +233,7 @@ def write_record(conn,cursor, record_time, goods_id, price):
         cursor.execute(sql, (record_time, goods_id, price))  # 添加参数
 
 
-def get_all_goods(conn,cursor):
+def get_all_goods(conn, cursor):
     try:
         sql = """Select * from  buff_goods;"""
         conn.ping(reconnect=True)
@@ -258,11 +258,11 @@ def get_all_goods(conn,cursor):
         return cursor.fetchall()
 
 
-def add_new_good(conn,cursor, name, goods_id, category, except_price,img_url):
+def add_new_good(conn, cursor, name, goods_id, category, except_price, img_url):
     try:
         sql = """Insert into buff_goods(name,goods_id,category,expected_price,img_url) value(%s,%s,%s,%s,%s);"""
         conn.ping(reconnect=True)
-        cursor.execute(sql, (name, goods_id, category, except_price,img_url))  # 添加参数
+        cursor.execute(sql, (name, goods_id, category, except_price, img_url))  # 添加参数
     except Exception as e:
         print("错误类型:", type(e))
         print("插入新商品失败失败:", e)
@@ -298,7 +298,9 @@ def get_all(urls):
                 #     driver.refresh()
                 price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
                 name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
-                img_url = driver.find_element(By.CLASS_NAME, "detail-pic").find_element(By.CLASS_NAME, "t_Center").find_element(By.TAG_NAME,"img").get_attribute("src")
+                img_url = driver.find_element(By.CLASS_NAME, "detail-pic").find_element(By.CLASS_NAME,
+                                                                                        "t_Center").find_element(
+                    By.TAG_NAME, "img").get_attribute("src")
                 while len(price_elements) <= 1:
                     price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
                     now_time = time.time()
@@ -344,9 +346,9 @@ def get_all(urls):
                             category = "全息"
                         elif "胶囊" in name:
                             category = "胶囊"
-                        add_new_good(conn,cursor, name, str(goods_id), category, str(price / 2),img_url)
+                        add_new_good(conn, cursor, name, str(goods_id), category, str(price / 2), img_url)
                         goods_id_in_sql.append(goods_id)
-                        write_record(conn,cursor, time_get, str(goods_id), str(price))
+                        write_record(conn, cursor, time_get, str(goods_id), str(price))
                         continue
                     else:
                         first_line = lines[0]
@@ -361,7 +363,7 @@ def get_all(urls):
                                 category = "全息"
                             elif "胶囊" in name:
                                 category = "胶囊"
-                            add_new_good(conn,cursor, name, str(goods_id), category, str(price / 2),img_url)
+                            add_new_good(conn, cursor, name, str(goods_id), category, str(price / 2), img_url)
 
                         last_price = float(lines[-1].split('¥')[1].replace(" ", "").replace("\n", ""))
                         one_day_price = []
@@ -417,7 +419,7 @@ def get_all(urls):
                         if last_price == price:
                             continue
                         f.write(f'{time_get};{name} ¥ {price}\n')
-                        write_record(conn,cursor, time_get, str(goods_id), str(price))
+                        write_record(conn, cursor, time_get, str(goods_id), str(price))
                         f.close()
 
                         if time.localtime(time.time()).tm_hour.real < 1 or time.localtime(time.time()).tm_hour.real > 7:
@@ -521,7 +523,7 @@ def send_mail(name, price, url):
 threads = []
 urls = []
 mail = {}
-files = os.listdir('../source')
+# files = os.listdir('../source')
 # conn = pymysql.connect(
 #     host="120.25.145.148",
 #     port=3306,
@@ -542,13 +544,12 @@ conn = pymysql.connect(
 )
 cursor = conn.cursor()
 goods_id_in_sql = []
-all_goods_from_sql = get_all_goods(conn,cursor)
+all_goods_from_sql = get_all_goods(conn, cursor)
 for goods in all_goods_from_sql:
     goods_id_in_sql.append(goods[0])
 
-for file in files:
-    with open('../source/' + file) as f:
-        urls.append(f.readlines())
+with open('../source/all.txt') as f:
+    urls = f.readlines()
 get_all(urls)
 # for file in files:
 #     with open('../source/' + file) as f:
