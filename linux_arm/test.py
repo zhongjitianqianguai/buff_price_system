@@ -286,7 +286,7 @@ def get_all(urls):
     driver.implicitly_wait(60)
     while True:
         for url in urls:
-            sleep_time = 6
+            sleep_time = 3
             try:
                 driver.get('https://buff.163.com/goods/' + url)
                 start_time = time.time()
@@ -478,7 +478,7 @@ def get_all(urls):
             finally:
                 time.sleep(sleep_time)
 
-        time.sleep(10)
+        time.sleep(5)
 
 
 def send_mail(name, price, url):
@@ -545,14 +545,19 @@ goods_id_in_sql = []
 all_goods_from_sql = get_all_goods(conn,cursor)
 for goods in all_goods_from_sql:
     goods_id_in_sql.append(goods[0])
+
 for file in files:
     with open('../source/' + file) as f:
-        urls = f.readlines()
-    f.close()
-    thread = threading.Thread(target=get_all, args=([urls]))
-    threads.append(thread)
-    time.sleep(5)
-    thread.start()
-
-for thread in threads:
-    thread.join()
+        urls.append(f.readlines())
+get_all(urls)
+# for file in files:
+#     with open('../source/' + file) as f:
+#         urls = f.readlines()
+#     f.close()
+#     thread = threading.Thread(target=get_all, args=([urls]))
+#     threads.append(thread)
+#     time.sleep(5)
+#     thread.start()
+#
+# for thread in threads:
+#     thread.join()
