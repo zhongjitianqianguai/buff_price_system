@@ -338,7 +338,13 @@ def get_all(urls):
                     if not lines:
                         f.write(str(goods_id) + ':' + str(price / 2) + '\n')
                         f.write(f'{time_get};{name} ¥ {price}\n')
-                        add_new_good(conn,cursor, name, str(goods_id), category, str(price / 2))
+                        if "金色" in name:
+                            category = "金色"
+                        elif "全息" in name:
+                            category = "全息"
+                        elif "胶囊" in name:
+                            category = "胶囊"
+                        add_new_good(conn,cursor, name, str(goods_id), category, str(price / 2),img_url)
                         goods_id_in_sql.append(goods_id)
                         write_record(conn,cursor, time_get, str(goods_id), str(price))
                         continue
@@ -355,7 +361,7 @@ def get_all(urls):
                                 category = "全息"
                             elif "胶囊" in name:
                                 category = "胶囊"
-                            add_new_good(cursor, name, str(goods_id), category, str(price / 2),img_url)
+                            add_new_good(conn,cursor, name, str(goods_id), category, str(price / 2),img_url)
 
                         last_price = float(lines[-1].split('¥')[1].replace(" ", "").replace("\n", ""))
                         one_day_price = []
@@ -437,7 +443,7 @@ def get_all(urls):
                 #     pass
             except NoSuchElementException as e:
                 print("超时" + e.msg)
-                time.sleep(2)
+                time.sleep(sleep_time)
                 continue
             except WebDriverException as e:
                 crash_time = 0
