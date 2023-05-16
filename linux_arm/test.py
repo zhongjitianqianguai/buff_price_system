@@ -285,6 +285,10 @@ def get_all(urls):
                               desired_capabilities=cap)
     driver.implicitly_wait(60)
     while True:
+        goods_id_in_sql = []
+        all_goods_from_sql = get_all_goods(conn, cursor)
+        for goods in all_goods_from_sql:
+            goods_id_in_sql.append(goods[0])
         for url in urls:
             sleep_time = 3
             try:
@@ -543,10 +547,7 @@ conn = pymysql.connect(
     autocommit=True
 )
 cursor = conn.cursor()
-goods_id_in_sql = []
-all_goods_from_sql = get_all_goods(conn, cursor)
-for goods in all_goods_from_sql:
-    goods_id_in_sql.append(goods[0])
+
 
 with open('../source/all.txt') as f:
     urls = f.readlines()
