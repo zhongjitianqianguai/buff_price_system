@@ -290,7 +290,7 @@ def get_all(urls):
         for goods in all_goods_from_sql:
             goods_id_in_sql.append(goods[0])
         for url in urls:
-            sleep_time = 3
+            sleep_time = random.randint(3, 6)
             try:
                 driver.get('https://buff.163.com/goods/' + url)
                 start_time = time.time()
