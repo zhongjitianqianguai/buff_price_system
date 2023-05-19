@@ -28,7 +28,7 @@ cap = DesiredCapabilities.CHROME
 cap["pageLoadStrategy"] = "none"
 
 
-def day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, one_day_price):
+def day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, one_day_price, goods_id):
     if len(one_day_price) > 0:
         day_prices = 0
         for day in one_day_price:
@@ -44,6 +44,7 @@ def day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, 
                     lowest_price_in_txt),
                           lowest_price,
                           'https://buff.163.com/goods/' + url)
+                update_good(conn, cursor, goods_id, str(daily_change), lowest_price_in_txt)
             elif mail.get(url) == price:
                 pass
             else:
@@ -53,6 +54,7 @@ def day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, 
                     lowest_price_in_txt),
                           lowest_price,
                           'https://buff.163.com/goods/' + url)
+                update_good(conn, cursor, goods_id, str(daily_change), lowest_price_in_txt)
         elif daily_change < -0.2:
             if mail.get(url) is None:
                 mail[url] = price
@@ -70,9 +72,10 @@ def day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, 
                     lowest_price_in_txt),
                           lowest_price,
                           'https://buff.163.com/goods/' + url)
+                update_good(conn, cursor, goods_id, str(daily_change), lowest_price_in_txt)
 
 
-def three_day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, three_day_price):
+def three_day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, three_day_price, goods_id):
     if len(three_day_price) > 0:
         three_prices = 0
         for three_day in three_day_price:
@@ -87,6 +90,7 @@ def three_day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, p
                     lowest_price_in_txt),
                           lowest_price,
                           'https://buff.163.com/goods/' + url)
+                update_good(conn, cursor, goods_id, str(three_day_change), lowest_price_in_txt)
             elif mail.get(url) == price:
                 pass
             else:
@@ -96,6 +100,8 @@ def three_day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, p
                     lowest_price_in_txt),
                           lowest_price,
                           'https://buff.163.com/goods/' + url)
+                update_good(conn, cursor, goods_id, str(three_day_change), lowest_price_in_txt)
+
 
         elif three_day_change < -0.3:
             if mail.get(url) is None:
@@ -258,11 +264,11 @@ def get_all_goods(conn, cursor):
         return cursor.fetchall()
 
 
-def add_new_good(conn, cursor, name, goods_id, category, except_price, img_url):
+def update_good_price(conn, cursor, goods_id, now_price):
     try:
-        sql = """Insert into buff_goods(name,goods_id,category,expected_price,img_url) value(%s,%s,%s,%s,%s);"""
+        sql = """Update buff_goods set now_price = %s where goods_id =%s;"""
         conn.ping(reconnect=True)
-        cursor.execute(sql, (name, goods_id, category, except_price, img_url))  # 添加参数
+        cursor.execute(sql, (now_price, goods_id))  # 添加参数
     except Exception as e:
         print("错误类型:", type(e))
         print("插入新商品失败失败:", e)
@@ -276,8 +282,75 @@ def add_new_good(conn, cursor, name, goods_id, category, except_price, img_url):
             autocommit=True
         )
         cursor = conn.cursor()
+        sql = """Update buff_goods set now_price = %s where goods_id =%s;"""
+        cursor.execute(sql, (now_price, goods_id))  # 添加参数
+
+
+def update_good_the_lowest_price(conn, cursor, goods_id, the_lowest_price):
+    try:
+        sql = """Update buff_goods set the_lowest_price = %s where goods_id =%s;"""
+        conn.ping(reconnect=True)
+        cursor.execute(sql, (the_lowest_price, goods_id))  # 添加参数
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("插入新商品失败失败:", e)
+        conn = pymysql.connect(
+            host="192.168.6.169",
+            port=3306,
+            user="root",
+            passwd="root",
+            db="buff_price",
+            charset='utf8',
+            autocommit=True
+        )
+        cursor = conn.cursor()
+        sql = """Update buff_goods set the_lowest_price = %s where goods_id =%s;"""
+        cursor.execute(sql, (the_lowest_price, goods_id))  # 添加参数
+
+
+def add_new_good(conn, cursor, name, goods_id, category, except_price, img_url, now_price):
+    try:
+        sql = """Insert into buff_goods(name,goods_id,category,expected_price,img_url,now_price) value(%s,%s,%s,%s,%s,%s);"""
+        conn.ping(reconnect=True)
+        cursor.execute(sql, (name, goods_id, category, except_price, img_url, now_price))  # 添加参数
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("新商品失败失败:", e)
+        conn = pymysql.connect(
+            host="192.168.6.169",
+            port=3306,
+            user="root",
+            passwd="root",
+            db="buff_price",
+            charset='utf8',
+            autocommit=True
+        )
+        cursor = conn.cursor()
         sql = """Insert into buff_goods(name,goods_id,category,expected_price) value(%s,%s,%s,%s)"""
         cursor.execute(sql, (name, goods_id, category, except_price))  # 添加参数
+
+
+def update_good(conn, cursor, goods_id, trend, lowest_price_in_txt):
+    try:
+        sql = """Update buff_goods set trend = %s, the_lowest_price =%s where goods_id =%s;"""
+        conn.ping(reconnect=True)
+        cursor.execute(sql, (trend, lowest_price_in_txt, goods_id))  # 添加参数
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("新商品失败:", e)
+        conn = pymysql.connect(
+            host="192.168.6.169",
+            port=3306,
+            user="root",
+            passwd="root",
+            db="buff_price",
+            charset='utf8',
+            autocommit=True
+        )
+        cursor = conn.cursor()
+        sql = """Update buff_goods set trend = %s ,the_lowest_price =%s where goods_id =%s;"""
+        conn.ping(reconnect=True)
+        cursor.execute(sql, (trend, lowest_price_in_txt, goods_id))  # 添加参数
 
 
 def get_all(urls):
@@ -350,7 +423,7 @@ def get_all(urls):
                             category = "全息"
                         elif "胶囊" in name:
                             category = "胶囊"
-                        add_new_good(conn, cursor, name, str(goods_id), category, str(price / 2), img_url)
+                        add_new_good(conn, cursor, name, str(goods_id), category, str(price / 2), img_url, str(price))
                         goods_id_in_sql.append(goods_id)
                         write_record(conn, cursor, time_get, str(goods_id), str(price))
                         continue
@@ -367,7 +440,8 @@ def get_all(urls):
                                 category = "全息"
                             elif "胶囊" in name:
                                 category = "胶囊"
-                            add_new_good(conn, cursor, name, str(goods_id), category, str(price / 2), img_url)
+                            add_new_good(conn, cursor, name, str(goods_id), category, str(price / 2), img_url,
+                                         str(price))
 
                         last_price = float(lines[-1].split('¥')[1].replace(" ", "").replace("\n", ""))
                         one_day_price = []
@@ -424,13 +498,15 @@ def get_all(urls):
                             continue
                         f.write(f'{time_get};{name} ¥ {price}\n')
                         write_record(conn, cursor, time_get, str(goods_id), str(price))
+                        update_good_price(conn, cursor, str(goods_id), str(price))
+                        update_good_the_lowest_price(conn, cursor, goods_id, lowest_price_in_txt)
                         f.close()
 
                         if time.localtime(time.time()).tm_hour.real < 1 or time.localtime(time.time()).tm_hour.real > 7:
                             day_send_mail(price, lowest_price_in_txt, name, url, price,
-                                          one_day_price)
+                                          one_day_price, goods_id)
                             three_day_send_mail(price, lowest_price_in_txt, name, url, price,
-                                                three_day_price)
+                                                three_day_price, goods_id)
                             week_send_mail(price, lowest_price_in_txt, name, url, price,
                                            week_day_price)
                             month_send_mail(price, lowest_price_in_txt, name, url, price,
@@ -547,7 +623,6 @@ conn = pymysql.connect(
     autocommit=True
 )
 cursor = conn.cursor()
-
 
 with open('../source/all.txt') as f:
     urls = f.readlines()
