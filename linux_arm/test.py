@@ -264,11 +264,11 @@ def get_all_goods(conn, cursor):
         return cursor.fetchall()
 
 
-def update_good_price(conn, cursor, goods_id, now_price):
+def update_good_price(conn, cursor, goods_id, now_price, lowest_price_in_txt):
     try:
-        sql = """Update buff_goods set now_price = %s where goods_id =%s;"""
+        sql = """Update buff_goods set now_price = %s,the_lowest_price=%s where goods_id =%s;"""
         conn.ping(reconnect=True)
-        cursor.execute(sql, (now_price, goods_id))  # 添加参数
+        cursor.execute(sql, (now_price, lowest_price_in_txt, goods_id))  # 添加参数
     except Exception as e:
         print("错误类型:", type(e))
         print("插入新商品失败失败:", e)
@@ -282,8 +282,9 @@ def update_good_price(conn, cursor, goods_id, now_price):
             autocommit=True
         )
         cursor = conn.cursor()
-        sql = """Update buff_goods set now_price = %s where goods_id =%s;"""
-        cursor.execute(sql, (now_price, goods_id))  # 添加参数
+        sql = """Update buff_goods set now_price = %s,the_lowest_price=%s where goods_id =%s;"""
+        conn.ping(reconnect=True)
+        cursor.execute(sql, (now_price, lowest_price_in_txt, goods_id))  # 添加参数
 
 
 def update_good_the_lowest_price(conn, cursor, goods_id, the_lowest_price):
@@ -494,12 +495,14 @@ def get_all(urls):
                         else:
                             print(
                                 f'{goods_id}:{time_get} :{name} 的最低价格未达到期望值, 当前价格是: {price}')
+                        #用于首次填充数据库，填充完毕后注释掉
+                        update_good_price(conn, cursor, str(goods_id), str(price), lowest_price_in_txt)
+
                         if last_price == price:
                             continue
                         f.write(f'{time_get};{name} ¥ {price}\n')
                         write_record(conn, cursor, time_get, str(goods_id), str(price))
-                        update_good_price(conn, cursor, str(goods_id), str(price))
-                        update_good_the_lowest_price(conn, cursor, goods_id, lowest_price_in_txt)
+                        update_good_price(conn, cursor, str(goods_id), str(price), lowest_price_in_txt)
                         f.close()
 
                         if time.localtime(time.time()).tm_hour.real < 1 or time.localtime(time.time()).tm_hour.real > 7:
