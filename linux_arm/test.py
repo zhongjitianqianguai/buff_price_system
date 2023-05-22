@@ -363,205 +363,205 @@ def get_all(urls):
             goods_id_in_sql.append(goods[0])
         for url in urls:
             sleep_time = random.randint(3, 6)
-            try:
-                driver.get('https://buff.163.com/goods/' + url)
-                start_time = time.time()
-                lowest_price_in_txt = 0
-                time_get = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-                # if "429 Too Many Requests" in driver.find_element(By.TAG_NAME, "title").text:
-                #     print("超时")
-                #     time.sleep(2)
-                #     driver.refresh()
-                price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
-                name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
-                img_url = driver.find_element(By.CLASS_NAME, "detail-pic").find_element(By.CLASS_NAME,
-                                                                                        "t_Center").find_element(
-                    By.TAG_NAME, "img").get_attribute("src")
-                while len(price_elements) <= 1:
-                    price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
-                    now_time = time.time()
-                    name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
-                    if now_time - start_time > 20:
-                        print(f'{time_get} :{url} 超时')
-                        driver.refresh()
-                        start_time = time.time()
-                # lowest_price = price_elements[1]
-                # price = float(lowest_price.replace("¥ ", ""))
+            while True:
                 try:
-                    price = float(price_elements[1].text.replace("¥ ", ""))
+                    driver.get('https://buff.163.com/goods/' + url)
+                    start_time = time.time()
+                    lowest_price_in_txt = 0
+                    time_get = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+                    # if "429 Too Many Requests" in driver.find_element(By.TAG_NAME, "title").text:
+                    #     print("超时")
+                    #     time.sleep(2)
+                    #     driver.refresh()
+                    price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
                     name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
-                    name = name_elements.text.splitlines()[2]
-                    category = name_elements.text.split("类型 |")[1].split("\n")[0]
-                except StaleElementReferenceException as e:
-                    # print("try to handle element is not attached to the page document ")
+                    img_url = driver.find_element(By.CLASS_NAME, "detail-pic").find_element(By.CLASS_NAME,
+                                                                                            "t_Center").find_element(
+                        By.TAG_NAME, "img").get_attribute("src")
+                    while len(price_elements) <= 1:
+                        price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
+                        now_time = time.time()
+                        name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
+                        if now_time - start_time > 20:
+                            print(f'{time_get} :{url} 超时')
+                            driver.refresh()
+                            start_time = time.time()
+                    # lowest_price = price_elements[1]
+                    # price = float(lowest_price.replace("¥ ", ""))
                     try:
-                        while True:
-                            price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
-                            while len(price_elements) <= 1:
+                        price = float(price_elements[1].text.replace("¥ ", ""))
+                        name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
+                        name = name_elements.text.splitlines()[2]
+                        category = name_elements.text.split("类型 |")[1].split("\n")[0]
+                    except StaleElementReferenceException as e:
+                        # print("try to handle element is not attached to the page document ")
+                        try:
+                            while True:
                                 price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
-                            price = float(price_elements[1].text.replace("¥ ", ""))
-                            name = name_elements.text.splitlines()[2]
-                            # category = name_elements.text.split("类型 |")[1].split("\n")[0]
-                            break
-                    except:
-                        pass
+                                while len(price_elements) <= 1:
+                                    price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
+                                price = float(price_elements[1].text.replace("¥ ", ""))
+                                name = name_elements.text.splitlines()[2]
+                                # category = name_elements.text.split("类型 |")[1].split("\n")[0]
+                                break
+                        except:
+                            pass
 
-                goods_id = driver.current_url.split('/')[-1]
-                if not os.path.exists('txt/' + str(goods_id) + '.txt'):
-                    f = open('txt/' + str(goods_id) + '.txt', 'w', encoding='utf-8')
-                    f.close()
-                with open('txt/' + str(goods_id) + '.txt', 'a+', encoding='utf-8') as f:
-                    f.seek(0)
-                    lines = f.readlines()
-                    if not lines:
-                        f.write(str(goods_id) + ':' + str(price / 2) + '\n')
-                        f.write(f'{time_get};{name} ¥ {price}\n')
-                        if "金色" in name:
-                            category = "金色"
-                        elif "全息" in name:
-                            category = "全息"
-                        elif "胶囊" in name:
-                            category = "胶囊"
-                        add_new_good(conn, cursor, name, str(goods_id), category, str(price / 2), img_url, str(price))
-                        goods_id_in_sql.append(goods_id)
-                        write_record(conn, cursor, time_get, str(goods_id), str(price))
-                        continue
-                    else:
-                        first_line = lines[0]
-                        expect_price = first_line.split(':')[1]
-                        if len(lines) == 1:
+                    goods_id = driver.current_url.split('/')[-1]
+                    if not os.path.exists('txt/' + str(goods_id) + '.txt'):
+                        f = open('txt/' + str(goods_id) + '.txt', 'w', encoding='utf-8')
+                        f.close()
+                    with open('txt/' + str(goods_id) + '.txt', 'a+', encoding='utf-8') as f:
+                        f.seek(0)
+                        lines = f.readlines()
+                        if not lines:
+                            f.write(str(goods_id) + ':' + str(price / 2) + '\n')
                             f.write(f'{time_get};{name} ¥ {price}\n')
-                            continue
-                        if goods_id not in goods_id_in_sql:
                             if "金色" in name:
                                 category = "金色"
                             elif "全息" in name:
                                 category = "全息"
                             elif "胶囊" in name:
                                 category = "胶囊"
-                            add_new_good(conn, cursor, name, str(goods_id), category, str(price / 2), img_url,
-                                         str(price))
-
-                        last_price = float(lines[-1].split('¥')[1].replace(" ", "").replace("\n", ""))
-                        one_day_price = []
-                        three_day_price = []
-                        week_day_price = []
-                        month_price = []
-                        days = [1, 3, 7, 30]
-                        lines.pop(0)
-                        lowest_price_in_txt = 100000
-
-                        for line in lines:
-                            price_data = line.split(';')
-                            # 获取 当前时间并计算与文本时间差
-                            old_time_str = price_data[0].replace('\n', '')
-                            old_time = datetime.datetime.strptime(old_time_str, "%Y-%m-%d %H:%M:%S")
-                            now_time = datetime.datetime.utcnow()
-                            diff_time = now_time - old_time
-                            # # 获取对应天数的历史价格
-                            if lowest_price_in_txt > float(
-                                    price_data[1].split('¥')[1].replace(" ", "").replace("\n", "")):
-                                lowest_price_in_txt = float(
-                                    price_data[1].split('¥')[1].replace(" ", "").replace("\n", ""))
-                            if diff_time.days == days[0]:
-                                one_day_price.append(
-                                    price_data[1].split('¥')[1].replace(" ", "").replace("\n", ""))
-                                # print("have one day ago price")
-                            elif diff_time.days == days[1]:
-                                three_day_price.append(
-                                    price_data[1].split('¥')[1].replace(" ", "").replace("\n", ""))
-                                # print("have 3 day ago price")
-
-                            elif diff_time.days == days[2]:
-                                week_day_price.append(
-                                    price_data[1].split('¥')[1].replace(" ", "").replace("\n", ""))
-                                # print("have 7 day ago price")
-
-                            elif diff_time.days == days[3]:
-                                month_price.append(
-                                    price_data[1].split('¥')[1].replace(" ", "").replace("\n", ""))
-                                # print("have 30 day ago price")
-                            # 计算各天数的价格变化
-
-                        if price <= float(expect_price) and lowest_price_in_txt > 0:
-                            print(
-                                f'{goods_id}:{time_get} :{name} 的最低价格达到期望值, 当前价格是: {price} the lowest price in record is:{lowest_price_in_txt}')
-                            send_mail(
-                                name + '\nthe lowest price in record is' + str(
-                                    lowest_price_in_txt), price,
-                                'https://buff.163.com/goods/' + url)
+                            add_new_good(conn, cursor, name, str(goods_id), category, str(price / 2), img_url, str(price))
+                            goods_id_in_sql.append(goods_id)
+                            write_record(conn, cursor, time_get, str(goods_id), str(price))
+                            break
                         else:
-                            print(
-                                f'{goods_id}:{time_get} :{name} 的最低价格未达到期望值, 当前价格是: {price}')
-                        # 用于首次填充数据库，填充完毕后注释掉
-                        # update_good_price(conn, cursor, str(goods_id), str(price), lowest_price_in_txt)
+                            first_line = lines[0]
+                            expect_price = first_line.split(':')[1]
+                            if len(lines) == 1:
+                                f.write(f'{time_get};{name} ¥ {price}\n')
+                                break
+                            if goods_id not in goods_id_in_sql:
+                                if "金色" in name:
+                                    category = "金色"
+                                elif "全息" in name:
+                                    category = "全息"
+                                elif "胶囊" in name:
+                                    category = "胶囊"
+                                add_new_good(conn, cursor, name, str(goods_id), category, str(price / 2), img_url,
+                                             str(price))
 
-                        if last_price == price:
-                            continue
-                        f.write(f'{time_get};{name} ¥ {price}\n')
-                        write_record(conn, cursor, time_get, str(goods_id), str(price))
-                        update_good_price(conn, cursor, str(goods_id), str(price), lowest_price_in_txt)
-                        f.close()
+                            last_price = float(lines[-1].split('¥')[1].replace(" ", "").replace("\n", ""))
+                            one_day_price = []
+                            three_day_price = []
+                            week_day_price = []
+                            month_price = []
+                            days = [1, 3, 7, 30]
+                            lines.pop(0)
+                            lowest_price_in_txt = 100000
 
-                        if time.localtime(time.time()).tm_hour.real < 1 or time.localtime(time.time()).tm_hour.real > 7:
-                            day_send_mail(price, lowest_price_in_txt, name, url, price,
-                                          one_day_price, goods_id)
-                            three_day_send_mail(price, lowest_price_in_txt, name, url, price,
-                                                three_day_price, goods_id)
-                            week_send_mail(price, lowest_price_in_txt, name, url, price,
-                                           week_day_price)
-                            month_send_mail(price, lowest_price_in_txt, name, url, price,
-                                            month_price)
-            except StaleElementReferenceException as e:
-                print("try to handle element is not attached to the page document in out loop")
-                continue
-                # try:
-                #     while True:
-                #         price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
-                #         while len(price_elements) <= 1:
-                #             price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
-                #         price = float(price_elements[1].text.replace("¥ ", ""))
-                #         break
-                # except:
-                #     pass
-            except NoSuchElementException as e:
-                print("超时" + e.msg)
-                driver.refresh()
-                driver.refresh()
+                            for line in lines:
+                                price_data = line.split(';')
+                                # 获取 当前时间并计算与文本时间差
+                                old_time_str = price_data[0].replace('\n', '')
+                                old_time = datetime.datetime.strptime(old_time_str, "%Y-%m-%d %H:%M:%S")
+                                now_time = datetime.datetime.utcnow()
+                                diff_time = now_time - old_time
+                                # # 获取对应天数的历史价格
+                                if lowest_price_in_txt > float(
+                                        price_data[1].split('¥')[1].replace(" ", "").replace("\n", "")):
+                                    lowest_price_in_txt = float(
+                                        price_data[1].split('¥')[1].replace(" ", "").replace("\n", ""))
+                                if diff_time.days == days[0]:
+                                    one_day_price.append(
+                                        price_data[1].split('¥')[1].replace(" ", "").replace("\n", ""))
+                                    # print("have one day ago price")
+                                elif diff_time.days == days[1]:
+                                    three_day_price.append(
+                                        price_data[1].split('¥')[1].replace(" ", "").replace("\n", ""))
+                                    # print("have 3 day ago price")
 
-                continue
-            except WebDriverException as e:
-                crash_time = 0
-                print(e)
-                while True:
-                    try:
-                        if crash_time == 2:
-                            time.sleep(600)
-                            send_mail("need to reboot chroot container", 0, '111')
+                                elif diff_time.days == days[2]:
+                                    week_day_price.append(
+                                        price_data[1].split('¥')[1].replace(" ", "").replace("\n", ""))
+                                    # print("have 7 day ago price")
 
-                        else:
-                            time.sleep(20)
-                        driver = webdriver.Chrome(chrome_options=chrome_options,
-                                                  executable_path="/usr/bin/chromedriver")
-                        driver.get('https://buff.163.com/goods/' + url)
-                        sleep_time = random.randint(5, 15)
-                        break
-                    except:
-                        crash_time += 1
-            except Exception as e:
-                print(e)
-                print('网络连接断开,等待网络恢复...')
-                if "please see" in str(e):
+                                elif diff_time.days == days[3]:
+                                    month_price.append(
+                                        price_data[1].split('¥')[1].replace(" ", "").replace("\n", ""))
+                                    # print("have 30 day ago price")
+                                # 计算各天数的价格变化
+
+                            if price <= float(expect_price) and lowest_price_in_txt > 0:
+                                print(
+                                    f'{goods_id}:{time_get} :{name} 的最低价格达到期望值, 当前价格是: {price} the lowest price in record is:{lowest_price_in_txt}')
+                                send_mail(
+                                    name + '\nthe lowest price in record is' + str(
+                                        lowest_price_in_txt), price,
+                                    'https://buff.163.com/goods/' + url)
+                            else:
+                                print(
+                                    f'{goods_id}:{time_get} :{name} 的最低价格未达到期望值, 当前价格是: {price}')
+                            # 用于首次填充数据库，填充完毕后注释掉
+                            # update_good_price(conn, cursor, str(goods_id), str(price), lowest_price_in_txt)
+
+                            if last_price == price:
+                                break
+                            f.write(f'{time_get};{name} ¥ {price}\n')
+                            write_record(conn, cursor, time_get, str(goods_id), str(price))
+                            update_good_price(conn, cursor, str(goods_id), str(price), lowest_price_in_txt)
+                            f.close()
+
+                            if time.localtime(time.time()).tm_hour.real < 1 or time.localtime(time.time()).tm_hour.real > 7:
+                                day_send_mail(price, lowest_price_in_txt, name, url, price,
+                                              one_day_price, goods_id)
+                                three_day_send_mail(price, lowest_price_in_txt, name, url, price,
+                                                    three_day_price, goods_id)
+                                week_send_mail(price, lowest_price_in_txt, name, url, price,
+                                               week_day_price)
+                                month_send_mail(price, lowest_price_in_txt, name, url, price,
+                                                month_price)
+                            break
+                except StaleElementReferenceException as e:
+                    print("try to handle element is not attached to the page document in out loop")
                     continue
-                while True:
-                    try:
-                        time.sleep(10)
-                        driver.refresh()
-                        break
-                    except:
-                        pass
-            finally:
-                time.sleep(sleep_time)
+                    # try:
+                    #     while True:
+                    #         price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
+                    #         while len(price_elements) <= 1:
+                    #             price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
+                    #         price = float(price_elements[1].text.replace("¥ ", ""))
+                    #         break
+                    # except:
+                    #     pass
+                except NoSuchElementException as e:
+                    print("超时" + e.msg)
+                    driver.refresh()
+                    continue
+                except WebDriverException as e:
+                    crash_time = 0
+                    print(e)
+                    while True:
+                        try:
+                            if crash_time == 2:
+                                time.sleep(600)
+                                send_mail("need to reboot chroot container", 0, '111')
+
+                            else:
+                                time.sleep(20)
+                            driver = webdriver.Chrome(chrome_options=chrome_options,
+                                                      executable_path="/usr/bin/chromedriver")
+                            driver.get('https://buff.163.com/goods/' + url)
+                            sleep_time = random.randint(5, 15)
+                            break
+                        except:
+                            crash_time += 1
+                except Exception as e:
+                    print(e)
+                    print('网络连接断开,等待网络恢复...')
+                    if "please see" in str(e):
+                        continue
+                    while True:
+                        try:
+                            time.sleep(10)
+                            driver.refresh()
+                            break
+                        except:
+                            pass
+                finally:
+                    time.sleep(sleep_time)
 
         time.sleep(5)
 
