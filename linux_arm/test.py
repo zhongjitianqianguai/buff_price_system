@@ -35,6 +35,8 @@ def day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, 
             day_prices += float(day)
         day_price = day_prices / len(one_day_price)
         daily_change = round((price - day_price) / day_price, 2)
+        update_good(conn, cursor, goods_id, str(daily_change), lowest_price_in_txt)
+
         if daily_change >= 0.2:
             print(mail.get(url))
             if mail.get(url) is None:
@@ -44,7 +46,6 @@ def day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, 
                     lowest_price_in_txt),
                           lowest_price,
                           'https://buff.163.com/goods/' + url)
-                update_good(conn, cursor, goods_id, str(daily_change), lowest_price_in_txt)
             elif mail.get(url) == price:
                 pass
             else:
@@ -54,7 +55,6 @@ def day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, 
                     lowest_price_in_txt),
                           lowest_price,
                           'https://buff.163.com/goods/' + url)
-                update_good(conn, cursor, goods_id, str(daily_change), lowest_price_in_txt)
         elif daily_change < -0.2:
             if mail.get(url) is None:
                 mail[url] = price
@@ -72,7 +72,6 @@ def day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, 
                     lowest_price_in_txt),
                           lowest_price,
                           'https://buff.163.com/goods/' + url)
-                update_good(conn, cursor, goods_id, str(daily_change), lowest_price_in_txt)
 
 
 def three_day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, three_day_price, goods_id):
@@ -82,6 +81,7 @@ def three_day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, p
             three_prices += float(three_day)
         three_price = three_prices / len(three_day_price)
         three_day_change = round((price - three_price) / three_price, 2)
+        update_good(conn, cursor, goods_id, str(three_day_change), lowest_price_in_txt)
         if three_day_change > 0.3:
             if mail.get(url) is None:
                 mail[url] = price
@@ -90,7 +90,6 @@ def three_day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, p
                     lowest_price_in_txt),
                           lowest_price,
                           'https://buff.163.com/goods/' + url)
-                update_good(conn, cursor, goods_id, str(three_day_change), lowest_price_in_txt)
             elif mail.get(url) == price:
                 pass
             else:
@@ -100,7 +99,6 @@ def three_day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, p
                     lowest_price_in_txt),
                           lowest_price,
                           'https://buff.163.com/goods/' + url)
-                update_good(conn, cursor, goods_id, str(three_day_change), lowest_price_in_txt)
 
 
         elif three_day_change < -0.3:
@@ -395,7 +393,7 @@ def get_all(urls):
                     name = name_elements.text.splitlines()[2]
                     category = name_elements.text.split("类型 |")[1].split("\n")[0]
                 except StaleElementReferenceException as e:
-                    print("try to handle element is not attached to the page document ")
+                    # print("try to handle element is not attached to the page document ")
                     try:
                         while True:
                             price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
@@ -495,8 +493,8 @@ def get_all(urls):
                         else:
                             print(
                                 f'{goods_id}:{time_get} :{name} 的最低价格未达到期望值, 当前价格是: {price}')
-                        #用于首次填充数据库，填充完毕后注释掉
-                        update_good_price(conn, cursor, str(goods_id), str(price), lowest_price_in_txt)
+                        # 用于首次填充数据库，填充完毕后注释掉
+                        # update_good_price(conn, cursor, str(goods_id), str(price), lowest_price_in_txt)
 
                         if last_price == price:
                             continue
@@ -528,7 +526,9 @@ def get_all(urls):
                 #     pass
             except NoSuchElementException as e:
                 print("超时" + e.msg)
-                time.sleep(sleep_time)
+                driver.refresh()
+                driver.refresh()
+
                 continue
             except WebDriverException as e:
                 crash_time = 0
