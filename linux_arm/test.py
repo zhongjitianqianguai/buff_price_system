@@ -18,7 +18,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 import pymysql
 
 chrome_options = Options()
-# chrome_options.add_argument('--headless')
+chrome_options.add_argument('--headless')
 chrome_options.add_argument('--disable-gpu')
 chrome_options.add_argument("window-size=1024,768")
 chrome_options.add_argument("--no-sandbox")
@@ -28,7 +28,7 @@ cap = DesiredCapabilities.CHROME
 cap["pageLoadStrategy"] = "none"
 
 
-def day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, one_day_price, goods_id):
+def day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, one_day_price, goods_id,conn, cursor):
     if len(one_day_price) > 0:
         day_prices = 0
         for day in one_day_price:
@@ -74,7 +74,7 @@ def day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, 
                           'https://buff.163.com/goods/' + url)
 
 
-def three_day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, three_day_price, goods_id):
+def three_day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, three_day_price, goods_id,conn, cursor):
     if len(three_day_price) > 0:
         three_prices = 0
         for three_day in three_day_price:
@@ -353,9 +353,19 @@ def update_good(conn, cursor, goods_id, trend, lowest_price_in_txt):
 
 
 def get_all(urls):
+    conn = pymysql.connect(
+        host="192.168.6.169",
+        port=3306,
+        user="root",
+        passwd="root",
+        db="buff_price",
+        charset='utf8',
+        autocommit=True
+    )
+    cursor = conn.cursor()
     driver = webdriver.Chrome(chrome_options=chrome_options, executable_path="/usr/bin/chromedriver",
                               desired_capabilities=cap)
-    driver.implicitly_wait(60)
+    driver.implicitly_wait(20)
     while True:
         goods_id_in_sql = []
         all_goods_from_sql = get_all_goods(conn, cursor)
@@ -380,12 +390,12 @@ def get_all(urls):
                         By.TAG_NAME, "img").get_attribute("src")
                     while len(price_elements) <= 1:
                         price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
-                        now_time = time.time()
+                        # now_time = time.time()
                         name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
-                        if now_time - start_time > 20:
-                            print(f'{time_get} :{url} 超时')
-                            driver.refresh()
-                            start_time = time.time()
+                        # if now_time - start_time > 20:
+                        #     print(f'{time_get} :{url} 超时')
+                        #     driver.refresh()
+                        #     start_time = time.time()
                     # lowest_price = price_elements[1]
                     # price = float(lowest_price.replace("¥ ", ""))
                     try:
@@ -505,10 +515,10 @@ def get_all(urls):
                             f.close()
 
                             if time.localtime(time.time()).tm_hour.real < 1 or time.localtime(time.time()).tm_hour.real > 7:
-                                day_send_mail(price, lowest_price_in_txt, name, url, price,
-                                              one_day_price, goods_id)
-                                three_day_send_mail(price, lowest_price_in_txt, name, url, price,
-                                                    three_day_price, goods_id)
+                                day_send_mail(price, lowest_price_in_txt, name, url, price, one_day_price, goods_id,
+                                              conn, cursor)
+                                three_day_send_mail(price, lowest_price_in_txt, name, url, price, three_day_price,
+                                                    goods_id, conn, cursor)
                                 week_send_mail(price, lowest_price_in_txt, name, url, price,
                                                week_day_price)
                                 month_send_mail(price, lowest_price_in_txt, name, url, price,
@@ -528,6 +538,7 @@ def get_all(urls):
                     #     pass
                 except NoSuchElementException as e:
                     print("超时" + e.msg)
+                    time.sleep(sleep_time)
                     driver.refresh()
                     continue
                 except WebDriverException as e:
@@ -606,7 +617,7 @@ def send_mail(name, price, url):
 threads = []
 urls = []
 mail = {}
-# files = os.listdir('../source')
+files = os.listdir('../source')
 # conn = pymysql.connect(
 #     host="120.25.145.148",
 #     port=3306,
@@ -616,28 +627,18 @@ mail = {}
 #     charset='utf8',
 #     autocommit=True
 # )
-conn = pymysql.connect(
-    host="192.168.6.169",
-    port=3306,
-    user="root",
-    passwd="root",
-    db="buff_price",
-    charset='utf8',
-    autocommit=True
-)
-cursor = conn.cursor()
 
-with open('../source/all.txt') as f:
-    urls = f.readlines()
-get_all(urls)
-# for file in files:
-#     with open('../source/' + file) as f:
-#         urls = f.readlines()
-#     f.close()
-#     thread = threading.Thread(target=get_all, args=([urls]))
-#     threads.append(thread)
-#     time.sleep(5)
-#     thread.start()
-#
-# for thread in threads:
-#     thread.join()
+# with open('../source/all.txt') as f:
+#     urls = f.readlines()
+# get_all(urls)
+for file in files:
+    with open('../source/' + file) as f:
+        urls = f.readlines()
+    f.close()
+    thread = threading.Thread(target=get_all, args=([urls]))
+    threads.append(thread)
+    time.sleep(random.randint(2, 5))
+    thread.start()
+
+for thread in threads:
+    thread.join()
