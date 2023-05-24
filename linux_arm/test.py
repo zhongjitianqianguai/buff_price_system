@@ -408,8 +408,10 @@ def get_all(urls):
                         try:
                             while True:
                                 price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
+                                name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
                                 while len(price_elements) <= 1:
                                     price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
+                                    name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
                                 price = float(price_elements[1].text.replace("¥ ", ""))
                                 name = name_elements.text.splitlines()[2]
                                 # category = name_elements.text.split("类型 |")[1].split("\n")[0]
