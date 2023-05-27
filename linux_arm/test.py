@@ -28,7 +28,7 @@ cap = DesiredCapabilities.CHROME
 cap["pageLoadStrategy"] = "none"
 
 
-def day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, one_day_price, goods_id,conn, cursor):
+def day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, one_day_price, goods_id, conn, cursor):
     if len(one_day_price) > 0:
         day_prices = 0
         for day in one_day_price:
@@ -38,7 +38,7 @@ def day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, 
         update_good(conn, cursor, goods_id, str(daily_change), lowest_price_in_txt)
 
         if daily_change >= 0.2:
-            print(mail.get(url))
+            # print(mail.get(url))
             if mail.get(url) is None:
                 mail[url] = price
                 send_mail(name_elements + '价格在一天内上涨超20% 具体涨幅为' + str(
@@ -74,7 +74,8 @@ def day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, 
                           'https://buff.163.com/goods/' + url)
 
 
-def three_day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, three_day_price, goods_id,conn, cursor):
+def three_day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, three_day_price, goods_id, conn,
+                        cursor):
     if len(three_day_price) > 0:
         three_prices = 0
         for three_day in three_day_price:
@@ -365,7 +366,7 @@ def get_all(urls):
     cursor = conn.cursor()
     driver = webdriver.Chrome(chrome_options=chrome_options, executable_path="/usr/bin/chromedriver",
                               desired_capabilities=cap)
-    driver.implicitly_wait(20)
+    driver.implicitly_wait(15)
     while True:
         goods_id_in_sql = []
         all_goods_from_sql = get_all_goods(conn, cursor)
@@ -435,7 +436,8 @@ def get_all(urls):
                                 category = "全息"
                             elif "胶囊" in name:
                                 category = "胶囊"
-                            add_new_good(conn, cursor, name, str(goods_id), category, str(price / 2), img_url, str(price))
+                            add_new_good(conn, cursor, name, str(goods_id), category, str(price / 2), img_url,
+                                         str(price))
                             goods_id_in_sql.append(goods_id)
                             write_record(conn, cursor, time_get, str(goods_id), str(price))
                             break
@@ -498,9 +500,9 @@ def get_all(urls):
 
                             if price <= float(expect_price) and lowest_price_in_txt > 0:
                                 print(
-                                    f'{goods_id}:{time_get} :{name} 的最低价格达到期望值, 当前价格是: {price} the lowest price in record is:{lowest_price_in_txt}')
+                                    f'{goods_id}:{time_get} :{name} 的最低价格达到期望值, 当前价格是: {price} 历史最低价格为:{lowest_price_in_txt}\n')
                                 send_mail(
-                                    name + '\nthe lowest price in record is' + str(
+                                    name + '\n历史最低价格为:' + str(
                                         lowest_price_in_txt), price,
                                     'https://buff.163.com/goods/' + url)
                             else:
@@ -516,7 +518,8 @@ def get_all(urls):
                             update_good_price(conn, cursor, str(goods_id), str(price), lowest_price_in_txt)
                             f.close()
 
-                            if time.localtime(time.time()).tm_hour.real < 1 or time.localtime(time.time()).tm_hour.real > 7:
+                            if time.localtime(time.time()).tm_hour.real < 1 or time.localtime(
+                                    time.time()).tm_hour.real > 7:
                                 day_send_mail(price, lowest_price_in_txt, name, url, price, one_day_price, goods_id,
                                               conn, cursor)
                                 three_day_send_mail(price, lowest_price_in_txt, name, url, price, three_day_price,
@@ -539,7 +542,7 @@ def get_all(urls):
                     # except:
                     #     pass
                 except NoSuchElementException as e:
-                    print("超时" + e.msg)
+                    # print("超时:"+url)
                     time.sleep(sleep_time)
                     driver.refresh()
                     continue
@@ -563,9 +566,14 @@ def get_all(urls):
                             crash_time += 1
                 except Exception as e:
                     print(e)
-                    print('网络连接断开,等待网络恢复...')
                     if "please see" in str(e):
+                        print('发送邮件数量达今日最大值.')
                         continue
+                    if "远程主机强迫关闭了一个现有的连接" in str(e):
+                        print('爬取速度过快,等待服务器响应...')
+                        time.sleep(sleep_time)
+                        continue
+                    print('网络连接断开,等待网络恢复...')
                     while True:
                         try:
                             time.sleep(10)
@@ -616,10 +624,11 @@ def send_mail(name, price, url):
     server.quit()
 
 
-threads = []
-urls = []
+#
+# threads = []
+# urls = []
 mail = {}
-files = os.listdir('../source')
+# files = os.listdir('../source')
 # conn = pymysql.connect(
 #     host="120.25.145.148",
 #     port=3306,
@@ -629,17 +638,34 @@ files = os.listdir('../source')
 #     charset='utf8',
 #     autocommit=True
 # )
-
+#
 # with open('../source/all.txt') as f:
 #     urls = f.readlines()
 # get_all(urls)
-for file in files:
-    with open('../source/' + file) as f:
-        urls = f.readlines()
-    f.close()
-    thread = threading.Thread(target=get_all, args=([urls]))
+# for file in files:
+#     with open('../source/' + file) as f:
+#         urls = f.readlines()
+#     f.close()
+#     thread = threading.Thread(target=get_all, args=([urls]))
+#     threads.append(thread)
+#     time.sleep(random.randint(2, 5))
+#     thread.start()
+#
+# for thread in threads:
+#     thread.join()
+with open('../source/all.txt') as f:
+    urls = f.readlines()
+
+urls_per_thread = len(urls) // 5  # 每个线程要处理的行数
+threads = []
+
+for i in range(5):
+    start = i * urls_per_thread
+    end = start + urls_per_thread if i < 4 else len(urls)  # 最后一个线程处理剩余行数
+    sublist = urls[start:end]
+    thread = threading.Thread(target=get_all, args=(sublist,))
     threads.append(thread)
-    time.sleep(random.randint(2, 5))
+    time.sleep(random.randint(3, 5))
     thread.start()
 
 for thread in threads:
