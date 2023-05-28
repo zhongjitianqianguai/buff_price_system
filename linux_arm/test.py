@@ -42,7 +42,7 @@ def day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, 
             if mail.get(url) is None:
                 mail[url] = price
                 send_mail(name_elements + '价格在一天内上涨超20% 具体涨幅为' + str(
-                    daily_change) + ' the lowest price in record is' + str(
+                    daily_change) + ' 历史最低价格为:' + str(
                     lowest_price_in_txt),
                           lowest_price,
                           'https://buff.163.com/goods/' + url)
@@ -51,7 +51,7 @@ def day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, 
             else:
                 mail[url] = price
                 send_mail(name_elements + '价格在一天内上涨超20% 具体涨幅为' + str(
-                    daily_change) + 'the lowest price in record is' + str(
+                    daily_change) + '历史最低价格为:' + str(
                     lowest_price_in_txt),
                           lowest_price,
                           'https://buff.163.com/goods/' + url)
@@ -59,7 +59,7 @@ def day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, 
             if mail.get(url) is None:
                 mail[url] = price
                 send_mail(name_elements + '价格在一天内下降超20% 具体涨幅为' + str(
-                    daily_change) + 'the lowest price in record is' + str(
+                    daily_change) + '历史最低价格为:' + str(
                     lowest_price_in_txt),
                           lowest_price,
                           'https://buff.163.com/goods/' + url)
@@ -68,7 +68,7 @@ def day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price, 
             else:
                 mail[url] = price
                 send_mail(name_elements + '价格在一天内下降超20% 具体涨幅为' + str(
-                    daily_change) + 'the lowest price in record is' + str(
+                    daily_change) + '历史最低价格为:' + str(
                     lowest_price_in_txt),
                           lowest_price,
                           'https://buff.163.com/goods/' + url)
@@ -87,7 +87,7 @@ def three_day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, p
             if mail.get(url) is None:
                 mail[url] = price
                 send_mail(name_elements + '价格在三天内上涨30% 具体涨幅为' + str(
-                    three_day_change) + ' the lowest price in record is' + str(
+                    three_day_change) + ' 历史最低价格为:' + str(
                     lowest_price_in_txt),
                           lowest_price,
                           'https://buff.163.com/goods/' + url)
@@ -96,7 +96,7 @@ def three_day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, p
             else:
                 mail[url] = price
                 send_mail(name_elements + '价格在三天内上涨30% 具体涨幅为' + str(
-                    three_day_change) + 'the lowest price in record is' + str(
+                    three_day_change) + '历史最低价格为:' + str(
                     lowest_price_in_txt),
                           lowest_price,
                           'https://buff.163.com/goods/' + url)
@@ -106,7 +106,7 @@ def three_day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, p
             if mail.get(url) is None:
                 mail[url] = price
                 send_mail(name_elements + '价格在三天内下降30% 具体涨幅为' + str(
-                    three_day_change) + 'the lowest price in record is' + str(
+                    three_day_change) + '历史最低价格为:' + str(
                     lowest_price_in_txt),
                           lowest_price,
                           'https://buff.163.com/goods/' + url)
@@ -115,7 +115,7 @@ def three_day_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, p
             else:
                 mail[url] = price
                 send_mail(name_elements + '价格在三天内下降30% 具体涨幅为' + str(
-                    three_day_change) + 'the lowest price in record is' + str(
+                    three_day_change) + '历史最低价格为:' + str(
                     lowest_price_in_txt),
                           lowest_price,
                           'https://buff.163.com/goods/' + url)
@@ -134,7 +134,7 @@ def week_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price,
             if mail.get(url) is None:
                 mail[url] = price
                 send_mail(name_elements + '价格在一周内上涨40% 具体涨幅为' + str(
-                    week_change) + ' the lowest price in record is' + str(
+                    week_change) + ' 历史最低价格为:' + str(
                     lowest_price_in_txt),
                           lowest_price,
                           'https://buff.163.com/goods/' + url)
@@ -143,7 +143,7 @@ def week_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price,
             else:
                 mail[url] = price
                 send_mail(name_elements + '价格在一周内上涨40% 具体涨幅为' + str(
-                    week_change) + ' the lowest price in record is' + str(
+                    week_change) + ' 历史最低价格为:' + str(
                     lowest_price_in_txt),
                           lowest_price,
                           'https://buff.163.com/goods/' + url)
@@ -152,7 +152,7 @@ def week_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price,
             if mail.get(url) is None:
                 mail[url] = price
                 send_mail(name_elements + '价格在一周内下降40% 具体涨幅为' + str(
-                    week_change) + ' the lowest price in record is' + str(
+                    week_change) + ' 历史最低价格为:' + str(
                     lowest_price_in_txt),
                           lowest_price,
                           'https://buff.163.com/goods/' + url)
@@ -161,7 +161,7 @@ def week_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price,
             else:
                 mail[url] = price
                 send_mail(name_elements + '价格在一周内下降40% 具体涨幅为' + str(
-                    week_change) + ' the lowest price in record is' + str(
+                    week_change) + ' 历史最低价格为:' + str(
                     lowest_price_in_txt),
                           lowest_price,
                           'https://buff.163.com/goods/' + url)
@@ -180,7 +180,7 @@ def month_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price
                 mail[url] = price
                 send_mail(name_elements.text.splitlines()[
                               2] + '价格在一个月内上涨50% 具体涨幅为' + str(
-                    month_change) + ' the lowest price in record is' + str(
+                    month_change) + ' 历史最低价格为:' + str(
                     lowest_price_in_txt),
                           lowest_price,
                           'https://buff.163.com/goods/' + url)
@@ -190,7 +190,7 @@ def month_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price
                 mail[url] = price
                 send_mail(name_elements.text.splitlines()[
                               2] + '价格在一个月内上涨50%  具体涨幅为' + str(
-                    month_change) + 'the lowest price in record is' + str(
+                    month_change) + '历史最低价格为:' + str(
                     lowest_price_in_txt),
                           lowest_price,
                           'https://buff.163.com/goods/' + url)
@@ -200,7 +200,7 @@ def month_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price
                 mail[url] = price
                 send_mail(name_elements.text.splitlines()[
                               2] + '价格在一个月内上涨50%  具体涨幅为' + str(
-                    month_change) + 'the lowest price in record is' + str(
+                    month_change) + '历史最低价格为:' + str(
                     lowest_price_in_txt),
                           lowest_price,
                           'https://buff.163.com/goods/' + url)
@@ -210,7 +210,7 @@ def month_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price
                 mail[url] = price
                 send_mail(name_elements.text.splitlines()[
                               2] + '价格在一个月内下降50% 具体涨幅为' + str(
-                    month_change) + ' the lowest price in record is' + str(
+                    month_change) + ' 历史最低价格为:' + str(
                     lowest_price_in_txt),
                           lowest_price,
                           'https://buff.163.com/goods/' + url)
@@ -330,6 +330,29 @@ def add_new_good(conn, cursor, name, goods_id, category, except_price, img_url, 
         cursor.execute(sql, (name, goods_id, category, except_price))  # 添加参数
 
 
+def add_new_mail(conn, cursor, content, goods_id, time):
+    try:
+        sql = """Insert into buff_mail(content,url,time,user_id) value(%s,%s,%s,%s);"""
+        conn.ping(reconnect=True)
+        cursor.execute(sql, (content, goods_id, time, 1))  # 添加参数
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("新商品失败失败:", e)
+        conn = pymysql.connect(
+            host="192.168.6.169",
+            port=3306,
+            user="root",
+            passwd="root",
+            db="buff_price",
+            charset='utf8',
+            autocommit=True
+        )
+        cursor = conn.cursor()
+        sql = """Insert into buff_mail(content,url,time,user_id) value(%s,%s,%s,%s);"""
+        conn.ping(reconnect=True)
+        cursor.execute(sql, (content, goods_id, time, 1))  # 添加参数
+
+
 def update_good(conn, cursor, goods_id, trend, lowest_price_in_txt):
     try:
         sql = """Update buff_goods set trend = %s, the_lowest_price =%s where goods_id =%s;"""
@@ -354,6 +377,7 @@ def update_good(conn, cursor, goods_id, trend, lowest_price_in_txt):
 
 
 def get_all(urls):
+    global can_mail
     conn = pymysql.connect(
         host="192.168.6.169",
         port=3306,
@@ -500,7 +524,7 @@ def get_all(urls):
 
                             if price <= float(expect_price) and lowest_price_in_txt > 0:
                                 print(
-                                    f'{goods_id}:{time_get} :{name} 的最低价格达到期望值, 当前价格是: {price} 历史最低价格为:{lowest_price_in_txt}\n')
+                                    f'{goods_id}:{time_get} :{name} 的最低价格达到期望值, 当前价格是: {price} 历史最低价格为:{lowest_price_in_txt}')
                                 send_mail(
                                     name + '\n历史最低价格为:' + str(
                                         lowest_price_in_txt), price,
@@ -517,9 +541,8 @@ def get_all(urls):
                             write_record(conn, cursor, time_get, str(goods_id), str(price))
                             update_good_price(conn, cursor, str(goods_id), str(price), lowest_price_in_txt)
                             f.close()
-
-                            if time.localtime(time.time()).tm_hour.real < 1 or time.localtime(
-                                    time.time()).tm_hour.real > 7:
+                            if can_mail and (time.localtime(time.time()).tm_hour.real < 1 or time.localtime(
+                                    time.time()).tm_hour.real > 7):
                                 day_send_mail(price, lowest_price_in_txt, name, url, price, one_day_price, goods_id,
                                               conn, cursor)
                                 three_day_send_mail(price, lowest_price_in_txt, name, url, price, three_day_price,
@@ -528,6 +551,10 @@ def get_all(urls):
                                                week_day_price)
                                 month_send_mail(price, lowest_price_in_txt, name, url, price,
                                                 month_price)
+                            if not can_mail and time.localtime(time.time()).tm_hour.real == 0:
+                                print("24:00:00 can_mail=True")
+                                print(time.localtime(time.time()).tm_hour.real)
+                                can_mail = True
                             break
                 except StaleElementReferenceException as e:
                     print("try to handle element is not attached to the page document in out loop")
@@ -565,15 +592,17 @@ def get_all(urls):
                         except:
                             crash_time += 1
                 except Exception as e:
-                    print(e)
+
                     if "please see" in str(e):
                         print('发送邮件数量达今日最大值.')
+                        can_mail = False
                         continue
                     if "远程主机强迫关闭了一个现有的连接" in str(e):
                         print('爬取速度过快,等待服务器响应...')
                         time.sleep(sleep_time)
                         continue
                     print('网络连接断开,等待网络恢复...')
+                    print(e)
                     while True:
                         try:
                             time.sleep(10)
@@ -624,49 +653,51 @@ def send_mail(name, price, url):
     server.quit()
 
 
-#
-# threads = []
-# urls = []
-mail = {}
-# files = os.listdir('../source')
-# conn = pymysql.connect(
-#     host="120.25.145.148",
-#     port=3306,
-#     user="homework",
-#     passwd="root",
-#     db="homework",
-#     charset='utf8',
-#     autocommit=True
-# )
-#
-# with open('../source/all.txt') as f:
-#     urls = f.readlines()
-# get_all(urls)
-# for file in files:
-#     with open('../source/' + file) as f:
-#         urls = f.readlines()
-#     f.close()
-#     thread = threading.Thread(target=get_all, args=([urls]))
-#     threads.append(thread)
-#     time.sleep(random.randint(2, 5))
-#     thread.start()
-#
-# for thread in threads:
-#     thread.join()
-with open('../source/all.txt') as f:
-    urls = f.readlines()
+if __name__ == '__main__':
+    # threads = []
+    # urls = []
+    mail = {}
+    can_mail = True
+    # files = os.listdir('../source')
+    # conn = pymysql.connect(
+    #     host="120.25.145.148",
+    #     port=3306,
+    #     user="homework",
+    #     passwd="root",
+    #     db="homework",
+    #     charset='utf8',
+    #     autocommit=True
+    # )
+    #
+    # with open('../source/all.txt') as f:
+    #     urls = f.readlines()
+    # get_all(urls)
+    # for file in files:
+    #     with open('../source/' + file) as f:
+    #         urls = f.readlines()
+    #     f.close()
+    #     thread = threading.Thread(target=get_all, args=([urls]))
+    #     threads.append(thread)
+    #     time.sleep(random.randint(2, 5))
+    #     thread.start()
+    #
+    # for thread in threads:
+    #     thread.join()
+    # service mariadb start
+    with open('../source/all.txt') as f:
+        urls = f.readlines()
 
-urls_per_thread = len(urls) // 5  # 每个线程要处理的行数
-threads = []
+    urls_per_thread = len(urls) // 6  # 每个线程要处理的行数
+    threads = []
 
-for i in range(5):
-    start = i * urls_per_thread
-    end = start + urls_per_thread if i < 4 else len(urls)  # 最后一个线程处理剩余行数
-    sublist = urls[start:end]
-    thread = threading.Thread(target=get_all, args=(sublist,))
-    threads.append(thread)
-    time.sleep(random.randint(3, 5))
-    thread.start()
+    for i in range(6):
+        start = i * urls_per_thread
+        end = start + urls_per_thread if i < 5 else len(urls)  # 最后一个线程处理剩余行数
+        sublist = urls[start:end]
+        thread = threading.Thread(target=get_all, args=(sublist,))
+        threads.append(thread)
+        time.sleep(random.randint(3, 5))
+        thread.start()
 
-for thread in threads:
-    thread.join()
+    for thread in threads:
+        thread.join()
