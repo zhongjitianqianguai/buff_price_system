@@ -75,6 +75,7 @@ def get_all(urls):
                         f.write(url)
                         results.add(url)
                 f.close()
+                break
             except StaleElementReferenceException as e:
                 print("try to handle element is not attached to the page document in out loop")
                 continue
@@ -160,4 +161,4 @@ if __name__ == '__main__':
     with open('../source/23巴黎.txt') as f:
         the_urls = f.readlines()
     threads_count = 10
-    start_threads(10, the_urls)
+    start_threads(20, the_urls)
