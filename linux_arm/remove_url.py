@@ -10,6 +10,8 @@ from selenium.webdriver.chrome import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 
+from linux_arm.test import MyThread
+
 
 def get_all(urls):
     driver = webdriver.Chrome(service=Service(r'chromedriver.exe'))
@@ -139,3 +141,23 @@ def get_all(urls):
                         pass
             finally:
                 time.sleep(sleep_time)
+def start_threads(threads_count, urls):
+    threads = []
+    urls_per_thread = len(urls) // threads_count
+    for i in range(threads_count):
+        start = i * urls_per_thread
+        end = start + urls_per_thread if i < threads_count - 1 else len(urls)
+        sublist = urls[start:end]
+        thread = MyThread(thread_id=i, target=get_all, args=(sublist,))
+        threads.append(thread)
+        time.sleep(random.randint(3, 5))
+        thread.start()
+    for thread in threads:
+        thread.join()
+
+
+if __name__ == '__main__':
+    with open('../source/23巴黎.txt') as f:
+        the_urls = f.readlines()
+    threads_count = 10
+    start_threads(10, the_urls)
