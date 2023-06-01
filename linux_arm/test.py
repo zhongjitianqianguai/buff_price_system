@@ -626,8 +626,27 @@ def get_all(urls):
                     #     pass
                 except NoSuchElementException as e:
                     # print("超时:"+url)
-                    time.sleep(sleep_time)
-                    driver.refresh()
+                    try:
+                        time.sleep(sleep_time)
+                        driver.refresh()
+                    except WebDriverException as e:
+                        crash_time = 0
+                        print(e)
+                        while True:
+                            try:
+                                if crash_time == 2:
+                                    time.sleep(600)
+                                    send_mail("need to reboot chroot container", 0, '111')
+
+                                else:
+                                    time.sleep(20)
+                                driver = webdriver.Chrome(chrome_options=chrome_options,
+                                                          executable_path="/usr/bin/chromedriver")
+                                driver.get('https://buff.163.com/goods/' + url)
+                                sleep_time = random.randint(5, 15)
+                                break
+                            except:
+                                crash_time += 1
                     continue
                 except WebDriverException as e:
                     crash_time = 0
@@ -741,13 +760,13 @@ if __name__ == '__main__':
     # service mariadb start
     with open('../source/all.txt') as f:
         urls = f.readlines()
-
-    urls_per_thread = len(urls) // 6  # 每个线程要处理的行数
+    threads_count=10
+    urls_per_thread = len(urls) // threads_count  # 每个线程要处理的行数
     threads = []
 
-    for i in range(6):
+    for i in range(threads_count):
         start = i * urls_per_thread
-        end = start + urls_per_thread if i < 5 else len(urls)  # 最后一个线程处理剩余行数
+        end = start + urls_per_thread if i < threads_count-1 else len(urls)  # 最后一个线程处理剩余行数
         sublist = urls[start:end]
         thread = threading.Thread(target=get_all, args=(sublist,))
         threads.append(thread)
