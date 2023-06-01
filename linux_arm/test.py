@@ -442,18 +442,22 @@ def get_all(urls):
     driver = webdriver.Chrome(chrome_options=chrome_options, executable_path="/usr/bin/chromedriver",
                               desired_capabilities=cap)
     driver.implicitly_wait(15)
+    climb_times = 1
+    thread_id = threading.current_thread().thread_id
     while True:
         goods_id_in_sql = []
         all_goods_from_sql = get_all_goods(conn, cursor)
+        start_climb_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+        print(f"{start_climb_time}:线程{thread_id}开始爬取第{climb_times}次")
         for goods in all_goods_from_sql:
             goods_id_in_sql.append(goods[0])
+        climb_goods_count = 0
         for url in urls:
             sleep_time = random.randint(2, 5)
             url = url.replace("\n", "")
             while True:
                 try:
                     driver.get('https://buff.163.com/goods/' + url)
-                    thread_id = threading.current_thread().thread_id
                     print(f"{thread_id}:{url}")
                     start_time = time.time()
                     lowest_price_in_txt = 0
@@ -577,8 +581,8 @@ def get_all(urls):
                                 # 计算各天数的价格变化
 
                             if price <= float(expect_price) and lowest_price_in_txt > 0:
-                                print(
-                                    f'{goods_id}:{time_get} :{name} 的最低价格达到期望值, 当前价格是: {price} 历史最低价格为:{lowest_price_in_txt}')
+                                # print(
+                                #     f'{goods_id}:{time_get} :{name} 的最低价格达到期望值, 当前价格是: {price} 历史最低价格为:{lowest_price_in_txt}')
                                 if can_mail and (time.localtime(time.time()).tm_hour.real < 1 or time.localtime(
                                         time.time()).tm_hour.real > 7):
                                     send_mail(
@@ -588,19 +592,21 @@ def get_all(urls):
                                 add_new_mail(conn, cursor, name + '\n历史最低价格为:' + str(
                                     lowest_price_in_txt) + '当前价格是:' + str(
                                     price), goods_id, time_get)
-                            else:
-                                print(
-                                    f'{goods_id}:{time_get} :{name} 的最低价格未达到期望值, 当前价格是: {price}')
+                            # else:
+                            #     print(
+                            #         f'{goods_id}:{time_get} :{name} 的最低价格未达到期望值, 当前价格是: {price}')
                             # 用于首次填充数据库，填充完毕后注释掉
                             # update_good_price(conn, cursor, str(goods_id), str(price), lowest_price_in_txt)
 
                             if last_price == price:
+                                climb_goods_count += 1
                                 break
                             f.write(f'{time_get};{name} ¥ {price}\n')
                             write_record(conn, cursor, time_get, str(goods_id), str(price))
                             update_good_price(conn, cursor, str(goods_id), str(price), lowest_price_in_txt)
                             update_good_with_img_name(conn, cursor, str(goods_id), lowest_price_in_txt, img_url, name)
                             f.close()
+                            climb_goods_count += 1
                             if can_mail and (time.localtime(time.time()).tm_hour.real < 1 or time.localtime(
                                     time.time()).tm_hour.real > 7):
                                 day_send_mail(price, lowest_price_in_txt, name, url, price, one_day_price, goods_id,
@@ -613,7 +619,7 @@ def get_all(urls):
                                                 month_price)
                             if not can_mail and time.localtime(time.time()).tm_hour.real == 0 and time.localtime(
                                     time.time()).tm_min == 0:
-                                print("set can_mail=true")
+                                # print("set can_mail=true")
                                 can_mail = True
                             break
                 except StaleElementReferenceException as e:
@@ -680,7 +686,7 @@ def get_all(urls):
                         time.sleep(sleep_time)
                         continue
                     print(traceback.format_exc())
-                    print(goods_id)
+                    print(url)
                     while True:
                         try:
                             time.sleep(10)
@@ -690,7 +696,11 @@ def get_all(urls):
                             pass
                 finally:
                     time.sleep(sleep_time)
-
+        print(f'线程{thread_id}:爬取一次完毕,要求爬取商品{len(urls)}个，实际共爬取{climb_goods_count}个商品')
+        end_climb_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+        print(f"{end_climb_time}:线程{thread_id}结束爬取第{climb_times}次")
+        print(f"线程{thread_id}爬取一次消耗的时间为{time.time() - time.strptime(start_climb_time, '%Y-%m-%d %H:%M:%S')}s")
+        climb_times += 1
         time.sleep(5)
 
 
@@ -749,7 +759,7 @@ def start_threads(threads_count, urls):
         time.sleep(random.randint(3, 5))
         thread.start()
     for thread in threads:
-            thread.join()
+        thread.join()
 
 
 if __name__ == '__main__':
