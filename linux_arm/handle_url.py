@@ -4,11 +4,11 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 import time
 
-with open('../source/23巴黎.txt') as f:
+with open('../source/all.txt') as f:
     urls = f.readlines()
 
 results = set()
-with open('../source/23巴黎.txt', 'w') as f:
+with open('../source/all.txt', 'w') as f:
     for url in urls:
         if 'page' not in url and url not in results:
             f.write(url)

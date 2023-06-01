@@ -5,8 +5,9 @@ import threading
 import time
 import traceback
 
+from selenium import webdriver
 from selenium.common import StaleElementReferenceException, WebDriverException, NoSuchElementException
-from selenium.webdriver.chrome import webdriver
+
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 
@@ -20,12 +21,11 @@ def get_all(urls):
     thread_id = threading.current_thread().thread_id
     for url in urls:
         sleep_time = random.randint(2, 5)
-        url = url.replace("\n", "")
         results = set()
         while True:
             try:
                 driver.get('https://buff.163.com/goods/' + url)
-                print(f"{thread_id}:{url}")
+                # print(f"{thread_id}:{url}")
                 start_time = time.time()
                 lowest_price_in_txt = 0
                 time_get = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
@@ -70,11 +70,14 @@ def get_all(urls):
                         pass
 
                 goods_id = driver.current_url.split('/')[-1]
-                with open('../source/23巴黎.txt', 'a+') as f:
-                    if '金色' not in name or '全息' not in name or '胶囊' not in name and url not in results:
+                with open('../source/22安特卫普全息+金色+胶囊.txt', '+a') as f:
+                    if '金色' in name or '全息' in name or '胶囊' in name and url not in results:
                         f.write(url)
                         results.add(url)
-                f.close()
+                        print("保留:" + url)
+
+                    else:
+                        print("移除:" + url)
                 break
             except StaleElementReferenceException as e:
                 print("try to handle element is not attached to the page document in out loop")
@@ -142,6 +145,8 @@ def get_all(urls):
                         pass
             finally:
                 time.sleep(sleep_time)
+
+
 def start_threads(threads_count, urls):
     threads = []
     urls_per_thread = len(urls) // threads_count
@@ -158,7 +163,7 @@ def start_threads(threads_count, urls):
 
 
 if __name__ == '__main__':
-    with open('../source/23巴黎.txt') as f:
+    with open('../source/22安特卫普.txt') as f:
         the_urls = f.readlines()
-    threads_count = 10
-    start_threads(20, the_urls)
+    threads_count = 20
+    start_threads(threads_count, the_urls)
