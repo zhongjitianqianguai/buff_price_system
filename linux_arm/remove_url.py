@@ -70,7 +70,7 @@ def get_all(urls):
                         pass
 
                 goods_id = driver.current_url.split('/')[-1]
-                with open('../source/22安特卫普全息+金色+胶囊.txt', '+a') as f:
+                with open('../source/22里约全息+金色+胶囊', '+a') as f:
                     if '金色' in name or '全息' in name or '胶囊' in name and url not in results:
                         f.write(url)
                         results.add(url)
@@ -163,7 +163,7 @@ def start_threads(threads_count, urls):
 
 
 if __name__ == '__main__':
-    with open('../source/22安特卫普.txt') as f:
+    with open('../source/22里约.txt') as f:
         the_urls = f.readlines()
     threads_count = 20
     start_threads(threads_count, the_urls)
