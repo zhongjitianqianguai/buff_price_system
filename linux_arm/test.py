@@ -2,6 +2,7 @@ import datetime
 import os
 import random
 import smtplib
+import subprocess
 import threading
 import traceback
 from email.header import Header
@@ -448,7 +449,9 @@ def get_all(urls):
         goods_id_in_sql = []
         all_goods_from_sql = get_all_goods(conn, cursor)
         start_climb_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-        print(f"{start_climb_time}:线程{thread_id}开始爬取第{climb_times}次")
+        # print(f"{start_climb_time}:线程{thread_id+1}:开始爬取第{climb_times}次")
+        start_time = time.time()
+
         for goods in all_goods_from_sql:
             goods_id_in_sql.append(goods[0])
         climb_goods_count = 0
@@ -458,8 +461,7 @@ def get_all(urls):
             while True:
                 try:
                     driver.get('https://buff.163.com/goods/' + url)
-                    print(f"{thread_id}:{url}")
-                    start_time = time.time()
+                    # print(f"{thread_id}:{url}")
                     lowest_price_in_txt = 0
                     time_get = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
                     # if "429 Too Many Requests" in driver.find_element(By.TAG_NAME, "title").text:
@@ -641,7 +643,7 @@ def get_all(urls):
                         driver.refresh()
                     except WebDriverException as e:
                         crash_time = 0
-                        print(e)
+                        # print(e)
                         while True:
                             try:
                                 if crash_time == 2:
@@ -660,7 +662,7 @@ def get_all(urls):
                     continue
                 except WebDriverException as e:
                     crash_time = 0
-                    print(e)
+                    # print(e)
                     while True:
                         try:
                             if crash_time == 2:
@@ -696,11 +698,14 @@ def get_all(urls):
                             pass
                 finally:
                     time.sleep(sleep_time)
-        print(f'线程{thread_id}:爬取一次完毕,要求爬取商品{len(urls)}个，实际共爬取{climb_goods_count}个商品')
+        # print(f'线程{thread_id}:爬取一次完毕,要求爬取商品{len(urls)}个，实际共爬取{climb_goods_count}个商品')
         end_climb_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-        print(f"{end_climb_time}:线程{thread_id}结束爬取第{climb_times}次")
-        print(f"线程{thread_id}爬取一次消耗的时间为{time.time() - time.strptime(start_climb_time, '%Y-%m-%d %H:%M:%S')}s")
+        # print(f"{end_climb_time}:线程{thread_id}结束爬取第{climb_times}次")
+        print(f"{end_climb_time}:线程{thread_id}爬取商品{len(urls)}个爬取第{climb_times}次消耗的时间为{(time.time() - start_time)/60} min")
         climb_times += 1
+        if climb_times % 3 == 0:
+            driver.close()
+            print(f"线程{thread_id}start new climb")
         time.sleep(5)
 
 
@@ -795,8 +800,19 @@ if __name__ == '__main__':
     # service mariadb start
     with open('../source/all.txt') as f:
         the_urls = f.readlines()
-    threads_count = 10
-    start_threads(10, the_urls)
+    threads_count = 8
+    start_threads(threads_count, the_urls)
+    while True:
+        now = datetime.datetime.now()
+        next_run_time = datetime.datetime(now.year, now.month, now.day, 11, 50, 0)
+        if now >= next_run_time:
+            next_run_time += datetime.timedelta(days=1)
+        sleep_time = (next_run_time - now).seconds
+        print(f"Next restart at {next_run_time}")
+        time.sleep(sleep_time)
+        print("Restarting...")
+        subprocess.Popen(["python", "test.py"])
+        time.sleep(10)
     # urls_per_thread = len(the_urls) // threads_count  # 每个线程要处理的行数
     # threads = []
     #
