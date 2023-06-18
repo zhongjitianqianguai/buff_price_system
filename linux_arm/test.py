@@ -702,10 +702,10 @@ def get_all(urls):
         climb_times += 1
         if cost_time >= 180:
             driver.close()
-            print(f"线程{thread_id}start new climb")
+            print(f"线程{thread_id}sleep 3600 s then restart new climb")
         elif cost_time >= 60:
             driver.close()
-            print(f"线程{thread_id}sleep 3600 s then restart new climb")
+            print(f"线程{thread_id}start new climb")
             time.sleep(3600)
         time.sleep(5)
 
