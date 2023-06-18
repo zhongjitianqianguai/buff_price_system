@@ -207,8 +207,7 @@ def month_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price
         if month_change > 0.5:
             if mail.get(url) is None:
                 mail[url] = price
-                send_mail(name_elements.text.splitlines()[
-                              2] + '价格在一个月内上涨50% 具体涨幅为' + str(
+                send_mail(name_elements + '价格在一个月内上涨50% 具体涨幅为' + str(
                     month_change) + ' 历史最低价格为:' + str(
                     lowest_price_in_txt),
                           lowest_price,
@@ -217,8 +216,7 @@ def month_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price
                 pass
             else:
                 mail[url] = price
-                send_mail(name_elements.text.splitlines()[
-                              2] + '价格在一个月内上涨50%  具体涨幅为' + str(
+                send_mail(name_elements + '价格在一个月内上涨50%  具体涨幅为' + str(
                     month_change) + '历史最低价格为:' + str(
                     lowest_price_in_txt),
                           lowest_price,
@@ -227,8 +225,7 @@ def month_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price
         elif month_change < -0.5:
             if mail.get(url) is None:
                 mail[url] = price
-                send_mail(name_elements.text.splitlines()[
-                              2] + '价格在一个月内上涨50%  具体涨幅为' + str(
+                send_mail(name_elements + '价格在一个月内下降50%  具体涨幅为' + str(
                     month_change) + '历史最低价格为:' + str(
                     lowest_price_in_txt),
                           lowest_price,
@@ -237,8 +234,7 @@ def month_send_mail(lowest_price, lowest_price_in_txt, name_elements, url, price
                 pass
             else:
                 mail[url] = price
-                send_mail(name_elements.text.splitlines()[
-                              2] + '价格在一个月内下降50% 具体涨幅为' + str(
+                send_mail(name_elements + '价格在一个月内下降50% 具体涨幅为' + str(
                     month_change) + ' 历史最低价格为:' + str(
                     lowest_price_in_txt),
                           lowest_price,
@@ -617,8 +613,8 @@ def get_all(urls):
                                                     goods_id, conn, cursor, time_get)
                                 week_send_mail(price, lowest_price_in_txt, name, url, price,
                                                week_day_price)
-                                month_send_mail(price, lowest_price_in_txt, name, url, price,
-                                                month_price)
+                                # month_send_mail(price, lowest_price_in_txt, name, url, price,
+                                #                 month_price)
                             if not can_mail and time.localtime(time.time()).tm_hour.real == 0 and time.localtime(
                                     time.time()).tm_min == 0:
                                 # print("set can_mail=true")
@@ -701,11 +697,16 @@ def get_all(urls):
         # print(f'线程{thread_id}:爬取一次完毕,要求爬取商品{len(urls)}个，实际共爬取{climb_goods_count}个商品')
         end_climb_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
         # print(f"{end_climb_time}:线程{thread_id}结束爬取第{climb_times}次")
-        print(f"{end_climb_time}:线程{thread_id}爬取商品{len(urls)}个爬取第{climb_times}次消耗的时间为{(time.time() - start_time)/60} min")
+        cost_time = (time.time() - start_time) / 60
+        print(f"{end_climb_time}:线程{thread_id}爬取商品{len(urls)}个爬取第{climb_times}次消耗的时间为{cost_time} min")
         climb_times += 1
-        if climb_times % 3 == 0:
+        if cost_time >= 180:
             driver.close()
             print(f"线程{thread_id}start new climb")
+        elif cost_time >= 60:
+            driver.close()
+            print(f"线程{thread_id}sleep 3600 s then restart new climb")
+            time.sleep(3600)
         time.sleep(5)
 
 
