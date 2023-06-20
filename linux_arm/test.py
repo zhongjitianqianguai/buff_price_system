@@ -426,16 +426,16 @@ def update_good_with_img_name(conn, cursor, goods_id, lowest_price_in_txt, img_u
 
 def get_all(urls):
     global can_mail
-    import os
-    import socket
-
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.connect(("8.8.8.8", 80))
-    ip = s.getsockname()[0]
-
-    print("IP:", ip)
+    # import os
+    # import socket
+    #
+    # s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    # s.connect(("8.8.8.8", 80))
+    # ip = s.getsockname()[0]
+    #
+    # print("IP:", ip)
     conn = pymysql.connect(
-        host=ip,
+        host='127.0.0.1',
         port=3306,
         user="root",
         passwd="root",
