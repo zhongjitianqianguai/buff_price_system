@@ -342,7 +342,7 @@ def add_new_good(conn, cursor, name, goods_id, category, except_price, img_url, 
         print("错误类型:", type(e))
         print("新商品失败失败:", e)
         conn = pymysql.connect(
-            host="192.168.6.169",
+            host="192.168.31.33",
             port=3306,
             user="root",
             passwd="root",
@@ -426,8 +426,16 @@ def update_good_with_img_name(conn, cursor, goods_id, lowest_price_in_txt, img_u
 
 def get_all(urls):
     global can_mail
+    import os
+    import socket
+
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    ip = s.getsockname()[0]
+
+    print("IP:", ip)
     conn = pymysql.connect(
-        host="192.168.6.169",
+        host=ip,
         port=3306,
         user="root",
         passwd="root",
@@ -703,10 +711,11 @@ def get_all(urls):
         if cost_time >= 180:
             driver.close()
             print(f"线程{thread_id}sleep 3600 s then restart new climb")
+            time.sleep(3600)
+
         elif cost_time >= 60:
             driver.close()
             print(f"线程{thread_id}start new climb")
-            time.sleep(3600)
         time.sleep(5)
 
 
