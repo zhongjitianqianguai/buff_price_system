@@ -14,6 +14,7 @@ conn = pymysql.connect(
 cursor = conn.cursor()
 lock = threading.Lock()
 
+
 def write_record(record_time, goods_id, price):
     try:
         lock.acquire()
@@ -25,6 +26,7 @@ def write_record(record_time, goods_id, price):
         print("插入记录失败:", e)
     finally:
         lock.release()
+
 
 def get_all_goods():
     try:
@@ -40,6 +42,58 @@ def get_all_goods():
     finally:
         lock.release()
 
+
+def get_good_expected_price(goods_id):
+    try:
+        lock.acquire()
+        sql = """Select expected_price from  buff_goods where goods_id=%s;"""
+        conn.ping(reconnect=True)
+        cursor.execute(sql, goods_id)  # 添加参数
+        temp = cursor.fetchall()
+        for i in temp:
+            return i[0]
+
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("获取商品预期价格失败:", e)
+    finally:
+        lock.release()
+
+
+def get_good_lowest_price(goods_id):
+    try:
+        lock.acquire()
+        sql = """Select the_lowest_price from  buff_goods where goods_id=%s;"""
+        conn.ping(reconnect=True)
+        cursor.execute(sql, goods_id)  # 添加参数
+        temp = cursor.fetchall()
+        for i in temp:
+            return i[0]
+
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("获取商品最低价格失败:", e)
+    finally:
+        lock.release()
+
+
+def get_good_last_record(goods_id):
+    try:
+        lock.acquire()
+        sql = """Select price from  buff_record where goods_id=%s order by time desc limit 1;"""
+        conn.ping(reconnect=True)
+        cursor.execute(sql, goods_id)  # 添加参数
+        temp = cursor.fetchall()
+        for i in temp:
+            return i[0]
+
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("获取商品预期价格失败:", e)
+    finally:
+        lock.release()
+
+
 def update_good_with_trend(goods_id, trend):
     try:
         lock.acquire()
@@ -51,6 +105,7 @@ def update_good_with_trend(goods_id, trend):
         print("更新商品价格趋势失败:", e)
     finally:
         lock.release()
+
 
 def update_good_without_trend(goods_id, img_url, name, now_price,
                               lowest_price_in_record):
@@ -65,6 +120,7 @@ def update_good_without_trend(goods_id, img_url, name, now_price,
     finally:
         lock.release()
 
+
 def add_new_good(name, goods_id, category, except_price, img_url, now_price):
     try:
         lock.acquire()
@@ -76,6 +132,7 @@ def add_new_good(name, goods_id, category, except_price, img_url, now_price):
         print("插入新商品失败:", e)
     finally:
         lock.release()
+
 
 def add_new_mail(content, goods_id, time):
     try:
