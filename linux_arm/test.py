@@ -14,10 +14,8 @@ from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 import time
-import pymysql
-
 import buff_sql
-from linux_arm import buff_mail
+import buff_mail
 
 chrome_options = Options()
 # chrome_options.add_argument('--headless')
@@ -513,12 +511,12 @@ def get_all(urls):
         cost_time = (time.time() - start_time) / 60
         print(f"{end_climb_time}:线程{thread_id}爬取商品{len(urls)}个爬取第{climb_times}次消耗的时间为{cost_time} min")
         climb_times += 1
-        if cost_time >= 180:
-            driver.close()
-            print(f"线程{thread_id}sleep 3600 s then restart new climb")
-            time.sleep(3600)
+        # if cost_time >= 180:
+        #     print(f"线程{thread_id}sleep 3600 s then restart new climb")
+        #     time.sleep(3600)
+        #     driver.close()
 
-        elif cost_time >= 60:
+        if cost_time >= 60:
             driver.close()
             print(f"线程{thread_id}start new climb")
         time.sleep(5)
