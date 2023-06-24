@@ -394,7 +394,7 @@ def get_all(urls):
                                 buff_sql.add_new_mail(name + '\n达到预期价格!!历史最低价格为:' + str(
                                     lowest_price) + '预期价格为' + str(expect_price) + '当前价格是:' + str(
                                     price), goods_id, time_get)
-                            if price < float(lowest_price):
+                            if float(lowest_price)-price/float(lowest_price) > 0.3:
                                 # print( f'{goods_id}:{time_get} :{name} 的最低价格达到期望值, 当前价格是: {price} 历史最低价格为:{
                                 # lowest_price}')
                                 if can_mail and (time.localtime(time.time()).tm_hour.real < 1 or time.localtime(
