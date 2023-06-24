@@ -3,6 +3,7 @@ import threading
 import pymysql
 
 conn = pymysql.connect(
+    # host='192.168.31.239',
     host='127.0.0.1',
     port=3306,
     user="root",
@@ -103,6 +104,19 @@ def update_good_with_trend(goods_id, trend):
     except Exception as e:
         print("错误类型:", type(e))
         print("更新商品价格趋势失败:", e)
+    finally:
+        lock.release()
+
+
+def change_all_goods_expected_price_div2():
+    try:
+        lock.acquire()
+        sql = """UPDATE buff_goods SET expected_price = now_price / 2;"""
+        conn.ping(reconnect=True)
+        cursor.execute(sql)  # 添加参数
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("改变商品预期价格为当前价格的1/2失败:", e)
     finally:
         lock.release()
 
