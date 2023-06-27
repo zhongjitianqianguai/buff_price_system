@@ -18,7 +18,7 @@ import buff_sql
 import buff_mail
 
 chrome_options = Options()
-# chrome_options.add_argument('--headless')
+chrome_options.add_argument('--headless')
 chrome_options.add_argument('--disable-gpu')
 chrome_options.add_argument("window-size=1024,768")
 chrome_options.add_argument("--no-sandbox")
@@ -73,7 +73,8 @@ def day_send_mail(lowest_price, name_elements, url, price, one_day_price, goods_
                     daily_change) + '历史最低价格为:' + str(
                     lowest_price) + '当前价格为' + str(price), url, time)
             elif mail.get(url) == price:
-                print("与上次发送邮件时的价格相同，不再发送邮件")
+                pass
+                # print("与上次发送邮件时的价格相同，不再发送邮件")
             else:
                 mail[url] = price
                 buff_mail.send_mail(name_elements + '价格在一天内下降超20% 具体涨幅为' + str(
@@ -394,7 +395,7 @@ def get_all(urls):
                                 buff_sql.add_new_mail(name + '\n达到预期价格!!历史最低价格为:' + str(
                                     lowest_price) + '预期价格为' + str(expect_price) + '当前价格是:' + str(
                                     price), goods_id, time_get)
-                            if price-float(lowest_price)/float(lowest_price) < -0.3:
+                            if price - float(lowest_price) / float(lowest_price) < -0.3 and price < float(lowest_price):
                                 # print( f'{goods_id}:{time_get} :{name} 的最低价格达到期望值, 当前价格是: {price} 历史最低价格为:{
                                 # lowest_price}')
                                 if can_mail and (time.localtime(time.time()).tm_hour.real < 1 or time.localtime(
@@ -491,6 +492,8 @@ def get_all(urls):
                 except smtplib.SMTPSenderRefused as e:
                     print('发送邮件数量达今日最大值.')
                     can_mail = False
+                    continue
+                except smtplib.SMTPAuthenticationError as e:
                     continue
                 except Exception as e:
                     if "远程主机强迫关闭了一个现有的连接" in str(e):
