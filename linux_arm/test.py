@@ -249,14 +249,11 @@ def get_all(urls):
     driver = webdriver.Chrome(chrome_options=chrome_options, executable_path="/usr/bin/chromedriver",
                               desired_capabilities=cap)
     driver.implicitly_wait(15)
-    # climb_times = 1
-    # thread_id = threading.current_thread().thread_id
+    thread_id = threading.current_thread().thread_id
     shutdown_time = datetime.time(23, 55, 0)  # 每天23:55关闭线程
     startup_time = datetime.time(7, 0, 0)  # 每天7:00启动线程
     global thread_status
-    start_climb_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
     # print(f"{start_climb_time}:线程{thread_id+1}:开始爬取第{climb_times}次")
-    start_time = time.time()
     climb_goods_count = 0
     for url in urls:
         now = datetime.datetime.now().time()
@@ -268,6 +265,7 @@ def get_all(urls):
             break
         sleep_time = random.randint(2, 5)
         url = url.replace("\n", "")
+        start_climb_one_time = time.time()
         while True:
             if not thread_status:
                 break
@@ -393,10 +391,16 @@ def get_all(urls):
                                 month_price.append(
                                     price_data[1].split('¥')[1].replace(" ", "").replace("\n", ""))
                                 # print("have 30 day ago price")
-                            # 计算各天数的价格变化
+                        now = datetime.datetime.now().time()
+                        if startup_time <= now < shutdown_time:
+                            thread_status = True
+                        else:
+                            thread_status = False
+                        if not thread_status:
+                            break
                         if price <= float(expect_price):
-                            # print( f'{goods_id}:{time_get} :{name} 的最低价格达到期望值, 当前价格是: {price} 历史最低价格为:{
-                            # lowest_price}')
+                            print(
+                                f'线程:{thread_id}:{goods_id}:{time_get} :{name} 的最低价格达到期望值, 当前价格是: {price} 历史最低价格为:{lowest_price} 爬取该商品花费时间:{time.time() - start_climb_one_time}秒')
                             if can_mail and (time.localtime(time.time()).tm_hour.real < 1 or time.localtime(
                                     time.time()).tm_hour.real > 7):
                                 buff_mail.send_mail(
@@ -406,6 +410,9 @@ def get_all(urls):
                             buff_sql.add_new_mail(name + '\n达到预期价格!!历史最低价格为:' + str(
                                 lowest_price) + '预期价格为' + str(expect_price) + '当前价格是:' + str(
                                 price), goods_id, time_get)
+                        else:
+                            print(
+                                f'线程:{thread_id}:{goods_id}:{time_get} :{name} 的最低价格未达到期望值, 当前价格是: {price} 历史最低价格为:{lowest_price} 爬取该商品花费时间:{time.time() - start_climb_one_time}秒')
                         if price - float(lowest_price) / float(lowest_price) < -0.3 and price < float(lowest_price):
                             # print( f'{goods_id}:{time_get} :{name} 的最低价格达到期望值, 当前价格是: {price} 历史最低价格为:{
                             # lowest_price}')
@@ -445,13 +452,7 @@ def get_all(urls):
                                 time.time()).tm_min == 0:
                             # print("set can_mail=true")
                             can_mail = True
-                        now = datetime.datetime.now().time()
-                        if startup_time <= now < shutdown_time:
-                            thread_status = True
-                        else:
-                            thread_status = False
-                        if not thread_status:
-                            break
+
                         break
             except StaleElementReferenceException as e:
                 print("try to handle element is not attached to the page document in out loop")
@@ -529,21 +530,6 @@ def get_all(urls):
                         pass
             finally:
                 time.sleep(sleep_time)
-    # # print(f'线程{thread_id}:爬取一次完毕,要求爬取商品{len(urls)}个，实际共爬取{climb_goods_count}个商品')
-    # end_climb_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-    # # print(f"{end_climb_time}:线程{thread_id}结束爬取第{climb_times}次")
-    # cost_time = (time.time() - start_time) / 60
-    # print(f"{end_climb_time}:线程{thread_id}爬取商品{len(urls)}个爬取第{climb_times}次消耗的时间为{cost_time} min")
-    # climb_times += 1
-    # # if cost_time >= 180:
-    # #     print(f"线程{thread_id}sleep 3600 s then restart new climb")
-    # #     time.sleep(3600)
-    # #     driver.close()
-    #
-    # if cost_time >= 60:
-    #     driver.close()
-    #     print(f"线程{thread_id}start new climb")
-    # time.sleep(5)
 
 
 class MyThread(threading.Thread):
@@ -557,8 +543,14 @@ class MyThread(threading.Thread):
         self.stop_event.set()
 
     def run(self):
+        climb_times = 1
         while not self.stop_event.is_set():
+            start_time = time.time()
             get_all(self.urls)
+            end_climb_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+            cost_time = (time.time() - start_time) / 60
+            print(f"{end_climb_time}:线程{self.thread_id}爬取商品{len(self.urls)}个爬取第{climb_times}次消耗的时间为{cost_time} min")
+            climb_times += 1
             time.sleep(5)
 
 
