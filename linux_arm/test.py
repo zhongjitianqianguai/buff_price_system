@@ -248,7 +248,7 @@ def get_all(urls):
     # print("IP:", ip)
     driver = webdriver.Chrome(chrome_options=chrome_options, executable_path="/usr/bin/chromedriver",
                               desired_capabilities=cap)
-    driver.implicitly_wait(10)
+    driver.implicitly_wait(6)
     thread_id = threading.current_thread().thread_id
     shutdown_time = datetime.time(23, 55, 0)  # 每天23:55关闭线程
     startup_time = datetime.time(7, 0, 0)  # 每天7:00启动线程
