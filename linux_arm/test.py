@@ -399,8 +399,8 @@ def get_all(urls):
                         if not thread_status:
                             break
                         if price <= float(expect_price):
-                            print(
-                                f'线程:{thread_id}:{goods_id}:{time_get} :{name} 的最低价格达到期望值, 当前价格是: {price} 历史最低价格为:{lowest_price} 爬取该商品花费时间:{time.time() - start_climb_one_time}秒')
+                            # print(
+                            #     f'线程:{thread_id}:{goods_id}:{time_get} :{name} 的最低价格达到期望值, 当前价格是: {price} 历史最低价格为:{lowest_price} 爬取该商品花费时间:{time.time() - start_climb_one_time}秒')
                             if can_mail and (time.localtime(time.time()).tm_hour.real < 1 or time.localtime(
                                     time.time()).tm_hour.real > 7):
                                 buff_mail.send_mail(
@@ -411,8 +411,9 @@ def get_all(urls):
                                 lowest_price) + '预期价格为' + str(expect_price) + '当前价格是:' + str(
                                 price), goods_id, time_get)
                         else:
-                            print(
-                                f'线程:{thread_id}:{goods_id}:{time_get} :{name} 的最低价格未达到期望值, 当前价格是: {price} 历史最低价格为:{lowest_price} 爬取该商品花费时间:{time.time() - start_climb_one_time}秒')
+                            pass
+                            # print(
+                            #     f'线程:{thread_id}:{goods_id}:{time_get} :{name} 的最低价格未达到期望值, 当前价格是: {price} 历史最低价格为:{lowest_price} 爬取该商品花费时间:{time.time() - start_climb_one_time}秒')
                         if price - float(lowest_price) / float(lowest_price) < -0.3 and price < float(lowest_price):
                             # print( f'{goods_id}:{time_get} :{name} 的最低价格达到期望值, 当前价格是: {price} 历史最低价格为:{
                             # lowest_price}')
@@ -545,13 +546,22 @@ class MyThread(threading.Thread):
     def run(self):
         climb_times = 1
         while not self.stop_event.is_set():
-            start_time = time.time()
-            get_all(self.urls)
-            end_climb_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-            cost_time = (time.time() - start_time) / 60
-            print(f"{end_climb_time}:线程{self.thread_id}爬取商品{len(self.urls)}个爬取第{climb_times}次消耗的时间为{cost_time} min")
-            climb_times += 1
-            time.sleep(5)
+            # 获取当前时间
+            now = datetime.datetime.now().time()
+            # 设置关闭时间和启动时间
+            shutdown_time = datetime.time(23, 55, 0)  # 每天23:55关闭线程
+            startup_time = datetime.time(7, 0, 0)  # 每天7:00启动线程
+            if startup_time <= now < shutdown_time:
+                start_time = time.time()
+                get_all(self.urls)
+                end_climb_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+                cost_time = (time.time() - start_time) / 60
+                print(
+                    f"{end_climb_time}:线程{self.thread_id}爬取商品{len(self.urls)}个爬取第{climb_times}次消耗的时间为{cost_time} min")
+                climb_times += 1
+                time.sleep(5)
+            else:
+                break
 
 
 # 定义启动线程的函数
@@ -612,9 +622,8 @@ if __name__ == '__main__':
     with open('../source/all.txt') as f:
         the_urls = f.readlines()
     threads_count = 8
-    threads = start_threads(threads_count, the_urls)  # 启动8个线程
-    threads_status = True
-
+    threads_status = False
+    threads = []
     while True:
         # 获取当前时间
         now = datetime.datetime.now().time()
