@@ -360,7 +360,8 @@ def get_all(urls):
                         days = [1, 3, 7, 30]
                         lines.pop(0)
                         lowest_price = buff_sql.get_good_lowest_price(goods_id)
-
+                        if lowest_price > price:
+                            lowest_price = price
                         for line in lines:
                             price_data = line.split(';')
                             # 获取 当前时间并计算与文本时间差
