@@ -360,7 +360,8 @@ def get_all(urls):
                         days = [1, 3, 7, 30]
                         lines.pop(0)
                         lowest_price = buff_sql.get_good_lowest_price(goods_id)
-
+                        if lowest_price > price:
+                            lowest_price = price
                         for line in lines:
                             price_data = line.split(';')
                             # 获取 当前时间并计算与文本时间差
@@ -583,8 +584,10 @@ def start_threads(threads_count, urls):
 def stop_threads(thread):
     for th in thread:
         th.stop()
+        # print('stop a thread')
     for th in thread:
         th.join()
+    print('stop threads count:'+str(len(thread)))
 
 
 if __name__ == '__main__':
@@ -637,11 +640,6 @@ if __name__ == '__main__':
                 stop_threads(threads)
                 threads_status = False
 
-        # 如果当前时间在启动时间之前，就等待到达启动时间
-        if now < startup_time:
-            print(f"Current time is {now}. Waiting until {startup_time} to start...")
-            time.sleep((datetime.datetime.combine(datetime.date.today(),
-                                                  startup_time) - datetime.datetime.now()).total_seconds())
         if startup_time <= now < shutdown_time and not threads_status:
             print("Startup time reached. Starting threads...")
             threads = start_threads(threads_count, the_urls)
