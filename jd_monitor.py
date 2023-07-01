@@ -83,7 +83,7 @@ while True:
     #     check_product(product_id)
     url = f'https://item.jd.com/100052404492.html'
     response = requests.get(url, headers=headers)
-    print(response.text)
+    # print(response.text)
     if '下柜' in response.text:
         print('商品下架啦')
     elif '无货' in response.text:
@@ -93,4 +93,4 @@ while True:
         buff_mail.send_mail('商品有货啦', '商品有货啦', url)
 
     # 等待一段时间
-    time.sleep(random.randint(5, 30))
+    time.sleep(random.randint(30, 60))
