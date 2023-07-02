@@ -252,7 +252,6 @@ def get_all(urls):
     thread_id = threading.current_thread().thread_id
     shutdown_time = datetime.time(23, 55, 0)  # 每天23:55关闭线程
     startup_time = datetime.time(7, 0, 0)  # 每天7:00启动线程
-    global thread_status
     # print(f"{start_climb_time}:线程{thread_id+1}:开始爬取第{climb_times}次")
     climb_goods_count = 0
     for url in urls:
@@ -546,12 +545,12 @@ class MyThread(threading.Thread):
 
     def run(self):
         climb_times = 1
+        # 设置关闭时间和启动时间
+        shutdown_time = datetime.time(23, 55, 0)  # 每天23:55关闭线程
+        startup_time = datetime.time(7, 0, 0)  # 每天7:00启动线程
         while not self.stop_event.is_set():
             # 获取当前时间
             now = datetime.datetime.now().time()
-            # 设置关闭时间和启动时间
-            shutdown_time = datetime.time(23, 55, 0)  # 每天23:55关闭线程
-            startup_time = datetime.time(7, 0, 0)  # 每天7:00启动线程
             if startup_time <= now < shutdown_time:
                 start_time = time.time()
                 get_all(self.urls)
@@ -587,7 +586,7 @@ def stop_threads(thread):
         # print('stop a thread')
     for th in thread:
         th.join()
-    print('stop threads count:'+str(len(thread)))
+    print('stop threads count:' + str(len(thread)))
 
 
 if __name__ == '__main__':
@@ -622,6 +621,9 @@ if __name__ == '__main__':
     # for thread in threads:
     #     thread.join()
     # service mariadb start
+    # 设置关闭时间和启动时间
+    shutdown_time = datetime.time(23, 55, 0)  # 每天23:55关闭线程
+    startup_time = datetime.time(7, 0, 0)  # 每天7:00启动线程
     with open('../source/all.txt') as f:
         the_urls = f.readlines()
     threads_count = 8
@@ -630,20 +632,21 @@ if __name__ == '__main__':
     while True:
         # 获取当前时间
         now = datetime.datetime.now().time()
-        # 设置关闭时间和启动时间
-        shutdown_time = datetime.time(23, 55, 0)  # 每天23:55关闭线程
-        startup_time = datetime.time(7, 0, 0)  # 每天7:00启动线程
+        print(now)
         # 如果当前时间在关闭时间之后，就关闭线程
-        if now >= shutdown_time:
-            if threads_status:
-                print("Shutdown time reached. Stopping threads...")
-                stop_threads(threads)
-                threads_status = False
-
+        if now >= shutdown_time and threads_status:
+            stop_threads(threads)
+            print(f"{now}:Shutdown time reached. Stopping threads...")
+            threads_status = False
+            print(f"set threads_status:{threads_status}")
+        print(f"threads_status:{threads_status}")
+        print(f"startup_time <= now:{startup_time <= now}")
+        print(f"now < shutdown_time:{now < shutdown_time}")
         if startup_time <= now < shutdown_time and not threads_status:
             print("Startup time reached. Starting threads...")
             threads = start_threads(threads_count, the_urls)
             threads_status = True
+            print(f"set threads_status:{threads_status}")
 
         # 等待一段时间
         time.sleep(60)  # 每隔60秒启动一次线程
