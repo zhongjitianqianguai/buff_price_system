@@ -18,7 +18,7 @@ import buff_sql
 import buff_mail
 
 chrome_options = Options()
-# chrome_options.add_argument('--headless')
+chrome_options.add_argument('--headless')
 chrome_options.add_argument('--disable-gpu')
 chrome_options.add_argument("window-size=1024,768")
 chrome_options.add_argument("--no-sandbox")
@@ -634,21 +634,26 @@ if __name__ == '__main__':
         now = datetime.datetime.now().time()
         # print(now)
         # 如果当前时间在关闭时间之后，就关闭线程
-        if now >= shutdown_time:
-            if threads_status:
-                print(f"{now}:Shutdown time reached. Stopping threads...")
-                threads_status = False
-                print(f"set threads_status:{threads_status}")
-                stop_threads(threads)
-        print(f"threads_status:{threads_status}")
-        print(f"startup_time <= now:{startup_time <= now}")
-        print(f"now < shutdown_time:{now < shutdown_time}")
         if startup_time <= now < shutdown_time:
             if not threads_status:
                 print("Startup time reached. Starting threads...")
                 threads = start_threads(threads_count, the_urls)
                 threads_status = True
                 print(f"set threads_status:{threads_status}")
+            else:
+                print("Startup time reached. Threads already started.")
+        if now >= shutdown_time:
+            if threads_status:
+                print(f"{now}:Shutdown time reached. Stopping threads...")
+                threads_status = False
+                print(f"set threads_status:{threads_status}")
+                stop_threads(threads)
+            else:
+                print(f"{now}:Shutdown time reached. Threads already stopped.")
+        print(f"threads_status:{threads_status}")
+        print(f"startup_time <= now:{startup_time <= now}")
+        print(f"now < shutdown_time:{now < shutdown_time}")
+
         time.sleep(5)
 
     # urls_per_thread = len(the_urls) // threads_count  # 每个线程要处理的行数
