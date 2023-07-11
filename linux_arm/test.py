@@ -261,12 +261,14 @@ def get_all(urls):
         else:
             thread_status = False
         if not thread_status:
+            driver.close()
             break
         sleep_time = random.randint(2, 5)
         url = url.replace("\n", "")
         start_climb_one_time = time.time()
         while True:
             if not thread_status:
+                driver.close()
                 break
             try:
                 driver.get('https://buff.163.com/goods/' + url)
@@ -397,6 +399,7 @@ def get_all(urls):
                         else:
                             thread_status = False
                         if not thread_status:
+                            driver.close()
                             break
                         if price <= float(expect_price):
                             # print(
@@ -412,8 +415,8 @@ def get_all(urls):
                                 price), goods_id, time_get)
                         else:
                             pass
-                            # print(
-                            #     f'线程:{thread_id}:{goods_id}:{time_get} :{name} 的最低价格未达到期望值, 当前价格是: {price} 历史最低价格为:{lowest_price} 爬取该商品花费时间:{time.time() - start_climb_one_time}秒')
+                            # print( f'线程:{thread_id}:{goods_id}:{time_get} :{name} 的最低价格未达到期望值, 当前价格是: {price}
+                            # 历史最低价格为:{lowest_price} 爬取该商品花费时间:{time.time() - start_climb_one_time}秒')
                         if price - float(lowest_price) / float(lowest_price) < -0.3 and price < float(lowest_price):
                             # print( f'{goods_id}:{time_get} :{name} 的最低价格达到期望值, 当前价格是: {price} 历史最低价格为:{
                             # lowest_price}')
