@@ -18,7 +18,7 @@ import buff_sql
 import buff_mail
 
 chrome_options = Options()
-chrome_options.add_argument('--headless')
+# chrome_options.add_argument('--headless')
 chrome_options.add_argument('--disable-gpu')
 chrome_options.add_argument("window-size=1024,768")
 chrome_options.add_argument("--no-sandbox")
@@ -261,15 +261,18 @@ def get_all(urls):
         else:
             thread_status = False
         if not thread_status:
-            driver.close()
-            break
+            pass
+            # driver.close()
+            # break
         sleep_time = random.randint(2, 5)
         url = url.replace("\n", "")
         start_climb_one_time = time.time()
         while True:
             if not thread_status:
-                driver.close()
-                break
+                pass
+
+                # driver.close()
+                # break
             try:
                 driver.get('https://buff.163.com/goods/' + url)
                 # print(f"{thread_id}:{url}")
@@ -554,17 +557,17 @@ class MyThread(threading.Thread):
         while not self.stop_event.is_set():
             # 获取当前时间
             now = datetime.datetime.now().time()
-            if startup_time <= now < shutdown_time:
-                start_time = time.time()
-                get_all(self.urls)
-                end_climb_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-                cost_time = (time.time() - start_time) / 60
-                print(
-                    f"{end_climb_time}:线程{self.thread_id}爬取商品{len(self.urls)}个爬取第{climb_times}次消耗的时间为{cost_time} min")
-                climb_times += 1
-                time.sleep(5)
-            else:
-                break
+            # if startup_time <= now < shutdown_time:
+            start_time = time.time()
+            get_all(self.urls)
+            end_climb_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+            cost_time = (time.time() - start_time) / 60
+            print(
+                f"{end_climb_time}:线程{self.thread_id}爬取商品{len(self.urls)}个爬取第{climb_times}次消耗的时间为{cost_time} min")
+            climb_times += 1
+            time.sleep(5)
+            # else:
+            #     break
 
 
 # 定义启动线程的函数
@@ -644,18 +647,20 @@ if __name__ == '__main__':
                 threads_status = True
                 print(f"set threads_status:{threads_status}")
             else:
-                print("Startup time reached. Threads already started.")
+                pass
+                # print("Startup time reached. Threads already started.")
         if now >= shutdown_time:
             if threads_status:
                 print(f"{now}:Shutdown time reached. Stopping threads...")
                 threads_status = False
                 print(f"set threads_status:{threads_status}")
-                stop_threads(threads)
+                # stop_threads(threads)
             else:
-                print(f"{now}:Shutdown time reached. Threads already stopped.")
-        print(f"threads_status:{threads_status}")
-        print(f"startup_time <= now:{startup_time <= now}")
-        print(f"now < shutdown_time:{now < shutdown_time}")
+                pass
+        #         print(f"{now}:Shutdown time reached. Threads already stopped.")
+        # print(f"threads_status:{threads_status}")
+        # print(f"startup_time <= now:{startup_time <= now}")
+        # print(f"now < shutdown_time:{now < shutdown_time}")
 
         time.sleep(5)
 
