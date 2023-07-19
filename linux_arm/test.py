@@ -261,18 +261,17 @@ def get_all(urls):
         else:
             thread_status = False
         if not thread_status:
-            pass
-            # driver.close()
-            # break
+            # pass
+            driver.quit()
+            break
         sleep_time = random.randint(2, 5)
         url = url.replace("\n", "")
         start_climb_one_time = time.time()
         while True:
             if not thread_status:
-                pass
-
-                # driver.close()
-                # break
+                # pass
+                driver.quit()
+                break
             try:
                 driver.get('https://buff.163.com/goods/' + url)
                 # print(f"{thread_id}:{url}")
@@ -287,7 +286,8 @@ def get_all(urls):
                 img_url = driver.find_element(By.CLASS_NAME, "detail-pic").find_element(By.CLASS_NAME,
                                                                                         "t_Center").find_element(
                     By.TAG_NAME, "img").get_attribute("src")
-                while len(price_elements) <= 1:
+                price = None
+                while len(price_elements) <= 1 or price is None:
                     price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
                     # now_time = time.time()
                     name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
@@ -295,8 +295,10 @@ def get_all(urls):
                     #     print(f'{time_get} :{url} 超时')
                     #     driver.refresh()
                     #     start_time = time.time()
-                # lowest_price = price_elements[1]
-                # price = float(lowest_price.replace("¥ ", ""))
+                    # lowest_price = price_elements[1]
+                    # price = float(lowest_price.replace("¥ ", ""))
+                    if time.time() - start_climb_one_time > 10:
+                        driver.refresh()
                 try:
                     price = float(price_elements[1].text.replace("¥ ", ""))
                     name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
@@ -308,7 +310,7 @@ def get_all(urls):
                         while True:
                             price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
                             name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
-                            while len(price_elements) <= 1:
+                            while len(price_elements) <= 1 or price is None:
                                 price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
                                 name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
                             price = float(price_elements[1].text.replace("¥ ", ""))
@@ -364,38 +366,61 @@ def get_all(urls):
                         days = [1, 3, 7, 30]
                         lines.pop(0)
                         lowest_price = buff_sql.get_good_lowest_price(goods_id)
+                        all_record = buff_sql.get_good_all_record(goods_id)
+
                         if lowest_price > price:
                             lowest_price = price
-                        for line in lines:
-                            price_data = line.split(';')
-                            # 获取 当前时间并计算与文本时间差
-                            old_time_str = price_data[0].replace('\n', '')
+                        for record in all_record:
+                            old_time_str = record[0]
                             old_time = datetime.datetime.strptime(old_time_str, "%Y-%m-%d %H:%M:%S")
                             now_time = datetime.datetime.utcnow()
                             diff_time = now_time - old_time
-                            # # 获取对应天数的历史价格
-                            # if lowest_price > float(
-                            #         price_data[1].split('¥')[1].replace(" ", "").replace("\n", "")):
-                            #     lowest_price = float(
-                            #         price_data[1].split('¥')[1].replace(" ", "").replace("\n", ""))
                             if diff_time.days == days[0]:
                                 one_day_price.append(
-                                    price_data[1].split('¥')[1].replace(" ", "").replace("\n", ""))
-                                # print("have one day ago price")
+                                    record[2])
                             elif diff_time.days == days[1]:
                                 three_day_price.append(
-                                    price_data[1].split('¥')[1].replace(" ", "").replace("\n", ""))
-                                # print("have 3 day ago price")
+                                    record[2])
+
 
                             elif diff_time.days == days[2]:
                                 week_day_price.append(
-                                    price_data[1].split('¥')[1].replace(" ", "").replace("\n", ""))
-                                # print("have 7 day ago price")
-
+                                    record[2])
                             elif diff_time.days == days[3]:
                                 month_price.append(
-                                    price_data[1].split('¥')[1].replace(" ", "").replace("\n", ""))
-                                # print("have 30 day ago price")
+                                    record[2])
+
+                        # for line in lines:
+                        #     price_data = line.split(';')
+                        #     # 获取 当前时间并计算与文本时间差
+                        #     old_time_str = price_data[0].replace('\n', '')
+                        #     print(old_time_str)
+                        #     old_time = datetime.datetime.strptime(old_time_str, "%Y-%m-%d %H:%M:%S")
+                        #     now_time = datetime.datetime.utcnow()
+                        #     diff_time = now_time - old_time
+                        #     # # 获取对应天数的历史价格
+                        #     # if lowest_price > float(
+                        #     #         price_data[1].split('¥')[1].replace(" ", "").replace("\n", "")):
+                        #     #     lowest_price = float(
+                        #     #         price_data[1].split('¥')[1].replace(" ", "").replace("\n", ""))
+                        #     if diff_time.days == days[0]:
+                        #         one_day_price.append(
+                        #             price_data[1].split('¥')[1].replace(" ", "").replace("\n", ""))
+                        #         # print("have one day ago price")
+                        #     elif diff_time.days == days[1]:
+                        #         three_day_price.append(
+                        #             price_data[1].split('¥')[1].replace(" ", "").replace("\n", ""))
+                        #         # print("have 3 day ago price")
+                        #
+                        #     elif diff_time.days == days[2]:
+                        #         week_day_price.append(
+                        #             price_data[1].split('¥')[1].replace(" ", "").replace("\n", ""))
+                        #         # print("have 7 day ago price")
+                        #
+                        #     elif diff_time.days == days[3]:
+                        #         month_price.append(
+                        #             price_data[1].split('¥')[1].replace(" ", "").replace("\n", ""))
+                        #         # print("have 30 day ago price")
                         now = datetime.datetime.now().time()
                         if startup_time <= now < shutdown_time:
                             thread_status = True
@@ -551,13 +576,7 @@ class MyThread(threading.Thread):
 
     def run(self):
         climb_times = 1
-        # 设置关闭时间和启动时间
-        shutdown_time = datetime.time(23, 55, 0)  # 每天23:55关闭线程
-        startup_time = datetime.time(7, 0, 0)  # 每天7:00启动线程
         while not self.stop_event.is_set():
-            # 获取当前时间
-            now = datetime.datetime.now().time()
-            # if startup_time <= now < shutdown_time:
             start_time = time.time()
             get_all(self.urls)
             end_climb_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
@@ -566,8 +585,6 @@ class MyThread(threading.Thread):
                 f"{end_climb_time}:线程{self.thread_id}爬取商品{len(self.urls)}个爬取第{climb_times}次消耗的时间为{cost_time} min")
             climb_times += 1
             time.sleep(5)
-            # else:
-            #     break
 
 
 # 定义启动线程的函数
@@ -654,10 +671,10 @@ if __name__ == '__main__':
                 print(f"{now}:Shutdown time reached. Stopping threads...")
                 threads_status = False
                 print(f"set threads_status:{threads_status}")
-                # stop_threads(threads)
+                stop_threads(threads)
             else:
                 pass
-        #         print(f"{now}:Shutdown time reached. Threads already stopped.")
+                # print(f"{now}:Shutdown time reached. Threads already stopped.")
         # print(f"threads_status:{threads_status}")
         # print(f"startup_time <= now:{startup_time <= now}")
         # print(f"now < shutdown_time:{now < shutdown_time}")

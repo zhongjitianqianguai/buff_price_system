@@ -7,7 +7,7 @@ conn = pymysql.connect(
     host='127.0.0.1',
     port=3306,
     user="root",
-    passwd="root",
+    passwd="jiege666",
     db="buff_price",
     charset='utf8',
     autocommit=True
@@ -40,6 +40,22 @@ def get_all_goods():
     except Exception as e:
         print("错误类型:", type(e))
         print("获取所有商品失败:", e)
+    finally:
+        lock.release()
+
+
+def get_good_all_record(goods_id):
+    try:
+        lock.acquire()
+        sql = """Select * from  buff_record where goods_id=%s order by time;"""
+        conn.ping(reconnect=True)
+        cursor.execute(sql, goods_id)  # 添加参数
+        return cursor.fetchall()
+
+
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("获取商品所有价格记录失败:", e)
     finally:
         lock.release()
 
@@ -90,7 +106,7 @@ def get_good_last_record(goods_id):
 
     except Exception as e:
         print("错误类型:", type(e))
-        print("获取商品预期价格失败:", e)
+        print("获取商品最新价格记录失败:", e)
     finally:
         lock.release()
 
