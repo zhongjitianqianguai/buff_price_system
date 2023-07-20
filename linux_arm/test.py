@@ -268,6 +268,7 @@ def get_all(urls):
         url = url.replace("\n", "")
         start_climb_one_time = time.time()
         while True:
+
             if not thread_status:
                 # pass
                 driver.quit()
@@ -277,48 +278,26 @@ def get_all(urls):
                 # print(f"{thread_id}:{url}")
                 lowest_price = 0
                 time_get = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-                # if "429 Too Many Requests" in driver.find_element(By.TAG_NAME, "title").text:
-                #     print("超时")
-                #     time.sleep(2)
-                #     driver.refresh()
+                if "429 Too Many Requests" in driver.find_element(By.TAG_NAME, "h1").text:
+                    # print("超时")
+                    time.sleep(1)
+                    continue
                 price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
                 name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
                 img_url = driver.find_element(By.CLASS_NAME, "detail-pic").find_element(By.CLASS_NAME,
                                                                                         "t_Center").find_element(
                     By.TAG_NAME, "img").get_attribute("src")
-                price = None
-                while len(price_elements) <= 1 or price is None:
+                this_wait_loop_start_time = time.time()
+                while len(price_elements) <= 1:
                     price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
-                    # now_time = time.time()
-                    name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
-                    # if now_time - start_time > 20:
-                    #     print(f'{time_get} :{url} 超时')
-                    #     driver.refresh()
-                    #     start_time = time.time()
-                    # lowest_price = price_elements[1]
-                    # price = float(lowest_price.replace("¥ ", ""))
-                    if time.time() - start_climb_one_time > 10:
-                        driver.refresh()
-                try:
-                    price = float(price_elements[1].text.replace("¥ ", ""))
-                    name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
-                    name = name_elements.text.splitlines()[2]
-                    category = name_elements.text.split("类型 |")[1].split("\n")[0]
-                except StaleElementReferenceException as e:
-                    # print("try to handle element is not attached to the page document ")
-                    try:
-                        while True:
-                            price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
-                            name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
-                            while len(price_elements) <= 1 or price is None:
-                                price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
-                                name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
-                            price = float(price_elements[1].text.replace("¥ ", ""))
-                            name = name_elements.text.splitlines()[2]
-                            # category = name_elements.text.split("类型 |")[1].split("\n")[0]
-                            break
-                    except:
-                        pass
+                    if time.time() - this_wait_loop_start_time > 4:
+                        continue
+
+                price = float(price_elements[1].text.replace("¥ ", ""))
+                name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
+                name = name_elements.text.splitlines()[2]
+                category = name_elements.text.split("类型 |")[1].split("\n")[0]
+
 
                 goods_id = driver.current_url.split('/')[-1]
                 if not os.path.exists('txt/' + str(goods_id) + '.txt'):
@@ -348,15 +327,6 @@ def get_all(urls):
                             f.write(f'{time_get};{name} ¥ {price}\n')
                             buff_sql.write_record(time_get, str(goods_id), str(price))
                             break
-                        # if buff_sql.get_good_expected_price(goods_id) is None:
-                        #     if "金色" in name:
-                        #         category = "金色"
-                        #     elif "全息" in name:
-                        #         category = "全息"
-                        #     elif "胶囊" in name:
-                        #         category = "胶囊"
-                        #     buff_sql.add_new_good(name, str(goods_id), category, str(price / 2), img_url,
-                        #                           str(price))
 
                         last_price = buff_sql.get_good_last_record(goods_id)
                         one_day_price = []
@@ -381,7 +351,6 @@ def get_all(urls):
                             elif diff_time.days == days[1]:
                                 three_day_price.append(
                                     record[2])
-
 
                             elif diff_time.days == days[2]:
                                 week_day_price.append(
@@ -427,7 +396,7 @@ def get_all(urls):
                         else:
                             thread_status = False
                         if not thread_status:
-                            driver.close()
+                            driver.quit()
                             break
                         if price <= float(expect_price):
                             # print(
@@ -457,11 +426,6 @@ def get_all(urls):
                             buff_sql.add_new_mail(name + '\n历史新低价!!!!历史最低价格为:' + str(
                                 lowest_price) + '当前价格是:' + str(
                                 price), goods_id, time_get)
-                        # else:
-                        #     print(
-                        #         f'{goods_id}:{time_get} :{name} 的最低价格未达到期望值, 当前价格是: {price}')
-                        # 用于首次填充数据库，填充完毕后注释掉
-                        # update_good_price(conn, cursor, str(goods_id), str(price), lowest_price)
 
                         if last_price == price:
                             climb_goods_count += 1
@@ -489,15 +453,6 @@ def get_all(urls):
             except StaleElementReferenceException as e:
                 print("try to handle element is not attached to the page document in out loop")
                 continue
-                # try:
-                #     while True:
-                #         price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
-                #         while len(price_elements) <= 1:
-                #             price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
-                #         price = float(price_elements[1].text.replace("¥ ", ""))
-                #         break
-                # except:
-                #     pass
             except NoSuchElementException as e:
                 # print(url+":超时")
                 try:
@@ -505,7 +460,7 @@ def get_all(urls):
                     driver.refresh()
                 except WebDriverException as e:
                     crash_time = 0
-                    # print(e)
+                    print(e)
                     while True:
                         try:
                             if crash_time == 2:
@@ -524,7 +479,7 @@ def get_all(urls):
                 continue
             except WebDriverException as e:
                 crash_time = 0
-                # print(e)
+                print(e)
                 while True:
                     try:
                         if crash_time == 2:
