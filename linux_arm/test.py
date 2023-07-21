@@ -290,7 +290,7 @@ def get_all(urls):
                 while len(price_elements) <= 1:
                     price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
                     if time.time() - this_wait_loop_start_time > 3:
-                        print("具体价格部分未加载")
+                        # print("具体价格部分未加载")
                         driver.refresh()
                         this_wait_loop_start_time = time.time()
 
