@@ -18,7 +18,7 @@ import buff_sql
 import buff_mail
 
 chrome_options = Options()
-# chrome_options.add_argument('--headless')
+chrome_options.add_argument('--headless')
 chrome_options.add_argument('--disable-gpu')
 chrome_options.add_argument("window-size=1024,768")
 chrome_options.add_argument("--no-sandbox")
@@ -246,8 +246,9 @@ def get_all(urls):
     # ip = s.getsockname()[0]
     #
     # print("IP:", ip)
-    driver = webdriver.Chrome(chrome_options=chrome_options, executable_path="/usr/bin/chromedriver",
-                              desired_capabilities=cap)
+    # driver = webdriver.Chrome(options=chrome_options, executable_path="/usr/bin/chromedriver",
+    #                           desired_capabilities=cap)
+    driver = webdriver.Chrome(options=chrome_options, desired_capabilities=cap)
     driver.implicitly_wait(6)
     thread_id = threading.current_thread().thread_id
     shutdown_time = datetime.time(23, 55, 0)  # 每天23:55关闭线程
@@ -279,19 +280,19 @@ def get_all(urls):
                 lowest_price = 0
                 time_get = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
                 if "429 Too Many Requests" in driver.find_element(By.TAG_NAME, "h1").text:
-                    # print("超时")
                     time.sleep(1)
                     continue
                 price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
-                name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
                 img_url = driver.find_element(By.CLASS_NAME, "detail-pic").find_element(By.CLASS_NAME,
                                                                                         "t_Center").find_element(
                     By.TAG_NAME, "img").get_attribute("src")
                 this_wait_loop_start_time = time.time()
                 while len(price_elements) <= 1:
                     price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
-                    if time.time() - this_wait_loop_start_time > 4:
-                        continue
+                    if time.time() - this_wait_loop_start_time > 3:
+                        print("具体价格部分未加载")
+                        driver.refresh()
+                        this_wait_loop_start_time = time.time()
 
                 price = float(price_elements[1].text.replace("¥ ", ""))
                 name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
