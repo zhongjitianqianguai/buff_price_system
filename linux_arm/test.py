@@ -5,20 +5,19 @@ import smtplib
 import subprocess
 import threading
 import traceback
-from email.header import Header
-from email.mime.text import MIMEText
 
 from selenium import webdriver
 from selenium.common import WebDriverException, StaleElementReferenceException, NoSuchElementException
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 import time
 import buff_sql
 import buff_mail
 
 chrome_options = Options()
-chrome_options.add_argument('--headless')
+# chrome_options.add_argument('--headless')
 chrome_options.add_argument('--disable-gpu')
 chrome_options.add_argument("window-size=1024,768")
 chrome_options.add_argument("--no-sandbox")
@@ -236,7 +235,7 @@ def month_send_mail(lowest_price, name_elements, url, price, month_price):
                                     'https://buff.163.com/goods/' + url)
 
 
-def get_all(urls):
+def get_all(urls, is_24_running):
     global can_mail
     # import os
     # import socket
@@ -248,32 +247,29 @@ def get_all(urls):
     # print("IP:", ip)
     # driver = webdriver.Chrome(options=chrome_options, executable_path="/usr/bin/chromedriver",
     #                           desired_capabilities=cap)
-    driver = webdriver.Chrome(options=chrome_options, desired_capabilities=cap)
+    service = Service("../windows/webdriver/chromedriver.exe")
+    driver = webdriver.Chrome(options=chrome_options, desired_capabilities=cap, service=service)
     driver.implicitly_wait(6)
-    thread_id = threading.current_thread().thread_id
+    # thread_id = threading.current_thread().thread_id
     shutdown_time = datetime.time(23, 55, 0)  # 每天23:55关闭线程
     startup_time = datetime.time(7, 0, 0)  # 每天7:00启动线程
     # print(f"{start_climb_time}:线程{thread_id+1}:开始爬取第{climb_times}次")
     climb_goods_count = 0
     for url in urls:
         now = datetime.datetime.now().time()
-        if startup_time <= now < shutdown_time:
-            thread_status = True
-        else:
-            thread_status = False
-        if not thread_status:
-            # pass
-            driver.quit()
-            break
-        sleep_time = random.randint(2, 5)
-        url = url.replace("\n", "")
-        start_climb_one_time = time.time()
-        while True:
-
+        if not is_24_running:
+            if startup_time <= now < shutdown_time:
+                thread_status = True
+            else:
+                thread_status = False
             if not thread_status:
                 # pass
                 driver.quit()
                 break
+        sleep_time = random.randint(2, 5)
+        url = url.replace("\n", "")
+        # start_climb_one_time = time.time()
+        while True:
             try:
                 driver.get('https://buff.163.com/goods/' + url)
                 # print(f"{thread_id}:{url}")
@@ -287,18 +283,24 @@ def get_all(urls):
                                                                                         "t_Center").find_element(
                     By.TAG_NAME, "img").get_attribute("src")
                 this_wait_loop_start_time = time.time()
+                content = driver.find_element(By.CLASS_NAME, "detail-tab-cont").text
+                if '暂无数据' in content:
+                    break
                 while len(price_elements) <= 1:
+                    content = driver.find_element(By.CLASS_NAME, "detail-tab-cont").text
+                    if '暂无数据' in content:
+                        break
                     price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
                     if time.time() - this_wait_loop_start_time > 3:
                         # print("具体价格部分未加载")
                         driver.refresh()
                         this_wait_loop_start_time = time.time()
-
+                if '暂无数据' in content:
+                    break
                 price = float(price_elements[1].text.replace("¥ ", ""))
                 name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
                 name = name_elements.text.splitlines()[2]
                 category = name_elements.text.split("类型 |")[1].split("\n")[0]
-
 
                 goods_id = driver.current_url.split('/')[-1]
                 if not os.path.exists('txt/' + str(goods_id) + '.txt'):
@@ -392,16 +394,17 @@ def get_all(urls):
                         #             price_data[1].split('¥')[1].replace(" ", "").replace("\n", ""))
                         #         # print("have 30 day ago price")
                         now = datetime.datetime.now().time()
-                        if startup_time <= now < shutdown_time:
-                            thread_status = True
-                        else:
-                            thread_status = False
-                        if not thread_status:
-                            driver.quit()
-                            break
+                        if not is_24_running:
+                            if startup_time <= now < shutdown_time:
+                                thread_status = True
+                            else:
+                                thread_status = False
+                            if not thread_status:
+                                driver.quit()
+                                break
                         if price <= float(expect_price):
-                            # print(
-                            #     f'线程:{thread_id}:{goods_id}:{time_get} :{name} 的最低价格达到期望值, 当前价格是: {price} 历史最低价格为:{lowest_price} 爬取该商品花费时间:{time.time() - start_climb_one_time}秒')
+                            # print( f'线程:{thread_id}:{goods_id}:{time_get} :{name} 的最低价格达到期望值, 当前价格是: {price}
+                            # 历史最低价格为:{lowest_price} 爬取该商品花费时间:{time.time() - start_climb_one_time}秒')
                             if can_mail and (time.localtime(time.time()).tm_hour.real < 1 or time.localtime(
                                     time.time()).tm_hour.real > 7):
                                 buff_mail.send_mail(
@@ -413,11 +416,11 @@ def get_all(urls):
                                 price), goods_id, time_get)
                         else:
                             pass
-                            # print( f'线程:{thread_id}:{goods_id}:{time_get} :{name} 的最低价格未达到期望值, 当前价格是: {price}
-                            # 历史最低价格为:{lowest_price} 爬取该商品花费时间:{time.time() - start_climb_one_time}秒')
+                            # print(
+                            #     f'{goods_id}:{time_get} :{name} 的最低价格未达到期望值, 当前价格是: {price}历史最低价格为:{lowest_price}')
                         if price - float(lowest_price) / float(lowest_price) < -0.3 and price < float(lowest_price):
-                            # print( f'{goods_id}:{time_get} :{name} 的最低价格达到期望值, 当前价格是: {price} 历史最低价格为:{
-                            # lowest_price}')
+                            print(
+                                f'{goods_id}:{time_get} :{name} 的最低价格达到期望值, 当前价格是: {price} 历史最低价格为:{lowest_price}')
                             if can_mail and (time.localtime(time.time()).tm_hour.real < 1 or time.localtime(
                                     time.time()).tm_hour.real > 7):
                                 buff_mail.send_mail(
@@ -447,13 +450,17 @@ def get_all(urls):
                                            week_day_price)
                         if not can_mail and time.localtime(time.time()).tm_hour.real == 0 and time.localtime(
                                 time.time()).tm_min == 0:
-                            # print("set can_mail=true")
                             can_mail = True
 
                         break
             except StaleElementReferenceException as e:
-                print("try to handle element is not attached to the page document in out loop")
+                # print("try to handle element is not attached to the page document in out loop")
                 continue
+            except OSError as e:
+                if "No space left on device" in str(e):
+                    print("No space left on device")
+                    buff_mail.send_mail("No space left on device", 0, '111')
+                    continue
             except NoSuchElementException as e:
                 # print(url+":超时")
                 try:
@@ -521,11 +528,12 @@ def get_all(urls):
 
 
 class MyThread(threading.Thread):
-    def __init__(self, thread_id, urls):
+    def __init__(self, thread_id, urls, is_24_hours_running):
         super().__init__()
         self.thread_id = thread_id
         self.urls = urls
         self.stop_event = threading.Event()
+        self.is_24_hours_running = is_24_hours_running
 
     def stop(self):
         self.stop_event.set()
@@ -534,7 +542,7 @@ class MyThread(threading.Thread):
         climb_times = 1
         while not self.stop_event.is_set():
             start_time = time.time()
-            get_all(self.urls)
+            get_all(self.urls, self.is_24_hours_running)
             end_climb_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             cost_time = (time.time() - start_time) / 60
             print(
@@ -544,14 +552,14 @@ class MyThread(threading.Thread):
 
 
 # 定义启动线程的函数
-def start_threads(threads_count, urls):
+def start_threads(threads_count, urls, is_24_hours_running):
     thread = []
     urls_per_thread = len(urls) // threads_count
     for i in range(threads_count):
         start = i * urls_per_thread
         end = start + urls_per_thread if i < threads_count - 1 else len(urls)
         sublist = urls[start:end]
-        th = MyThread(thread_id=i, urls=sublist)
+        th = MyThread(thread_id=i, urls=sublist, is_24_hours_running=is_24_hours_running)
         thread.append(th)
         time.sleep(1)
         th.start()
@@ -600,6 +608,8 @@ if __name__ == '__main__':
     # for thread in threads:
     #     thread.join()
     # service mariadb start
+    # 设置是否24小时运行
+    work_24_hours = True
     # 设置关闭时间和启动时间
     shutdown_time = datetime.time(23, 55, 0)  # 每天23:55关闭线程
     startup_time = datetime.time(7, 0, 0)  # 每天7:00启动线程
@@ -608,46 +618,26 @@ if __name__ == '__main__':
     threads_count = 8
     threads_status = False
     threads = []
-    while True:
-        # 获取当前时间
-        now = datetime.datetime.now().time()
-        # print(now)
-        # 如果当前时间在关闭时间之后，就关闭线程
-        if startup_time <= now < shutdown_time:
-            if not threads_status:
-                print("Startup time reached. Starting threads...")
-                threads = start_threads(threads_count, the_urls)
-                threads_status = True
-                print(f"set threads_status:{threads_status}")
-            else:
-                pass
-                # print("Startup time reached. Threads already started.")
-        if now >= shutdown_time:
-            if threads_status:
-                print(f"{now}:Shutdown time reached. Stopping threads...")
-                threads_status = False
-                print(f"set threads_status:{threads_status}")
-                stop_threads(threads)
-            else:
-                pass
-                # print(f"{now}:Shutdown time reached. Threads already stopped.")
-        # print(f"threads_status:{threads_status}")
-        # print(f"startup_time <= now:{startup_time <= now}")
-        # print(f"now < shutdown_time:{now < shutdown_time}")
+    if not work_24_hours:
+        while True:
+            # 获取当前时间
+            now = datetime.datetime.now().time()
+            # print(now)
+            # 如果当前时间在关闭时间之后，就关闭线程
+            if startup_time <= now < shutdown_time:
+                if not threads_status:
+                    print("Startup time reached. Starting threads...")
+                    threads = start_threads(threads_count, the_urls, work_24_hours)
+                    threads_status = True
+                    print(f"set threads_status:{threads_status}")
 
-        time.sleep(5)
+            if now >= shutdown_time:
+                if threads_status:
+                    print(f"{now}:Shutdown time reached. Stopping threads...")
+                    threads_status = False
+                    print(f"set threads_status:{threads_status}")
+                    stop_threads(threads)
 
-    # urls_per_thread = len(the_urls) // threads_count  # 每个线程要处理的行数
-    # threads = []
-    #
-    # for i in range(threads_count):
-    #     start = i * urls_per_thread
-    #     end = start + urls_per_thread if i < threads_count-1 else len(the_urls)  # 最后一个线程处理剩余行数
-    #     sublist = the_urls[start:end]
-    #     thread = threading.Thread(target=get_all, args=(sublist,))
-    #     threads.append(thread)
-    #     time.sleep(random.randint(3, 5))
-    #     thread.start()
-    #
-    # for thread in threads:
-    #     thread.join()
+            time.sleep(5)
+    else:
+        start_threads(threads_count, the_urls, work_24_hours)

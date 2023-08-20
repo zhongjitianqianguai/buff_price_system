@@ -6,72 +6,50 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 import time
 
-driver = webdriver.Chrome(service=Service(r'chromedriver.exe'))
-driver.get(
-    'https://buff.163.com/market/csgo#tab=selling&page_num=1&category=sticker_tournament20')
-# driver.implicitly_wait(10)
-# # element = driver.find_element(By.CSS_SELECTOR, "input[placeholder='输入物品名称']")
-# # element.send_keys("胶囊")
-# index = 2
-# time.sleep(100)
-# while True:
-#     element = driver.find_element(By.ID, "j_market_card")
-#     elements = element.find_elements(By.TAG_NAME, "li")
-#     for li in elements:
-#         try:
-#             url = li.find_element(By.TAG_NAME, "a").get_attribute("href").split("?")[0]
-#             if 'page' not in url:
-#                 print(url)
-#         except Exception:
-#             time.sleep(1)
-#     driver.get('https://buff.163.com/market/csgo#tab=selling&page_num=' + str(
-#         index) + "&category=sticker_tournament21&search=（金色）|%202023年巴黎锦标赛")
-#     driver.get('https://buff.163.com/market/csgo#tab=selling&page_num=' + str(
-#         index) + "&category=sticker_tournament21&search=（金色）|%202023年巴黎锦标赛")
+driver = webdriver.Chrome(service=Service(r'../windows/webdriver/chromedriver.exe'))
+# driver.get(
+#     'https://buff.163.com/market/csgo#tab=selling&page_num=1&category_group=type_customplayer')
 #
+# time.sleep(30)
+# index = 2
+# while index < 6:
+#     try:
+#         element = driver.find_element(By.ID, "j_market_card")
+#         elements = element.find_elements(By.TAG_NAME, "li")
+#         for li in elements:
+#             try:
+#                 url = li.find_element(By.TAG_NAME, "a").get_attribute("href").split("?")[0]
+#                 if 'page' not in url:
+#                     print(url)
+#             except Exception:
+#                 time.sleep(1)
+#         if index < 5:
+#             driver.get('https://buff.163.com/market/csgo#tab=selling&page_num=' + str(index) + '&category_group=type_customplayer')
+#             driver.get('https://buff.163.com/market/csgo#tab=selling&page_num=' + str(index) + '&category_group=type_customplayer')
+#     except NoSuchElementException:
+#         time.sleep(10)
+#         element = driver.find_element(By.ID, "j_market_card")
+#         elements = element.find_elements(By.TAG_NAME, "li")
+#         for li in elements:
+#             try:
+#                 url = li.find_element(By.TAG_NAME, "a").get_attribute("href").split("?")[0]
+#                 if 'page' not in url:
+#                     print(url)
+#             except Exception:
+#                 time.sleep(1)
+#         driver.get('https://buff.163.com/market/csgo#tab=selling&page_num=' + str(index) + '&category_group=type_customplayer')
+#         driver.get('https://buff.163.com/market/csgo#tab=selling&page_num=' + str(index) + '&category_group=type_customplayer')
 #     time.sleep(10)
 #     index = index + 1
 
-time.sleep(100)
-index = 2
-while index < 32:
-    try:
-        element = driver.find_element(By.ID, "j_market_card")
-        elements = element.find_elements(By.TAG_NAME, "li")
-        for li in elements:
-            try:
-                url = li.find_element(By.TAG_NAME, "a").get_attribute("href").split("?")[0]
-                if 'page' not in url:
-                    print(url)
-            except Exception:
-                time.sleep(1)
-        driver.get('https://buff.163.com/market/csgo#tab=selling&page_num=' + str(index) + '&category'
-                                                                                           '=sticker_tournament20')
-        driver.get('https://buff.163.com/market/csgo#tab=selling&page_num=' + str(index) + '&category'
-                                                                                           '=sticker_tournament20')
-    except NoSuchElementException:
-        time.sleep(10)
-        element = driver.find_element(By.ID, "j_market_card")
-        elements = element.find_elements(By.TAG_NAME, "li")
-        for li in elements:
-            try:
-                url = li.find_element(By.TAG_NAME, "a").get_attribute("href").split("?")[0]
-                if 'page' not in url:
-                    print(url)
-            except Exception:
-                time.sleep(1)
-        driver.get('https://buff.163.com/market/csgo#tab=selling&page_num=' + str(index) + str(index) + '&category'
-                                                                                                        '=sticker_tournament20')
-        driver.get('https://buff.163.com/market/csgo#tab=selling&page_num=' + str(index) + str(index) + '&category'
-                                                                                                        '=sticker_tournament20')
-    time.sleep(10)
-    index = index + 1
-# #获取所有的url
 driver.get(
-    'https://buff.163.com/market/csgo#tab=selling&page_num=1&category=sticker_tournament18')
-print('21斯德哥尔摩锦标赛')
+    'https://buff.163.com/market/csgo#tab=selling&page_num=1&search=%E6%AD%A6%E5%99%A8%E7%AE%B1')
+driver.get(
+    'https://buff.163.com/market/csgo#tab=selling&page_num=1&search=%E6%AD%A6%E5%99%A8%E7%AE%B1')
+print('武器箱')
+time.sleep(30)
 index = 2
-while index < 13:
+while index <4:
     try:
         element = driver.find_element(By.ID, "j_market_card")
         elements = element.find_elements(By.TAG_NAME, "li")
@@ -82,10 +60,9 @@ while index < 13:
                     print(url)
             except Exception:
                 time.sleep(1)
-        driver.get('https://buff.163.com/market/csgo#tab=selling&page_num=' + str(index) + '&category'
-                                                                                           '=sticker_tournament18')
-        driver.get('https://buff.163.com/market/csgo#tab=selling&page_num=' + str(index) + '&category'
-                                                                                           '=sticker_tournament18')
+        if index < 3:
+            driver.get('https://buff.163.com/market/csgo#tab=selling&page_num=' + str(index) + '&search=%E6%AD%A6%E5%99%A8%E7%AE%B1')
+            driver.get('https://buff.163.com/market/csgo#tab=selling&page_num=' + str(index) + '&search=%E6%AD%A6%E5%99%A8%E7%AE%B1')
     except NoSuchElementException:
         time.sleep(10)
         element = driver.find_element(By.ID, "j_market_card")
@@ -97,9 +74,7 @@ while index < 13:
                     print(url)
             except Exception:
                 time.sleep(1)
-        driver.get('https://buff.163.com/market/csgo#tab=selling&page_num=' + str(index) + str(index) + '&category'
-                                                                                                        '=sticker_tournament18')
-        driver.get('https://buff.163.com/market/csgo#tab=selling&page_num=' + str(index) + str(index) + '&category'
-                                                                                                        '=sticker_tournament18')
+        driver.get('https://buff.163.com/market/csgo#tab=selling&page_num=' + str(index) + '&category=csgo_type_weaponcase')
+        driver.get('https://buff.163.com/market/csgo#tab=selling&page_num=' + str(index) + '&category=csgo_type_weaponcase')
     time.sleep(10)
     index = index + 1
