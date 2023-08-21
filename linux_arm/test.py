@@ -2,7 +2,6 @@ import datetime
 import os
 import random
 import smtplib
-import subprocess
 import threading
 import traceback
 
@@ -245,10 +244,9 @@ def get_all(urls, is_24_running):
     # ip = s.getsockname()[0]
     #
     # print("IP:", ip)
-    # driver = webdriver.Chrome(options=chrome_options, executable_path="/usr/bin/chromedriver",
-    #                           desired_capabilities=cap)
-    service = Service("../windows/webdriver/chromedriver.exe")
-    driver = webdriver.Chrome(options=chrome_options, desired_capabilities=cap, service=service)
+    service = Service("/usr/bin/chromedriver")
+    driver = webdriver.Chrome(options=chrome_options, service=service)
+
     driver.implicitly_wait(6)
     # thread_id = threading.current_thread().thread_id
     shutdown_time = datetime.time(23, 55, 0)  # 每天23:55关闭线程
