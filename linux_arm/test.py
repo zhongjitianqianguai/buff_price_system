@@ -12,6 +12,9 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 import time
+
+from tqdm import tqdm
+
 import buff_sql
 import buff_mail
 
@@ -245,15 +248,15 @@ def get_all(urls, is_24_running):
     #
     # print("IP:", ip)
     service = Service("/usr/bin/chromedriver")
+    service = Service("../windows/webdriver/chromedriver.exe")
     driver = webdriver.Chrome(options=chrome_options, service=service)
 
     driver.implicitly_wait(6)
-    # thread_id = threading.current_thread().thread_id
+    thread_id = threading.current_thread().thread_id
     shutdown_time = datetime.time(23, 55, 0)  # 每天23:55关闭线程
     startup_time = datetime.time(7, 0, 0)  # 每天7:00启动线程
-    # print(f"{start_climb_time}:线程{thread_id+1}:开始爬取第{climb_times}次")
-    climb_goods_count = 0
-    for url in urls:
+    pbar = tqdm(total=len(urls), dynamic_ncols=True, mininterval=0, position=thread_id)
+    for i, url in enumerate(urls):
         now = datetime.datetime.now().time()
         if not is_24_running:
             if startup_time <= now < shutdown_time:
@@ -261,11 +264,10 @@ def get_all(urls, is_24_running):
             else:
                 thread_status = False
             if not thread_status:
-                # pass
                 driver.quit()
                 break
         sleep_time = random.randint(2, 5)
-        url = url.replace("\n", "")
+
         # start_climb_one_time = time.time()
         while True:
             try:
@@ -321,12 +323,16 @@ def get_all(urls, is_24_running):
                         buff_sql.add_new_good(name, str(goods_id), category, str(price / 2), img_url,
                                               str(price))
                         buff_sql.write_record(time_get, str(goods_id), str(price))
+                        pbar.update(1)
+                        pbar.set_description(f"爬取第 {i+1}/{len(urls)}个商品中")
                         break
                     else:
                         expect_price = buff_sql.get_good_expected_price(goods_id)
                         if len(lines) == 1:
                             f.write(f'{time_get};{name} ¥ {price}\n')
                             buff_sql.write_record(time_get, str(goods_id), str(price))
+                            pbar.update(1)
+                            pbar.set_description(f"爬取第 {i+1}/{len(urls)}个商品中")
                             break
 
                         last_price = buff_sql.get_good_last_record(goods_id)
@@ -430,14 +436,14 @@ def get_all(urls, is_24_running):
                                 price), goods_id, time_get)
 
                         if last_price == price:
-                            climb_goods_count += 1
+                            pbar.update(1)
+                            pbar.set_description(f"爬取第 {i+1}/{len(urls)}个商品中")
                             break
                         f.write(f'{time_get};{name} ¥ {price}\n')
                         buff_sql.write_record(time_get, str(goods_id), str(price))
                         buff_sql.update_good_without_trend(str(goods_id), img_url, name, price,
                                                            lowest_price)
                         f.close()
-                        climb_goods_count += 1
                         if can_mail and (time.localtime(time.time()).tm_hour.real < 1 or time.localtime(
                                 time.time()).tm_hour.real > 7):
                             day_send_mail(lowest_price, name, url, price, one_day_price, goods_id,
@@ -449,7 +455,8 @@ def get_all(urls, is_24_running):
                         if not can_mail and time.localtime(time.time()).tm_hour.real == 0 and time.localtime(
                                 time.time()).tm_min == 0:
                             can_mail = True
-
+                        pbar.update(1)
+                        pbar.set_description(f"爬取第 {i+1}/{len(urls)}个商品中")
                         break
             except StaleElementReferenceException as e:
                 # print("try to handle element is not attached to the page document in out loop")
@@ -523,6 +530,7 @@ def get_all(urls, is_24_running):
                         pass
             finally:
                 time.sleep(sleep_time)
+    pbar.close()
 
 
 class MyThread(threading.Thread):
@@ -540,7 +548,8 @@ class MyThread(threading.Thread):
         climb_times = 1
         while not self.stop_event.is_set():
             start_time = time.time()
-            get_all(self.urls, self.is_24_hours_running)
+            urls = [url.replace("\n", "") for url in self.urls]
+            get_all(urls, self.is_24_hours_running)
             end_climb_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             cost_time = (time.time() - start_time) / 60
             print(
