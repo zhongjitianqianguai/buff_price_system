@@ -324,7 +324,7 @@ def get_all(urls, is_24_running):
                                               str(price))
                         buff_sql.write_record(time_get, str(goods_id), str(price))
                         pbar.update(1)
-                        pbar.set_description(f"爬取第 {i+1}/{len(urls)}个商品中")
+                        pbar.set_description(f"线程{thread_id}:爬取第 {i+1}/{len(urls)}个商品中")
                         break
                     else:
                         expect_price = buff_sql.get_good_expected_price(goods_id)
@@ -332,8 +332,8 @@ def get_all(urls, is_24_running):
                             f.write(f'{time_get};{name} ¥ {price}\n')
                             buff_sql.write_record(time_get, str(goods_id), str(price))
                             pbar.update(1)
-                            pbar.set_description(f"爬取第 {i+1}/{len(urls)}个商品中")
-                            break
+                            pbar.set_description(f"线程{thread_id}:爬取第 {i+1}/{len(urls)}个商品中")
+                        break
 
                         last_price = buff_sql.get_good_last_record(goods_id)
                         one_day_price = []
@@ -437,7 +437,7 @@ def get_all(urls, is_24_running):
 
                         if last_price == price:
                             pbar.update(1)
-                            pbar.set_description(f"爬取第 {i+1}/{len(urls)}个商品中")
+                            pbar.set_description(f"线程{thread_id}:爬取第 {i+1}/{len(urls)}个商品中")
                             break
                         f.write(f'{time_get};{name} ¥ {price}\n')
                         buff_sql.write_record(time_get, str(goods_id), str(price))
@@ -456,7 +456,7 @@ def get_all(urls, is_24_running):
                                 time.time()).tm_min == 0:
                             can_mail = True
                         pbar.update(1)
-                        pbar.set_description(f"爬取第 {i+1}/{len(urls)}个商品中")
+                        pbar.set_description(f"线程{thread_id}:爬取第 {i+1}/{len(urls)}个商品中")
                         break
             except StaleElementReferenceException as e:
                 # print("try to handle element is not attached to the page document in out loop")
