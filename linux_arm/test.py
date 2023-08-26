@@ -19,7 +19,7 @@ import buff_sql
 import buff_mail
 
 chrome_options = Options()
-# chrome_options.add_argument('--headless')
+chrome_options.add_argument('--headless')
 chrome_options.add_argument('--disable-gpu')
 chrome_options.add_argument("window-size=1024,768")
 chrome_options.add_argument("--no-sandbox")
@@ -248,7 +248,7 @@ def get_all(urls, is_24_running):
     #
     # print("IP:", ip)
     service = Service("/usr/bin/chromedriver")
-    service = Service("../windows/webdriver/chromedriver.exe")
+    # service = Service("../windows/webdriver/chromedriver.exe")
     driver = webdriver.Chrome(options=chrome_options, service=service)
 
     driver.implicitly_wait(6)
@@ -333,7 +333,7 @@ def get_all(urls, is_24_running):
                             buff_sql.write_record(time_get, str(goods_id), str(price))
                             pbar.update(1)
                             pbar.set_description(f"线程{thread_id}:爬取第 {i+1}/{len(urls)}个商品中")
-                        break
+                            break
 
                         last_price = buff_sql.get_good_last_record(goods_id)
                         one_day_price = []
@@ -466,6 +466,7 @@ def get_all(urls, is_24_running):
                     print("No space left on device")
                     buff_mail.send_mail("No space left on device", 0, '111')
                     continue
+
             except NoSuchElementException as e:
                 # print(url+":超时")
                 try:
@@ -493,6 +494,8 @@ def get_all(urls, is_24_running):
             except WebDriverException as e:
                 crash_time = 0
                 print(e)
+                if 'unknown error' in e:
+                    continue
                 while True:
                     try:
                         if crash_time == 2:
