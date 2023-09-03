@@ -6,7 +6,7 @@ import threading
 import traceback
 
 from selenium import webdriver
-from selenium.common import WebDriverException, StaleElementReferenceException, NoSuchElementException
+from selenium.common import WebDriverException, StaleElementReferenceException, NoSuchElementException, TimeoutException
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
@@ -466,7 +466,8 @@ def get_all(urls, is_24_running):
                     print("No space left on device")
                     buff_mail.send_mail("No space left on device", 0, '111')
                     continue
-
+            except TimeoutException as e:
+                continue
             except NoSuchElementException as e:
                 # print(url+":超时")
                 try:
@@ -494,7 +495,7 @@ def get_all(urls, is_24_running):
             except WebDriverException as e:
                 crash_time = 0
                 print(e)
-                if 'unknown error' in e:
+                if 'unknown error' in str(e):
                     continue
                 while True:
                     try:
