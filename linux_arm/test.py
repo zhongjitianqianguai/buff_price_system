@@ -282,6 +282,8 @@ def get_all(urls, is_24_running):
                 img_url = driver.find_element(By.CLASS_NAME, "detail-pic").find_element(By.CLASS_NAME,
                                                                                         "t_Center").find_element(
                     By.TAG_NAME, "img").get_attribute("src")
+                sale_count = driver.find_element(By.CLASS_NAME, "selling on").find_element(
+                    By.TAG_NAME, "a").text.replace("当前在售(", "").replace(")", "").replace("+", "")
                 this_wait_loop_start_time = time.time()
                 content = driver.find_element(By.CLASS_NAME, "detail-tab-cont").text
                 if '暂无数据' in content:
@@ -324,7 +326,7 @@ def get_all(urls, is_24_running):
                                               str(price))
                         buff_sql.write_record(time_get, str(goods_id), str(price))
                         pbar.update(1)
-                        pbar.set_description(f"线程{thread_id}:爬取第 {i+1}/{len(urls)}个商品中")
+                        pbar.set_description(f"线程{thread_id}:爬取第 {i + 1}/{len(urls)}个商品中")
                         break
                     else:
                         expect_price = buff_sql.get_good_expected_price(goods_id)
@@ -332,7 +334,7 @@ def get_all(urls, is_24_running):
                             f.write(f'{time_get};{name} ¥ {price}\n')
                             buff_sql.write_record(time_get, str(goods_id), str(price))
                             pbar.update(1)
-                            pbar.set_description(f"线程{thread_id}:爬取第 {i+1}/{len(urls)}个商品中")
+                            pbar.set_description(f"线程{thread_id}:爬取第 {i + 1}/{len(urls)}个商品中")
                             break
 
                         last_price = buff_sql.get_good_last_record(goods_id)
@@ -437,7 +439,7 @@ def get_all(urls, is_24_running):
 
                         if last_price == price:
                             pbar.update(1)
-                            pbar.set_description(f"线程{thread_id}:爬取第 {i+1}/{len(urls)}个商品中")
+                            pbar.set_description(f"线程{thread_id}:爬取第 {i + 1}/{len(urls)}个商品中")
                             break
                         f.write(f'{time_get};{name} ¥ {price}\n')
                         buff_sql.write_record(time_get, str(goods_id), str(price))
@@ -445,7 +447,7 @@ def get_all(urls, is_24_running):
                                                            lowest_price)
                         f.close()
                         if can_mail and (time.localtime(time.time()).tm_hour.real < 1 or time.localtime(
-                                time.time()).tm_hour.real > 7):
+                                time.time()).tm_hour.real > 7) and int(sale_count) > 20:
                             day_send_mail(lowest_price, name, url, price, one_day_price, goods_id,
                                           time_get)
                             three_day_send_mail(lowest_price, name, url, price, three_day_price,
@@ -456,7 +458,7 @@ def get_all(urls, is_24_running):
                                 time.time()).tm_min == 0:
                             can_mail = True
                         pbar.update(1)
-                        pbar.set_description(f"线程{thread_id}:爬取第 {i+1}/{len(urls)}个商品中")
+                        pbar.set_description(f"线程{thread_id}:爬取第 {i + 1}/{len(urls)}个商品中")
                         break
             except StaleElementReferenceException as e:
                 # print("try to handle element is not attached to the page document in out loop")
