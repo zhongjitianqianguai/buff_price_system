@@ -497,9 +497,9 @@ def get_all(urls, is_24_running):
                 continue
             except WebDriverException as e:
                 crash_time = 0
-                print(e)
                 if 'unknown error' in str(e):
                     continue
+                print(e)
                 while True:
                     try:
                         if crash_time == 2:
