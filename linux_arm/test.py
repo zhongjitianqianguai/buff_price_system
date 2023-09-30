@@ -504,7 +504,7 @@ def get_all(urls, is_24_running):
                         if crash_time == 2:
                             time.sleep(600)
                             buff_mail.send_mail("need to reboot chroot container", 0, '111')
-
+                            crash_time = 0
                         else:
                             time.sleep(20)
                         driver = webdriver.Chrome(chrome_options=chrome_options,
@@ -514,6 +514,7 @@ def get_all(urls, is_24_running):
                         break
                     except:
                         crash_time += 1
+                continue
             except smtplib.SMTPSenderRefused as e:
                 print('发送邮件数量达今日最大值.')
                 can_mail = False
