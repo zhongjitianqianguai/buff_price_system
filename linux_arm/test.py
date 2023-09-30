@@ -282,7 +282,8 @@ def get_all(urls, is_24_running):
                 img_url = driver.find_element(By.CLASS_NAME, "detail-pic").find_element(By.CLASS_NAME,
                                                                                         "t_Center").find_element(
                     By.TAG_NAME, "img").get_attribute("src")
-                sale_count = driver.find_element(By.CLASS_NAME, "selling on").find_element(
+
+                sale_count = driver.find_element(By.CLASS_NAME, "new-tab").find_element(
                     By.TAG_NAME, "a").text.replace("当前在售(", "").replace(")", "").replace("+", "")
                 this_wait_loop_start_time = time.time()
                 content = driver.find_element(By.CLASS_NAME, "detail-tab-cont").text
@@ -412,7 +413,7 @@ def get_all(urls, is_24_running):
                             # print( f'线程:{thread_id}:{goods_id}:{time_get} :{name} 的最低价格达到期望值, 当前价格是: {price}
                             # 历史最低价格为:{lowest_price} 爬取该商品花费时间:{time.time() - start_climb_one_time}秒')
                             if can_mail and (time.localtime(time.time()).tm_hour.real < 1 or time.localtime(
-                                    time.time()).tm_hour.real > 7):
+                                    time.time()).tm_hour.real > 7) and int(sale_count) > 20:
                                 buff_mail.send_mail(
                                     name + '\n达到预期价格!!历史最低价格为:' + str(
                                         lowest_price) + '预期价格为' + str(expect_price), price,
@@ -428,7 +429,7 @@ def get_all(urls, is_24_running):
                             print(
                                 f'{goods_id}:{time_get} :{name} 的最低价格达到期望值, 当前价格是: {price} 历史最低价格为:{lowest_price}')
                             if can_mail and (time.localtime(time.time()).tm_hour.real < 1 or time.localtime(
-                                    time.time()).tm_hour.real > 7):
+                                    time.time()).tm_hour.real > 7) and int(sale_count) > 20:
                                 buff_mail.send_mail(
                                     name + '\n历史新低价!!!!历史最低价格为:' + str(
                                         lowest_price), price,
@@ -496,9 +497,9 @@ def get_all(urls, is_24_running):
                 continue
             except WebDriverException as e:
                 crash_time = 0
-                print(e)
                 if 'unknown error' in str(e):
                     continue
+                print(e)
                 while True:
                     try:
                         if crash_time == 2:
