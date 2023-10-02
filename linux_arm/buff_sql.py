@@ -2,36 +2,41 @@ import threading
 
 import pymysql
 
-conn = pymysql.connect(
-    # host='192.168.31.239',
+import pymysql
+from dbutils.pooled_db import PooledDB
+
+pool = PooledDB(
+    creator=pymysql,
+    maxconnections=10,
     host='127.0.0.1',
     port=3306,
-    user="root",
-    passwd="root",
-    db="buff_price",
-    charset='utf8',
-    autocommit=True
+    user='root',
+    password='root',
+    database='buff_price',
+    charset='utf8'
 )
-cursor = conn.cursor()
-lock = threading.Lock()
 
 
 def write_record(record_time, goods_id, price):
+    conn = pool.connection()
+    cursor = conn.cursor()
     try:
-        lock.acquire()
         sql = """Insert into buff_record(time,goods_id,price) value(%s,%s,%s)"""
-        conn.ping(reconnect=True)
-        cursor.execute(sql, (record_time, goods_id, price))  # 添加参数
+        cursor.execute(sql, (record_time, goods_id, price))
+        conn.commit()
     except Exception as e:
         print("错误类型:", type(e))
         print("插入记录失败:", e)
+        conn.rollback()
     finally:
-        lock.release()
+        cursor.close()
+        conn.close()
 
 
 def get_all_goods():
+    conn = pool.connection()
+    cursor = conn.cursor()
     try:
-        lock.acquire()
         sql = """Select * from  buff_goods;"""
         conn.ping(reconnect=True)
         cursor.execute(sql)  # 添加参数
@@ -41,12 +46,14 @@ def get_all_goods():
         print("错误类型:", type(e))
         print("获取所有商品失败:", e)
     finally:
-        lock.release()
+        cursor.close()
+        conn.close()
 
 
 def get_good_all_record(goods_id):
+    conn = pool.connection()
+    cursor = conn.cursor()
     try:
-        lock.acquire()
         sql = """Select * from  buff_record where goods_id=%s order by time;"""
         conn.ping(reconnect=True)
         cursor.execute(sql, goods_id)  # 添加参数
@@ -57,12 +64,14 @@ def get_good_all_record(goods_id):
         print("错误类型:", type(e))
         print("获取商品所有价格记录失败:", e)
     finally:
-        lock.release()
+        cursor.close()
+        conn.close()
 
 
 def get_good_expected_price(goods_id):
+    conn = pool.connection()
+    cursor = conn.cursor()
     try:
-        lock.acquire()
         sql = """Select expected_price from  buff_goods where goods_id=%s;"""
         conn.ping(reconnect=True)
         cursor.execute(sql, goods_id)  # 添加参数
@@ -74,12 +83,14 @@ def get_good_expected_price(goods_id):
         print("错误类型:", type(e))
         print("获取商品预期价格失败:", e)
     finally:
-        lock.release()
+        cursor.close()
+        conn.close()
 
 
 def get_good_lowest_price(goods_id):
+    conn = pool.connection()
+    cursor = conn.cursor()
     try:
-        lock.acquire()
         sql = """Select the_lowest_price from  buff_goods where goods_id=%s;"""
         conn.ping(reconnect=True)
         cursor.execute(sql, goods_id)  # 添加参数
@@ -91,12 +102,15 @@ def get_good_lowest_price(goods_id):
         print("错误类型:", type(e))
         print("获取商品最低价格失败:", e)
     finally:
-        lock.release()
+        cursor.close()
+        conn.close()
 
 
 def get_good_last_record(goods_id):
+    conn = pool.connection()
+    cursor = conn.cursor()
     try:
-        lock.acquire()
+
         sql = """Select price from  buff_record where goods_id=%s order by time desc limit 1;"""
         conn.ping(reconnect=True)
         cursor.execute(sql, goods_id)  # 添加参数
@@ -108,70 +122,97 @@ def get_good_last_record(goods_id):
         print("错误类型:", type(e))
         print("获取商品最新价格记录失败:", e)
     finally:
-        lock.release()
+        cursor.close()
+        conn.close()
 
 
 def update_good_with_trend(goods_id, trend):
+    conn = pool.connection()
+    cursor = conn.cursor()
     try:
-        lock.acquire()
+
         sql = """Update buff_goods set trend = %s where goods_id =%s;"""
         conn.ping(reconnect=True)
         cursor.execute(sql, (trend, goods_id))  # 添加参数
+        conn.commit()
     except Exception as e:
         print("错误类型:", type(e))
         print("更新商品价格趋势失败:", e)
+        conn.rollback()
+
     finally:
-        lock.release()
+        cursor.close()
+        conn.close()
 
 
 def change_all_goods_expected_price_div2():
+    conn = pool.connection()
+    cursor = conn.cursor()
     try:
-        lock.acquire()
+
         sql = """UPDATE buff_goods SET expected_price = now_price / 2;"""
         conn.ping(reconnect=True)
         cursor.execute(sql)  # 添加参数
+        conn.commit()
     except Exception as e:
         print("错误类型:", type(e))
         print("改变商品预期价格为当前价格的1/2失败:", e)
+        conn.rollback()
     finally:
-        lock.release()
+        cursor.close()
+        conn.close()
 
 
 def update_good_without_trend(goods_id, img_url, name, now_price,
                               lowest_price_in_record):
+    conn = pool.connection()
+    cursor = conn.cursor()
     try:
-        lock.acquire()
+
         sql = """Update buff_goods set  the_lowest_price =%s ,img_url=%s,name=%s,now_price=%s where goods_id =%s;"""
         conn.ping(reconnect=True)
         cursor.execute(sql, (lowest_price_in_record, img_url, name, now_price, goods_id))  # 添加参数
+        conn.commit()
     except Exception as e:
         print("错误类型:", type(e))
         print("更新商品失败:", e)
+        conn.rollback()
     finally:
-        lock.release()
+        cursor.close()
+        conn.close()
 
 
 def add_new_good(name, goods_id, category, except_price, img_url, now_price):
+    conn = pool.connection()
+    cursor = conn.cursor()
     try:
-        lock.acquire()
+
         sql = """Insert into buff_goods(name,goods_id,category,expected_price,img_url,now_price) value(%s,%s,%s,%s,%s,%s);"""
         conn.ping(reconnect=True)
         cursor.execute(sql, (name, goods_id, category, except_price, img_url, now_price))  # 添加参数
+        conn.commit()
     except Exception as e:
         print("错误类型:", type(e))
         print("插入新商品失败:", e)
+        conn.rollback()
     finally:
-        lock.release()
+        cursor.close()
+        conn.close()
 
 
 def add_new_mail(content, goods_id, time):
+    conn = pool.connection()
+    cursor = conn.cursor()
     try:
-        lock.acquire()
+
         sql = """Insert into buff_mail(content,url,time,user_id) value(%s,%s,%s,%s);"""
         conn.ping(reconnect=True)
         cursor.execute(sql, (content, goods_id, time, 1))  # 添加参数
+        conn.commit()
     except Exception as e:
         print("错误类型:", type(e))
         print("插入新邮件失败:", e)
+        conn.rollback()
     finally:
-        lock.release()
+        cursor.close()
+        conn.close()
