@@ -447,8 +447,8 @@ def get_all(urls, is_24_running):
                         buff_sql.update_good_without_trend(str(goods_id), img_url, name, price,
                                                            lowest_price)
                         f.close()
-                        if can_mail and (time.localtime(time.time()).tm_hour.real < 1 or time.localtime(
-                                time.time()).tm_hour.real > 7) and int(sale_count) > 20:
+                        if can_mail and int(sale_count) > 20:  # and (time.localtime(time.time()).tm_hour.real < 1 or
+                            # time.localtime(time.time()).tm_hour.real > 7)
                             day_send_mail(lowest_price, name, url, price, one_day_price, goods_id,
                                           time_get)
                             three_day_send_mail(lowest_price, name, url, price, three_day_price,
