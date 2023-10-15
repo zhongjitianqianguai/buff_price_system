@@ -29,7 +29,7 @@ cap = DesiredCapabilities.CHROME
 cap["pageLoadStrategy"] = "none"
 
 
-def day_send_mail(lowest_price, name_elements, url, price, one_day_price, goods_id, time, mail, user_id):
+def day_send_mail(lowest_price, name_elements, url, price, one_day_price, goods_id, time, mail_addr, user_id):
     if len(one_day_price) > 0:
         day_prices = 0
         for day in one_day_price:
@@ -46,7 +46,7 @@ def day_send_mail(lowest_price, name_elements, url, price, one_day_price, goods_
                     daily_change) + ' 历史最低价格为:' + str(
                     lowest_price),
                                     price,
-                                    'https://buff.163.com/goods/' + url, mail)
+                                    'https://buff.163.com/goods/' + url, mail_addr)
                 buff_sql.add_new_mail(name_elements + '价格在一天内上涨超20% 具体涨幅为' + str(
                     daily_change) + ' 历史最低价格为:' + str(
                     lowest_price) + '当前价格为' + str(price), url, time, user_id)
@@ -58,7 +58,7 @@ def day_send_mail(lowest_price, name_elements, url, price, one_day_price, goods_
                     daily_change) + '历史最低价格为:' + str(
                     lowest_price),
                                     price,
-                                    'https://buff.163.com/goods/' + url, mail)
+                                    'https://buff.163.com/goods/' + url, mail_addr)
                 buff_sql.add_new_mail(name_elements + '价格在一天内上涨超20% 具体涨幅为' + str(
                     daily_change) + ' 历史最低价格为:' + str(
                     lowest_price) + '当前价格为' + str(price), url, time, user_id)
@@ -69,7 +69,7 @@ def day_send_mail(lowest_price, name_elements, url, price, one_day_price, goods_
                     daily_change) + '历史最低价格为:' + str(
                     lowest_price),
                                     price,
-                                    'https://buff.163.com/goods/' + url, mail)
+                                    'https://buff.163.com/goods/' + url, mail_addr)
                 buff_sql.add_new_mail(name_elements + '价格在一天内下降超20% 具体涨幅为' + str(
                     daily_change) + '历史最低价格为:' + str(
                     lowest_price) + '当前价格为' + str(price), url, time, user_id)
@@ -82,13 +82,13 @@ def day_send_mail(lowest_price, name_elements, url, price, one_day_price, goods_
                     daily_change) + '历史最低价格为:' + str(
                     lowest_price),
                                     price,
-                                    'https://buff.163.com/goods/' + url, mail)
+                                    'https://buff.163.com/goods/' + url, mail_addr)
                 buff_sql.add_new_mail(name_elements + '价格在一天内下降超20% 具体涨幅为' + str(
                     daily_change) + '历史最低价格为:' + str(
                     lowest_price) + '当前价格为' + str(price), url, time, user_id)
 
 
-def three_day_send_mail(lowest_price, name_elements, url, price, three_day_price, goods_id, time, user_id):
+def three_day_send_mail(lowest_price, name_elements, url, price, three_day_price, goods_id, time,mail_addr, user_id):
     if len(three_day_price) > 0:
         three_prices = 0
         for three_day in three_day_price:
@@ -103,7 +103,7 @@ def three_day_send_mail(lowest_price, name_elements, url, price, three_day_price
                     three_day_change) + ' 历史最低价格为:' + str(
                     lowest_price),
                                     price,
-                                    'https://buff.163.com/goods/' + url, mail)
+                                    'https://buff.163.com/goods/' + url, mail_addr)
                 buff_sql.add_new_mail(name_elements + '价格在三天内上涨30% 具体涨幅为' + str(
                     three_day_change) + ' 历史最低价格为:' + str(
                     lowest_price) + '当前价格为' + str(price), url, time, user_id)
@@ -115,7 +115,7 @@ def three_day_send_mail(lowest_price, name_elements, url, price, three_day_price
                     three_day_change) + '历史最低价格为:' + str(
                     lowest_price),
                                     price,
-                                    'https://buff.163.com/goods/' + url, mail)
+                                    'https://buff.163.com/goods/' + url, mail_addr)
                 buff_sql.add_new_mail(name_elements + '价格在三天内上涨30% 具体涨幅为' + str(
                     three_day_change) + '当前价格为' + str(price) + ' 历史最低价格为:' + str(
                     lowest_price), url, time, user_id)
@@ -127,7 +127,7 @@ def three_day_send_mail(lowest_price, name_elements, url, price, three_day_price
                     three_day_change) + '历史最低价格为:' + str(
                     lowest_price),
                                     price,
-                                    'https://buff.163.com/goods/' + url, mail)
+                                    'https://buff.163.com/goods/' + url, mail_addr)
                 buff_sql.add_new_mail(name_elements + '价格在三天内下降30% 具体涨幅为' + str(
                     three_day_change) + '历史最低价格为:' + str(
                     lowest_price) + '当前价格为' + str(price), url, time, user_id)
@@ -139,7 +139,7 @@ def three_day_send_mail(lowest_price, name_elements, url, price, three_day_price
                     three_day_change) + '历史最低价格为:' + str(
                     lowest_price),
                                     price,
-                                    'https://buff.163.com/goods/' + url, mail)
+                                    'https://buff.163.com/goods/' + url, mail_addr)
                 buff_sql.add_new_mail(name_elements + '价格在三天内下降30% 具体涨幅为' + str(
                     three_day_change) + '历史最低价格为:' + str(
                     lowest_price) + '当前价格为' + str(price), url, time, user_id)
@@ -453,7 +453,7 @@ def get_all(urls, is_24_running):
                             day_send_mail(lowest_price, name, url, price, one_day_price, goods_id,
                                           time_get, '1094410998@qq.com', 1)
                             three_day_send_mail(lowest_price, name, url, price, three_day_price,
-                                                goods_id, time_get, 1)
+                                                goods_id, time_get, '1094410998@qq.com',1)
                             week_send_mail(lowest_price, name, url, price,
                                            week_day_price)
                         if not can_mail and time.localtime(time.time()).tm_hour.real == 0 and time.localtime(
