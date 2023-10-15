@@ -2,7 +2,8 @@ import smtplib
 from email.mime.text import MIMEText
 from email.header import Header
 
-def send_mail(name, price, url):
+
+def send_mail(name, price, url, mail_addr):
     # 邮件内容
     message = f'{name} \n当前价格为{price}\n链接为{url}'
 
@@ -14,7 +15,7 @@ def send_mail(name, price, url):
     password = 'ZVDXBZPBIPTSMYGX'
 
     # 收信方邮箱
-    to_addr = '1094410998@qq.com'
+    to_addr = mail_addr
 
     # 发信服务器
     smtp_server = 'smtp.163.com'

@@ -72,7 +72,24 @@ def get_good_expected_price(goods_id):
     conn = pool.connection()
     cursor = conn.cursor()
     try:
-        sql = """Select expected_price from  buff_goods where goods_id=%s;"""
+        sql = """Select expected_price,user_id from  buff_user_collect where goods_id=%s;"""
+        conn.ping(reconnect=True)
+        cursor.execute(sql, goods_id)  # 添加参数
+        return cursor.fetchall()
+
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("获取商品预期价格失败:", e)
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_user_mail_by_user_id(goods_id):
+    conn = pool.connection()
+    cursor = conn.cursor()
+    try:
+        sql = """Select mail from  buff_user where user_id=%s;"""
         conn.ping(reconnect=True)
         cursor.execute(sql, goods_id)  # 添加参数
         temp = cursor.fetchall()
@@ -81,7 +98,7 @@ def get_good_expected_price(goods_id):
 
     except Exception as e:
         print("错误类型:", type(e))
-        print("获取商品预期价格失败:", e)
+        print("通过用户id获取用户邮件失败:", e)
     finally:
         cursor.close()
         conn.close()
@@ -200,14 +217,14 @@ def add_new_good(name, goods_id, category, except_price, img_url, now_price):
         conn.close()
 
 
-def add_new_mail(content, goods_id, time):
+def add_new_mail(content, goods_id, time, user_id):
     conn = pool.connection()
     cursor = conn.cursor()
     try:
 
         sql = """Insert into buff_mail(content,url,time,user_id) value(%s,%s,%s,%s);"""
         conn.ping(reconnect=True)
-        cursor.execute(sql, (content, goods_id, time, 1))  # 添加参数
+        cursor.execute(sql, (content, goods_id, time, user_id))  # 添加参数
         conn.commit()
     except Exception as e:
         print("错误类型:", type(e))
