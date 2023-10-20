@@ -21,7 +21,7 @@ def write_record(record_time, goods_id, price):
     conn = pool.connection()
     cursor = conn.cursor()
     try:
-        sql = """Insert into buff_record(time,goods_id,price) value(%s,%s,%s)"""
+        sql = """Insert into buff_record(time,goods_id,price,source) value(%s,%s,%s,'buff')"""
         cursor.execute(sql, (record_time, goods_id, price))
         conn.commit()
     except Exception as e:
