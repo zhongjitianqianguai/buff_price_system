@@ -311,7 +311,7 @@ def get_all(urls, is_24_running):
                 with open('txt/' + str(goods_id) + '.txt', 'a+', encoding='utf-8') as f:
                     f.seek(0)
                     lines = f.readlines()
-                    if not lines:
+                    if not lines or buff_sql.get_good_lowest_price(goods_id) is None:
                         f.write(str(goods_id) + ':' + str(price / 2) + '\n')
                         f.write(f'{time_get};{name} ¥ {price}\n')
                         if "金色" in name:
