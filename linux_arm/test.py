@@ -271,7 +271,6 @@ def get_all(urls, is_24_running):
             try:
                 driver.get('https://buff.163.com/goods/' + url)
                 # print(f"{thread_id}:{url}")
-                lowest_price = 0
                 time_get = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
                 if "429 Too Many Requests" in driver.find_element(By.TAG_NAME, "h1").text:
                     time.sleep(1)
@@ -286,10 +285,12 @@ def get_all(urls, is_24_running):
                 this_wait_loop_start_time = time.time()
                 content = driver.find_element(By.CLASS_NAME, "detail-tab-cont").text
                 if '暂无数据' in content:
+                    pbar.set_description(f"线程{thread_id}:爬取第 {i + 1}/{len(urls)}个商品中")
                     break
                 while len(price_elements) <= 1:
                     content = driver.find_element(By.CLASS_NAME, "detail-tab-cont").text
                     if '暂无数据' in content:
+                        pbar.set_description(f"线程{thread_id}:爬取第 {i + 1}/{len(urls)}个商品中")
                         break
                     price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
                     if time.time() - this_wait_loop_start_time > 3:
@@ -297,6 +298,7 @@ def get_all(urls, is_24_running):
                         driver.refresh()
                         this_wait_loop_start_time = time.time()
                 if '暂无数据' in content:
+                    pbar.set_description(f"线程{thread_id}:爬取第 {i + 1}/{len(urls)}个商品中")
                     break
                 price = float(price_elements[1].text.replace("¥ ", ""))
                 name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
