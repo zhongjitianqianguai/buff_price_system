@@ -255,6 +255,7 @@ def get_all(urls, is_24_running):
     pbar = tqdm(total=len(urls), dynamic_ncols=True, mininterval=0, position=thread_id)
     for i, url in enumerate(urls):
         all_goods_ids = buff_sql.get_all_goods_id()
+        print("all_goods_ids:", len(all_goods_ids))
         # now = datetime.datetime.now().time()
         # if not is_24_running:
         #     if startup_time <= now < shutdown_time:
@@ -314,6 +315,7 @@ def get_all(urls, is_24_running):
                 if goods_id not in all_goods_ids:
                     # f.write(str(goods_id) + ':' + str(price / 2) + '\n')
                     # f.write(f'{time_get};{name} ¥ {price}\n')
+                    print("新增商品")
                     if "金色" in name:
                         category = "金色"
                     elif "全息" in name:
