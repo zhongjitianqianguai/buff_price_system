@@ -256,6 +256,7 @@ def get_all(urls, is_24_running):
     startup_time = datetime.time(7, 0, 0)  # 每天7:00启动线程
     pbar = tqdm(total=len(urls), dynamic_ncols=True, mininterval=0, position=thread_id)
     for i, url in enumerate(urls):
+        all_goods_ids=buff_sql.get_all_goods_id()
         now = datetime.datetime.now().time()
         if not is_24_running:
             if startup_time <= now < shutdown_time:
@@ -303,7 +304,6 @@ def get_all(urls, is_24_running):
                 name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
                 name = name_elements.text.splitlines()[2]
                 category = name_elements.text.split("类型 |")[1].split("\n")[0]
-
                 goods_id = driver.current_url.split('/')[-1]
                 if not os.path.exists('txt/' + str(goods_id) + '.txt'):
                     f = open('txt/' + str(goods_id) + '.txt', 'w', encoding='utf-8')
@@ -323,7 +323,7 @@ def get_all(urls, is_24_running):
                         elif "武器箱" in name:
                             category = "武器箱"
                         buff_sql.add_new_good(name, str(goods_id), category, str(price / 2), img_url,
-                                              str(price))
+                                              str(price),str(price))
                         buff_sql.write_record(time_get, str(goods_id), str(price))
                         pbar.update(1)
                         pbar.set_description(f"线程{thread_id}:爬取第 {i + 1}/{len(urls)}个商品中")
