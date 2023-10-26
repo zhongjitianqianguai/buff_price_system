@@ -224,7 +224,7 @@ def add_new_good(name, goods_id, category, img_url, now_price, lowest_price_in_r
     cursor = conn.cursor()
     try:
 
-        sql = """Insert into buff_goods(name,goods_id,category,expected_price,img_url,now_price,the_lowest_price) value(%s,%s,%s,%s,%s,%s,%s);"""
+        sql = """Insert into buff_goods(name,goods_id,category,img_url,now_price,the_lowest_price) value(%s,%s,%s,%s,%s,%s,%s);"""
         conn.ping(reconnect=True)
         cursor.execute(sql,
                        (name, goods_id, category, img_url, now_price, lowest_price_in_record))  # 添加参数
