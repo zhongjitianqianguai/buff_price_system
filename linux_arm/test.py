@@ -249,7 +249,6 @@ def get_all(urls, is_24_running):
     service = Service("/usr/bin/chromedriver")
     # service = Service("../windows/webdriver/chromedriver.exe")
     driver = webdriver.Chrome(options=chrome_options, service=service)
-
     driver.implicitly_wait(6)
     thread_id = threading.current_thread().thread_id
     shutdown_time = datetime.time(23, 55, 0)  # 每天23:55关闭线程
@@ -257,15 +256,15 @@ def get_all(urls, is_24_running):
     pbar = tqdm(total=len(urls), dynamic_ncols=True, mininterval=0, position=thread_id)
     for i, url in enumerate(urls):
         all_goods_ids=buff_sql.get_all_goods_id()
-        now = datetime.datetime.now().time()
-        if not is_24_running:
-            if startup_time <= now < shutdown_time:
-                thread_status = True
-            else:
-                thread_status = False
-            if not thread_status:
-                driver.quit()
-                break
+        # now = datetime.datetime.now().time()
+        # if not is_24_running:
+        #     if startup_time <= now < shutdown_time:
+        #         thread_status = True
+        #     else:
+        #         thread_status = False
+        #     if not thread_status:
+        #         driver.quit()
+        #         break
         sleep_time = random.randint(2, 5)
 
         # start_climb_one_time = time.time()
@@ -305,68 +304,68 @@ def get_all(urls, is_24_running):
                 name = name_elements.text.splitlines()[2]
                 category = name_elements.text.split("类型 |")[1].split("\n")[0]
                 goods_id = driver.current_url.split('/')[-1]
-                if not os.path.exists('txt/' + str(goods_id) + '.txt'):
-                    f = open('txt/' + str(goods_id) + '.txt', 'w', encoding='utf-8')
-                    f.close()
-                with open('txt/' + str(goods_id) + '.txt', 'a+', encoding='utf-8') as f:
-                    f.seek(0)
-                    lines = f.readlines()
-                    if not lines or buff_sql.get_good_lowest_price(goods_id) is None:
-                        f.write(str(goods_id) + ':' + str(price / 2) + '\n')
-                        f.write(f'{time_get};{name} ¥ {price}\n')
-                        if "金色" in name:
-                            category = "金色"
-                        elif "全息" in name:
-                            category = "全息"
-                        elif "胶囊" in name:
-                            category = "胶囊"
-                        elif "武器箱" in name:
-                            category = "武器箱"
-                        buff_sql.add_new_good(name, str(goods_id), category, str(price / 2), img_url,
-                                              str(price),str(price))
+                # if not os.path.exists('txt/' + str(goods_id) + '.txt'):
+                #     f = open('txt/' + str(goods_id) + '.txt', 'w', encoding='utf-8')
+                #     f.close()
+            # with open('txt/' + str(goods_id) + '.txt', 'a+', encoding='utf-8') as f:
+            #         f.seek(0)
+            #         lines = f.readlines()
+                if goods_id not in all_goods_ids:
+                    # f.write(str(goods_id) + ':' + str(price / 2) + '\n')
+                    # f.write(f'{time_get};{name} ¥ {price}\n')
+                    if "金色" in name:
+                        category = "金色"
+                    elif "全息" in name:
+                        category = "全息"
+                    elif "胶囊" in name:
+                        category = "胶囊"
+                    elif "武器箱" in name:
+                        category = "武器箱"
+                    buff_sql.add_new_good(name, str(goods_id), category, str(price / 2), img_url,
+                                          str(price),str(price))
+                    buff_sql.write_record(time_get, str(goods_id), str(price))
+                    pbar.update(1)
+                    pbar.set_description(f"线程{thread_id}:爬取第 {i + 1}/{len(urls)}个商品中")
+                    break
+                else:
+                    all_record = buff_sql.get_good_all_record(goods_id)
+                    user_expect_price_list = buff_sql.get_good_expected_price(goods_id)
+                    if len(all_record) <= 1:
+                        # f.write(f'{time_get};{name} ¥ {price}\n')
                         buff_sql.write_record(time_get, str(goods_id), str(price))
                         pbar.update(1)
                         pbar.set_description(f"线程{thread_id}:爬取第 {i + 1}/{len(urls)}个商品中")
                         break
-                    else:
-                        user_expect_price_list = buff_sql.get_good_expected_price(goods_id)
-                        if len(lines) == 1:
-                            f.write(f'{time_get};{name} ¥ {price}\n')
-                            buff_sql.write_record(time_get, str(goods_id), str(price))
-                            pbar.update(1)
-                            pbar.set_description(f"线程{thread_id}:爬取第 {i + 1}/{len(urls)}个商品中")
-                            break
+                    last_price = buff_sql.get_good_last_record(goods_id)
+                    one_day_price = []
+                    three_day_price = []
+                    week_day_price = []
+                    month_price = []
+                    days = [1, 3, 7, 30]
+                    # lines.pop(0)
+                    lowest_price = buff_sql.get_good_lowest_price(goods_id)
+                    if lowest_price is None:
+                        lowest_price = price
+                    elif lowest_price > price:
+                        lowest_price = price
+                    for record in all_record:
+                        old_time_str = record[0]
+                        old_time = datetime.datetime.strptime(old_time_str, "%Y-%m-%d %H:%M:%S")
+                        now_time = datetime.datetime.utcnow()
+                        diff_time = now_time - old_time
+                        if diff_time.days == days[0]:
+                            one_day_price.append(
+                                record[2])
+                        elif diff_time.days == days[1]:
+                            three_day_price.append(
+                                record[2])
 
-                        last_price = buff_sql.get_good_last_record(goods_id)
-                        one_day_price = []
-                        three_day_price = []
-                        week_day_price = []
-                        month_price = []
-                        days = [1, 3, 7, 30]
-                        lines.pop(0)
-                        lowest_price = buff_sql.get_good_lowest_price(goods_id)
-                        all_record = buff_sql.get_good_all_record(goods_id)
-
-                        if lowest_price > price:
-                            lowest_price = price
-                        for record in all_record:
-                            old_time_str = record[0]
-                            old_time = datetime.datetime.strptime(old_time_str, "%Y-%m-%d %H:%M:%S")
-                            now_time = datetime.datetime.utcnow()
-                            diff_time = now_time - old_time
-                            if diff_time.days == days[0]:
-                                one_day_price.append(
-                                    record[2])
-                            elif diff_time.days == days[1]:
-                                three_day_price.append(
-                                    record[2])
-
-                            elif diff_time.days == days[2]:
-                                week_day_price.append(
-                                    record[2])
-                            elif diff_time.days == days[3]:
-                                month_price.append(
-                                    record[2])
+                        elif diff_time.days == days[2]:
+                            week_day_price.append(
+                                record[2])
+                        elif diff_time.days == days[3]:
+                            month_price.append(
+                                record[2])
 
                         # for line in lines:
                         #     price_data = line.split(';')
@@ -399,15 +398,17 @@ def get_all(urls, is_24_running):
                         #         month_price.append(
                         #             price_data[1].split('¥')[1].replace(" ", "").replace("\n", ""))
                         #         # print("have 30 day ago price")
-                        now = datetime.datetime.now().time()
-                        if not is_24_running:
-                            if startup_time <= now < shutdown_time:
-                                thread_status = True
-                            else:
-                                thread_status = False
-                            if not thread_status:
-                                driver.quit()
-                                break
+
+
+                        # now = datetime.datetime.now().time()
+                        # if not is_24_running:
+                        #     if startup_time <= now < shutdown_time:
+                        #         thread_status = True
+                        #     else:
+                        #         thread_status = False
+                        #     if not thread_status:
+                        #         driver.quit()
+                        #         break
                         for temp in user_expect_price_list:
                             if price <= float(temp[0]):
                                 # print( f'线程:{thread_id}:{goods_id}:{time_get} :{name} 的最低价格达到期望值, 当前价格是: {price}
@@ -443,11 +444,11 @@ def get_all(urls, is_24_running):
                             pbar.update(1)
                             pbar.set_description(f"线程{thread_id}:爬取第 {i + 1}/{len(urls)}个商品中")
                             break
-                        f.write(f'{time_get};{name} ¥ {price}\n')
+                        # f.write(f'{time_get};{name} ¥ {price}\n')
                         buff_sql.write_record(time_get, str(goods_id), str(price))
                         buff_sql.update_good_without_trend(str(goods_id), img_url, name, price,
                                                            lowest_price)
-                        f.close()
+                        # f.close()
                         if can_mail and int(sale_count) > 20:  # and (time.localtime(time.time()).tm_hour.real < 1 or
                             # time.localtime(time.time()).tm_hour.real > 7)
                             day_send_mail(lowest_price, name, url, price, one_day_price, goods_id,
