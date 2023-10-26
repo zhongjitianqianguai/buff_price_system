@@ -219,14 +219,15 @@ def update_good_without_trend(goods_id, img_url, name, now_price,
         conn.close()
 
 
-def add_new_good(name, goods_id, category, except_price, img_url, now_price, lowest_price_in_record):
+def add_new_good(name, goods_id, category, img_url, now_price, lowest_price_in_record):
     conn = pool.connection()
     cursor = conn.cursor()
     try:
 
         sql = """Insert into buff_goods(name,goods_id,category,expected_price,img_url,now_price,the_lowest_price) value(%s,%s,%s,%s,%s,%s,%s);"""
         conn.ping(reconnect=True)
-        cursor.execute(sql, (name, goods_id, category, except_price, img_url, now_price,lowest_price_in_record))  # 添加参数
+        cursor.execute(sql,
+                       (name, goods_id, category, img_url, now_price, lowest_price_in_record))  # 添加参数
         conn.commit()
     except Exception as e:
         print("错误类型:", type(e))
