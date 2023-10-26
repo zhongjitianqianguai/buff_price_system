@@ -1,5 +1,4 @@
 import datetime
-import os
 import random
 import smtplib
 import threading
@@ -88,7 +87,7 @@ def day_send_mail(lowest_price, name_elements, url, price, one_day_price, goods_
                     lowest_price) + '当前价格为' + str(price), url, time, user_id)
 
 
-def three_day_send_mail(lowest_price, name_elements, url, price, three_day_price, goods_id, time,mail_addr, user_id):
+def three_day_send_mail(lowest_price, name_elements, url, price, three_day_price, goods_id, time, mail_addr, user_id):
     if len(three_day_price) > 0:
         three_prices = 0
         for three_day in three_day_price:
@@ -255,7 +254,7 @@ def get_all(urls, is_24_running):
     startup_time = datetime.time(7, 0, 0)  # 每天7:00启动线程
     pbar = tqdm(total=len(urls), dynamic_ncols=True, mininterval=0, position=thread_id)
     for i, url in enumerate(urls):
-        all_goods_ids=buff_sql.get_all_goods_id()
+        all_goods_ids = buff_sql.get_all_goods_id()
         # now = datetime.datetime.now().time()
         # if not is_24_running:
         #     if startup_time <= now < shutdown_time:
@@ -307,9 +306,9 @@ def get_all(urls, is_24_running):
                 # if not os.path.exists('txt/' + str(goods_id) + '.txt'):
                 #     f = open('txt/' + str(goods_id) + '.txt', 'w', encoding='utf-8')
                 #     f.close()
-            # with open('txt/' + str(goods_id) + '.txt', 'a+', encoding='utf-8') as f:
-            #         f.seek(0)
-            #         lines = f.readlines()
+                # with open('txt/' + str(goods_id) + '.txt', 'a+', encoding='utf-8') as f:
+                #         f.seek(0)
+                #         lines = f.readlines()
                 if goods_id not in all_goods_ids:
                     # f.write(str(goods_id) + ':' + str(price / 2) + '\n')
                     # f.write(f'{time_get};{name} ¥ {price}\n')
@@ -321,8 +320,8 @@ def get_all(urls, is_24_running):
                         category = "胶囊"
                     elif "武器箱" in name:
                         category = "武器箱"
-                    buff_sql.add_new_good(name, str(goods_id), category, str(price / 2), img_url,
-                                          str(price),str(price))
+                    buff_sql.add_new_good(name, str(goods_id), category, img_url,
+                                          str(price), str(price))
                     buff_sql.write_record(time_get, str(goods_id), str(price))
                     pbar.update(1)
                     pbar.set_description(f"线程{thread_id}:爬取第 {i + 1}/{len(urls)}个商品中")
@@ -399,7 +398,6 @@ def get_all(urls, is_24_running):
                         #             price_data[1].split('¥')[1].replace(" ", "").replace("\n", ""))
                         #         # print("have 30 day ago price")
 
-
                         # now = datetime.datetime.now().time()
                         # if not is_24_running:
                         #     if startup_time <= now < shutdown_time:
@@ -454,7 +452,7 @@ def get_all(urls, is_24_running):
                             day_send_mail(lowest_price, name, url, price, one_day_price, goods_id,
                                           time_get, '1094410998@qq.com', 1)
                             three_day_send_mail(lowest_price, name, url, price, three_day_price,
-                                                goods_id, time_get, '1094410998@qq.com',1)
+                                                goods_id, time_get, '1094410998@qq.com', 1)
                             week_send_mail(lowest_price, name, url, price,
                                            week_day_price)
                         if not can_mail and time.localtime(time.time()).tm_hour.real == 0 and time.localtime(
@@ -489,8 +487,7 @@ def get_all(urls, is_24_running):
 
                             else:
                                 time.sleep(20)
-                            driver = webdriver.Chrome(chrome_options=chrome_options,
-                                                      executable_path="/usr/bin/chromedriver")
+                            driver = webdriver.Chrome(options=chrome_options, service=service)
                             driver.get('https://buff.163.com/goods/' + url)
                             sleep_time = random.randint(5, 15)
                             break
@@ -510,8 +507,7 @@ def get_all(urls, is_24_running):
                             crash_time = 0
                         else:
                             time.sleep(20)
-                        driver = webdriver.Chrome(chrome_options=chrome_options,
-                                                  executable_path="/usr/bin/chromedriver")
+                        driver = webdriver.Chrome(options=chrome_options, service=service)
                         driver.get('https://buff.163.com/goods/' + url)
                         sleep_time = random.randint(5, 15)
                         break
