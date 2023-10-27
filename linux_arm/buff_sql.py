@@ -47,7 +47,27 @@ def get_all_goods_id():
 
     except Exception as e:
         print("错误类型:", type(e))
-        print("获取所有商品失败:", e)
+        print("获取所有商品id失败:", e)
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_all_goods_name():
+    conn = pool.connection()
+    cursor = conn.cursor()
+    try:
+        sql = """Select name from  buff_goods;"""
+        conn.ping(reconnect=True)
+        cursor.execute(sql)  # 添加参数
+        goods_names = []
+        for good in cursor.fetchall():
+            goods_names.append(good[2])
+        return goods_names
+
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("获取所有商品name失败:", e)
     finally:
         cursor.close()
         conn.close()
