@@ -255,7 +255,7 @@ def get_all(urls, is_24_running):
     pbar = tqdm(total=len(urls), dynamic_ncols=True, mininterval=0, position=thread_id)
     for i, url in enumerate(urls):
         all_goods_ids = buff_sql.get_all_goods_id()
-        print("all_goods_ids:", len(all_goods_ids))
+        print("all_goods_ids:", len(all_goods_ids), "goods_id", url)
         # now = datetime.datetime.now().time()
         # if not is_24_running:
         #     if startup_time <= now < shutdown_time:
