@@ -274,6 +274,7 @@ def get_all(urls, is_24_running):
                 # print(f"{thread_id}:{url}")
                 time_get = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
                 if "429 Too Many Requests" in driver.find_element(By.TAG_NAME, "h1").text:
+                    print(thread_id,"429 Too Many Requests")
                     time.sleep(1)
                     continue
                 price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
@@ -286,19 +287,22 @@ def get_all(urls, is_24_running):
                 this_wait_loop_start_time = time.time()
                 content = driver.find_element(By.CLASS_NAME, "detail-tab-cont").text
                 if '暂无数据' in content:
+                    print("暂无数据")
                     pbar.set_description(f"线程{thread_id}:爬取第 {i + 1}/{len(urls)}个商品中")
                     break
                 while len(price_elements) <= 1:
                     content = driver.find_element(By.CLASS_NAME, "detail-tab-cont").text
                     if '暂无数据' in content:
+                        print("暂无数据")
                         pbar.set_description(f"线程{thread_id}:爬取第 {i + 1}/{len(urls)}个商品中")
                         break
                     price_elements = driver.find_elements(By.CLASS_NAME, "f_Strong")
                     if time.time() - this_wait_loop_start_time > 3:
-                        # print("具体价格部分未加载")
+                        print("具体价格部分未加载")
                         driver.refresh()
                         this_wait_loop_start_time = time.time()
                 if '暂无数据' in content:
+                    print("暂无数据")
                     pbar.set_description(f"线程{thread_id}:爬取第 {i + 1}/{len(urls)}个商品中")
                     break
                 price = float(price_elements[1].text.replace("¥ ", ""))
@@ -331,9 +335,11 @@ def get_all(urls, is_24_running):
                     pbar.set_description(f"线程{thread_id}:爬取第 {i + 1}/{len(urls)}个商品中")
                     break
                 else:
+                    print("更新商品")
                     all_record = buff_sql.get_good_all_record(goods_id)
                     user_expect_price_list = buff_sql.get_good_expected_price(goods_id)
                     if len(all_record) <= 1:
+                        print("只有一条记录")
                         # f.write(f'{time_get};{name} ¥ {price}\n')
                         buff_sql.write_record(time_get, str(goods_id), str(price))
                         pbar.update(1)
