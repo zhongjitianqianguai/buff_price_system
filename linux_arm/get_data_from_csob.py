@@ -13,7 +13,6 @@ options.add_experimental_option('useAutomationExtension', False)
 options.add_argument("--no-sandbox")
 options.add_argument("--lang=zh_CN")
 browser = webdriver.Chrome(service=Service('/usr/bin/chromedriver'), options=options)
-# browser = webdriver.Chrome(service=Service('../windows/webdriver/chromedriver.exe'), options=options)
 
 browser.set_page_load_timeout(300)
 
@@ -23,6 +22,6 @@ for name in all_names:
     browser.get('https://www.csgoob.com/goods?name=' + name)
     for request in browser.requests:
         if 'chart' in str(request):
-            print(request.response.body)
+            print(request.response.body.decode('utf-8'))
             break
 

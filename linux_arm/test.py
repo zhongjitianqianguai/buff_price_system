@@ -306,8 +306,8 @@ def get_all(urls, is_24_running):
                     pbar.set_description(f"线程{thread_id}:爬取第 {i + 1}/{len(urls)}个商品中")
                     break
                 price = float(price_elements[1].text.replace("¥ ", ""))
-                name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
-                name = name_elements.text.splitlines()[2]
+                name_elements = driver.find_element(By.CLASS_NAME, "detail-cont").find_element(By.TAG_NAME,"h1")
+                name = name_elements.text
                 category = name_elements.text.split("类型 |")[1].split("\n")[0]
                 goods_id = driver.current_url.split('/')[-1]
                 # if not os.path.exists('txt/' + str(goods_id) + '.txt'):

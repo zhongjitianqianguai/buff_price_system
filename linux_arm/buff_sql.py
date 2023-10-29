@@ -62,7 +62,7 @@ def get_all_goods_name():
         cursor.execute(sql)  # 添加参数
         goods_names = []
         for good in cursor.fetchall():
-            goods_names.append(good[2])
+            goods_names.append(good[0])
         return goods_names
 
     except Exception as e:
