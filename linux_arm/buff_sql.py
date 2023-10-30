@@ -17,12 +17,12 @@ pool = PooledDB(
 )
 
 
-def write_record(record_time, goods_id, price):
+def write_record(record_time, goods_id, price, source):
     conn = pool.connection()
     cursor = conn.cursor()
     try:
-        sql = """Insert into buff_record(time,goods_id,price,source) value(%s,%s,%s,'buff')"""
-        cursor.execute(sql, (record_time, goods_id, price))
+        sql = """Insert into buff_record(time,goods_id,price,source) value(%s,%s,%s,%s)"""
+        cursor.execute(sql, (record_time, goods_id, price, source))
         conn.commit()
     except Exception as e:
         print("错误类型:", type(e))
