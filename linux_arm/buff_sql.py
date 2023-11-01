@@ -21,9 +21,13 @@ def write_record(record_time, goods_id, price, source):
     conn = pool.connection()
     cursor = conn.cursor()
     try:
-        sql = """Insert into buff_record(time,goods_id,price,source) value(%s,%s,%s,%s)"""
+        sql = """SELECT * FROM buff_record WHERE time = %s AND goods_id = %s AND price = %s AND source = %s"""
         cursor.execute(sql, (record_time, goods_id, price, source))
-        conn.commit()
+        result = cursor.fetchone()
+        if result is None:
+            sql = """INSERT INTO buff_record(time,goods_id,price,source) VALUES(%s,%s,%s,%s)"""
+            cursor.execute(sql, (record_time, goods_id, price, source))
+            conn.commit()
     except Exception as e:
         print("错误类型:", type(e))
         print("插入记录失败:", e)
@@ -68,6 +72,31 @@ def get_all_goods_name():
     except Exception as e:
         print("错误类型:", type(e))
         print("获取所有商品name失败:", e)
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def update_good_lowest_price(goods_id, lowest_price, source):
+    conn = pool.connection()
+    cursor = conn.cursor()
+    try:
+        if source == 'buff':
+            sql = """Update buff_goods set the_lowest_price_buff = %s where goods_id =%s;"""
+        elif source == 'uu':
+            sql = """Update buff_goods set the_lowest_price_uu = %s where goods_id =%s;"""
+        elif source == 'igxe':
+            sql = """Update buff_goods set the_lowest_price_igxe = %s where goods_id =%s;"""
+        elif source == 'c5':
+            sql = """Update buff_goods set the_lowest_price_c5 = %s where goods_id =%s;"""
+        conn.ping(reconnect=True)
+        cursor.execute(sql, (lowest_price, goods_id))  # 添加参数
+        conn.commit()
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("更新商品最低价格失败:", e)
+        conn.rollback()
+
     finally:
         cursor.close()
         conn.close()

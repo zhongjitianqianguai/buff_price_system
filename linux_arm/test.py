@@ -330,7 +330,7 @@ def get_all(urls, is_24_running):
                         category = "武器箱"
                     buff_sql.add_new_good(name, str(goods_id), category, img_url,
                                           str(price), str(price))
-                    buff_sql.write_record(time_get, str(goods_id), str(price),'buff')
+                    buff_sql.write_record(time_get, str(goods_id), str(price), 'buff')
                     pbar.update(1)
                     pbar.set_description(f"线程{thread_id}:爬取第 {i + 1}/{len(urls)}个商品中")
                     break
@@ -341,7 +341,7 @@ def get_all(urls, is_24_running):
                     if len(all_record) <= 1:
                         # print("只有一条记录")
                         # f.write(f'{time_get};{name} ¥ {price}\n')
-                        buff_sql.write_record(time_get, str(goods_id), str(price),'buff')
+                        buff_sql.write_record(time_get, str(goods_id), str(price), 'buff')
                         pbar.update(1)
                         pbar.set_description(f"线程{thread_id}:爬取第 {i + 1}/{len(urls)}个商品中")
                         break
@@ -453,7 +453,7 @@ def get_all(urls, is_24_running):
                         pbar.set_description(f"线程{thread_id}:爬取第 {i + 1}/{len(urls)}个商品中")
                         break
                     # f.write(f'{time_get};{name} ¥ {price}\n')
-                    buff_sql.write_record(time_get, str(goods_id), str(price),'buff')
+                    buff_sql.write_record(time_get, str(goods_id), str(price), 'buff')
                     buff_sql.update_good_without_trend(str(goods_id), img_url, name, price,
                                                        lowest_price)
                     # f.close()
