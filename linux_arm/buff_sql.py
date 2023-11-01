@@ -177,7 +177,7 @@ def get_good_lowest_price(goods_id):
     conn = pool.connection()
     cursor = conn.cursor()
     try:
-        sql = """Select the_lowest_price from  buff_goods where goods_id=%s;"""
+        sql = """Select the_lowest_price_buff from  buff_goods where goods_id=%s;"""
         conn.ping(reconnect=True)
         cursor.execute(sql, goods_id)  # 添加参数
         temp = cursor.fetchall()

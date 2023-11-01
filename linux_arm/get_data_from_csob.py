@@ -8,7 +8,7 @@ from seleniumwire import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-from windows import buff_sql
+import buff_sql
 
 options = Options()
 # 去掉"chrome正受到自动化测试软件的控制"的提示条
