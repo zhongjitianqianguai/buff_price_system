@@ -16,7 +16,7 @@ options.add_experimental_option("excludeSwitches", ["enable-automation"])
 options.add_experimental_option('useAutomationExtension', False)
 options.add_argument("--no-sandbox")
 options.add_argument("--lang=zh_CN")
-browser = webdriver.Chrome(service=Service('/usr/webdriver/chromedriver'), options=options)
+browser = webdriver.Chrome(service=Service('/usr/bin/chromedriver'), options=options)
 browser.scopes = [
     '.*/api/v1/goods/chart',
 ]
@@ -127,7 +127,7 @@ for (goods_id, trend, name, category, img_url, now_price, the_lowest_price_buff,
                                             price = price[:-2] + '.' + price[-2:]  # 在price后两位前加上一个小数点
                                             if the_lowest_price_buff is None:
                                                 buff_sql.update_good_lowest_price(goods_id, price, 'buff')
-                                            elif float(price) < the_lowest_price_buff:
+                                            elif float(price) < float(the_lowest_price_buff):
                                                 buff_sql.update_good_lowest_price(goods_id, price, 'buff')
                                             # f.write(
                                             #     "INSERT INTO buff_record(time,goods_id,price,source) SELECT '" +
@@ -144,7 +144,7 @@ for (goods_id, trend, name, category, img_url, now_price, the_lowest_price_buff,
                                             price = price[:-2] + '.' + price[-2:]
                                             if the_lowest_price_uu is None:
                                                 buff_sql.update_good_lowest_price(goods_id, price, 'uu')
-                                            elif float(price) < the_lowest_price_uu:
+                                            elif float(price) < float(the_lowest_price_uu):
                                                 buff_sql.update_good_lowest_price(goods_id, price, 'uu')
                                             # f.write( "INSERT INTO buff_record(time,goods_id,price,source) SELECT '"
                                             # + record_time + "','" + goods_id + "','" + price + "','uu' FROM
@@ -162,7 +162,7 @@ for (goods_id, trend, name, category, img_url, now_price, the_lowest_price_buff,
                                             price = price[:-2] + '.' + price[-2:]
                                             if the_lowest_price_igxe is None:
                                                 buff_sql.update_good_lowest_price(goods_id, price, 'igxe')
-                                            elif float(price) < the_lowest_price_igxe:
+                                            elif float(price) < float(the_lowest_price_igxe):
                                                 buff_sql.update_good_lowest_price(goods_id, price, 'igxe')
                                             # f.write(
                                             #     "INSERT INTO buff_record(time,goods_id,price,source) SELECT '" +
@@ -179,7 +179,7 @@ for (goods_id, trend, name, category, img_url, now_price, the_lowest_price_buff,
                                             price = price[:-2] + '.' + price[-2:]
                                             if the_lowest_price_c5 is None:
                                                 buff_sql.update_good_lowest_price(goods_id, price, 'c5')
-                                            elif float(price) < the_lowest_price_c5:
+                                            elif float(price) < float(the_lowest_price_c5):
                                                 buff_sql.update_good_lowest_price(goods_id, price, 'c5')
                                             # f.write(
                                             #     "INSERT INTO buff_record(time,goods_id,price,source) SELECT '" +
