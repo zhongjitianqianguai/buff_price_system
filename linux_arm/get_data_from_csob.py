@@ -54,9 +54,10 @@ browser.set_page_load_timeout(300)
 
 all_goods = buff_sql.get_all_goods()
 
-for (goods_id, trend, name, category, img_url, now_price, the_lowest_price_buff, wear_tear_group,
+for (goods_id, trend, name, category, img_url, now_price_buff, the_lowest_price_buff, wear_tear_group,
      the_lowest_price_uu,
-     the_lowest_price_igxe, the_lowest_price_c5) in all_goods:
+     the_lowest_price_igxe, the_lowest_price_c5, now_price_uu, now_price_igxe, now_price_c5,
+     now_price_steam) in all_goods:
     while True:
         try:
             browser.get('http://csgoob.onet4p.net/goods?name=' + name)
