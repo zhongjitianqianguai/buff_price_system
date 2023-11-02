@@ -1,7 +1,7 @@
 import json
 import time
 from threading import Thread
-from selenium.common import StaleElementReferenceException, NoSuchElementException
+from selenium.common import StaleElementReferenceException, NoSuchElementException, TimeoutException
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
 from seleniumwire import webdriver
@@ -210,4 +210,6 @@ for (goods_id, trend, name, category, img_url, now_price, the_lowest_price_buff,
         except NoSuchElementException as e:
             continue
         except IndexError as e:
+            continue
+        except TimeoutException as e:
             continue
