@@ -158,7 +158,7 @@ def get_user_mail_by_user_id(goods_id):
     conn = pool.connection()
     cursor = conn.cursor()
     try:
-        sql = """Select email from  buff_user where user_id=%s;"""
+        sql = """Select email from  buff_user where id=%s;"""
         conn.ping(reconnect=True)
         cursor.execute(sql, goods_id)  # 添加参数
         temp = cursor.fetchall()
