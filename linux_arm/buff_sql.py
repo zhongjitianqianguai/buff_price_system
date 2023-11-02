@@ -236,7 +236,7 @@ def change_all_goods_expected_price_div2():
     cursor = conn.cursor()
     try:
 
-        sql = """UPDATE buff_goods SET expected_price = now_price / 2;"""
+        sql = """UPDATE buff_goods SET expected_price = now_price_buff / 2;"""
         conn.ping(reconnect=True)
         cursor.execute(sql)  # 添加参数
         conn.commit()
@@ -249,15 +249,15 @@ def change_all_goods_expected_price_div2():
         conn.close()
 
 
-def update_good_without_trend(goods_id, img_url, name, now_price,
+def update_good_without_trend(goods_id, img_url, name, now_price_buff,
                               lowest_price_in_record):
     conn = pool.connection()
     cursor = conn.cursor()
     try:
 
-        sql = """Update buff_goods set  the_lowest_price_buff =%s ,img_url=%s,name=%s,now_price=%s where goods_id =%s;"""
+        sql = """Update buff_goods set  the_lowest_price_buff =%s ,img_url=%s,name=%s,now_price_buff=%s where goods_id =%s;"""
         conn.ping(reconnect=True)
-        cursor.execute(sql, (lowest_price_in_record, img_url, name, now_price, goods_id))  # 添加参数
+        cursor.execute(sql, (lowest_price_in_record, img_url, name, now_price_buff, goods_id))  # 添加参数
         conn.commit()
     except Exception as e:
         print("错误类型:", type(e))
@@ -268,15 +268,15 @@ def update_good_without_trend(goods_id, img_url, name, now_price,
         conn.close()
 
 
-def add_new_good(name, goods_id, category, img_url, now_price, lowest_price_in_record):
+def add_new_good(name, goods_id, category, img_url, now_price_buff, lowest_price_in_record):
     conn = pool.connection()
     cursor = conn.cursor()
     try:
 
-        sql = """Insert into buff_goods(name,goods_id,category,img_url,now_price,the_lowest_price_buff) value(%s,%s,%s,%s,%s,%s);"""
+        sql = """Insert into buff_goods(name,goods_id,category,img_url,now_price_buff,the_lowest_price_buff) value(%s,%s,%s,%s,%s,%s);"""
         conn.ping(reconnect=True)
         cursor.execute(sql,
-                       (name, goods_id, category, img_url, now_price, lowest_price_in_record))  # 添加参数
+                       (name, goods_id, category, img_url, now_price_buff, lowest_price_in_record))  # 添加参数
         conn.commit()
     except Exception as e:
         print("错误类型:", type(e))
