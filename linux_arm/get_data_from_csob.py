@@ -35,10 +35,11 @@ def write_sql(json_data):
                 record_time = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
                 price = str(data[1])
                 price = price[:-2] + '.' + price[-2:]  # 在price后两位前加上一个小数点
-                if the_lowest_price_buff is None:
-                    buff_sql.update_good_lowest_price(goods_id, price, 'buff')
-                elif float(price) < float(the_lowest_price_buff):
-                    buff_sql.update_good_lowest_price(goods_id, price, 'buff')
+                with lock:
+                    if the_lowest_price_buff is None:
+                        buff_sql.update_good_lowest_price(goods_id, price, 'buff')
+                    elif float(price) < float(the_lowest_price_buff):
+                        buff_sql.update_good_lowest_price(goods_id, price, 'buff')
                 # f.write(
                 #     "INSERT INTO buff_record(time,goods_id,price,source) SELECT '" +
                 #     record_time + "','" + goods_id + "','" + price + "','buff' FROM buff_record WHERE NOT EXISTS(SELECT * FROM buff_record WHERE time = '" +
@@ -51,10 +52,11 @@ def write_sql(json_data):
                 record_time = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
                 price = str(data[1])
                 price = price[:-2] + '.' + price[-2:]
-                if the_lowest_price_uu is None:
-                    buff_sql.update_good_lowest_price(goods_id, price, 'uu')
-                elif float(price) < float(the_lowest_price_uu):
-                    buff_sql.update_good_lowest_price(goods_id, price, 'uu')
+                with lock:
+                    if the_lowest_price_uu is None:
+                        buff_sql.update_good_lowest_price(goods_id, price, 'uu')
+                    elif float(price) < float(the_lowest_price_uu):
+                        buff_sql.update_good_lowest_price(goods_id, price, 'uu')
                 # f.write( "INSERT INTO buff_record(time,goods_id,price,source) SELECT '"
                 # + record_time + "','" + goods_id + "','" + price + "','uu' FROM
                 # buff_record WHERE NOT EXISTS(SELECT * FROM buff_record WHERE time = '"
@@ -68,10 +70,11 @@ def write_sql(json_data):
                 record_time = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
                 price = str(data[1])
                 price = price[:-2] + '.' + price[-2:]
-                if the_lowest_price_igxe is None:
-                    buff_sql.update_good_lowest_price(goods_id, price, 'igxe')
-                elif float(price) < float(the_lowest_price_igxe):
-                    buff_sql.update_good_lowest_price(goods_id, price, 'igxe')
+                with lock:
+                    if the_lowest_price_igxe is None:
+                        buff_sql.update_good_lowest_price(goods_id, price, 'igxe')
+                    elif float(price) < float(the_lowest_price_igxe):
+                        buff_sql.update_good_lowest_price(goods_id, price, 'igxe')
                 # f.write(
                 #     "INSERT INTO buff_record(time,goods_id,price,source) SELECT '" +
                 #     record_time + "','" + goods_id + "','" + price + "','igxe' FROM buff_record WHERE NOT EXISTS(SELECT * FROM buff_record WHERE time = '" +
@@ -84,10 +87,11 @@ def write_sql(json_data):
                 record_time = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
                 price = str(data[1])
                 price = price[:-2] + '.' + price[-2:]
-                if the_lowest_price_c5 is None:
-                    buff_sql.update_good_lowest_price(goods_id, price, 'c5')
-                elif float(price) < float(the_lowest_price_c5):
-                    buff_sql.update_good_lowest_price(goods_id, price, 'c5')
+                with lock:
+                    if the_lowest_price_c5 is None:
+                        buff_sql.update_good_lowest_price(goods_id, price, 'c5')
+                    elif float(price) < float(the_lowest_price_c5):
+                        buff_sql.update_good_lowest_price(goods_id, price, 'c5')
                 # f.write(
                 #     "INSERT INTO buff_record(time,goods_id,price,source) SELECT '" +
                 #     record_time + "','" + goods_id + "','" + price + "','c5' FROM buff_record WHERE NOT EXISTS(SELECT * FROM buff_record WHERE time = '" +
