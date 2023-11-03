@@ -21,6 +21,83 @@ browser.scopes = [
     '.*/api/v1/goods/chart',
 ]
 browser.set_page_load_timeout(300)
+lock = threading.Lock()
+
+
+def write_sql(json_data):
+    for datas in json_data['data']['list']:
+        platform = datas['platform']
+        for data in datas['data']:
+            if platform == 0:
+                timeStamp = data[0]
+                timeArray = time.localtime(timeStamp)
+                record_time = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
+                price = str(data[1])
+                price = price[:-2] + '.' + price[-2:]  # 在price后两位前加上一个小数点
+                if the_lowest_price_buff is None:
+                    buff_sql.update_good_lowest_price(goods_id, price, 'buff')
+                elif float(price) < float(the_lowest_price_buff):
+                    buff_sql.update_good_lowest_price(goods_id, price, 'buff')
+                # f.write(
+                #     "INSERT INTO buff_record(time,goods_id,price,source) SELECT '" +
+                #     record_time + "','" + goods_id + "','" + price + "','buff' FROM buff_record WHERE NOT EXISTS(SELECT * FROM buff_record WHERE time = '" +
+                #     record_time + "' AND goods_id = '" + goods_id + "' AND price = '" + price + "' AND source = 'buff');\n")
+                sql = "INSERT INTO buff_record(time,goods_id,price,source) value('" + record_time + "','" + goods_id + "','" + price + "','buff'); \n"
+
+            elif platform == 1:
+                timeStamp = data[0]
+                timeArray = time.localtime(timeStamp)
+                record_time = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
+                price = str(data[1])
+                price = price[:-2] + '.' + price[-2:]
+                if the_lowest_price_uu is None:
+                    buff_sql.update_good_lowest_price(goods_id, price, 'uu')
+                elif float(price) < float(the_lowest_price_uu):
+                    buff_sql.update_good_lowest_price(goods_id, price, 'uu')
+                # f.write( "INSERT INTO buff_record(time,goods_id,price,source) SELECT '"
+                # + record_time + "','" + goods_id + "','" + price + "','uu' FROM
+                # buff_record WHERE NOT EXISTS(SELECT * FROM buff_record WHERE time = '"
+                # + record_time + "' AND goods_id = '" + goods_id + "' AND price = '" +
+                # price + "' AND source = 'uu');\n")
+                sql = "INSERT INTO buff_record(time,goods_id,price,source) value('" + record_time + "','" + goods_id + "','" + price + "','uu'); \n"
+
+            elif platform == 2:
+                timeStamp = data[0]
+                timeArray = time.localtime(timeStamp)
+                record_time = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
+                price = str(data[1])
+                price = price[:-2] + '.' + price[-2:]
+                if the_lowest_price_igxe is None:
+                    buff_sql.update_good_lowest_price(goods_id, price, 'igxe')
+                elif float(price) < float(the_lowest_price_igxe):
+                    buff_sql.update_good_lowest_price(goods_id, price, 'igxe')
+                # f.write(
+                #     "INSERT INTO buff_record(time,goods_id,price,source) SELECT '" +
+                #     record_time + "','" + goods_id + "','" + price + "','igxe' FROM buff_record WHERE NOT EXISTS(SELECT * FROM buff_record WHERE time = '" +
+                #     record_time + "' AND goods_id = '" + goods_id + "' AND price = '" + price + "' AND source = 'igxe');\n")
+                sql = "INSERT INTO buff_record(time,goods_id,price,source) value('" + record_time + "','" + goods_id + "','" + price + "','igxe'); \n"
+
+            elif platform == 3:
+                timeStamp = data[0]
+                timeArray = time.localtime(timeStamp)
+                record_time = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
+                price = str(data[1])
+                price = price[:-2] + '.' + price[-2:]
+                if the_lowest_price_c5 is None:
+                    buff_sql.update_good_lowest_price(goods_id, price, 'c5')
+                elif float(price) < float(the_lowest_price_c5):
+                    buff_sql.update_good_lowest_price(goods_id, price, 'c5')
+                # f.write(
+                #     "INSERT INTO buff_record(time,goods_id,price,source) SELECT '" +
+                #     record_time + "','" + goods_id + "','" + price + "','c5' FROM buff_record WHERE NOT EXISTS(SELECT * FROM buff_record WHERE time = '" +
+                #     record_time + "' AND goods_id = '" + goods_id + "' AND price = '" + price + "' AND source = 'c5');\n")
+                sql = "INSERT INTO buff_record(time,goods_id,price,source) value('" + record_time + "','" + goods_id + "','" + price + "','c5'); \n"
+            with lock:
+                with open('buff_record_expand.sql', 'a+') as f:
+                    all_sql = f.readlines()
+                    if sql not in all_sql:
+                        f.write(sql)
+
 
 # def data_insert(da, pl):
 #     for d in da:
@@ -116,94 +193,23 @@ for (goods_id, trend, name, category, img_url, now_price_buff, the_lowest_price_
                             # print(len(json_data['data']['list'][0]['data']))
                             if json_data['data']['list'][0]['data'][-1][0] > 1698204471:
                                 continue
-                            with open('buff_record_expand.sql', 'w+') as f:
-                                for datas in json_data['data']['list']:
-                                    platform = datas['platform']
-                                    for data in datas['data']:
-                                        if platform == 0:
-                                            timeStamp = data[0]
-                                            timeArray = time.localtime(timeStamp)
-                                            record_time = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
-                                            price = str(data[1])
-                                            price = price[:-2] + '.' + price[-2:]  # 在price后两位前加上一个小数点
-                                            if the_lowest_price_buff is None:
-                                                buff_sql.update_good_lowest_price(goods_id, price, 'buff')
-                                            elif float(price) < float(the_lowest_price_buff):
-                                                buff_sql.update_good_lowest_price(goods_id, price, 'buff')
-                                            # f.write(
-                                            #     "INSERT INTO buff_record(time,goods_id,price,source) SELECT '" +
-                                            #     record_time + "','" + goods_id + "','" + price + "','buff' FROM buff_record WHERE NOT EXISTS(SELECT * FROM buff_record WHERE time = '" +
-                                            #     record_time + "' AND goods_id = '" + goods_id + "' AND price = '" + price + "' AND source = 'buff');\n")
-                                            f.write(
-                                                "INSERT INTO buff_record(time,goods_id,price,source)  value('" +
-                                                record_time + "','" + goods_id + "','" + price + "','buff'); \n")
-                                        elif platform == 1:
-                                            timeStamp = data[0]
-                                            timeArray = time.localtime(timeStamp)
-                                            record_time = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
-                                            price = str(data[1])
-                                            price = price[:-2] + '.' + price[-2:]
-                                            if the_lowest_price_uu is None:
-                                                buff_sql.update_good_lowest_price(goods_id, price, 'uu')
-                                            elif float(price) < float(the_lowest_price_uu):
-                                                buff_sql.update_good_lowest_price(goods_id, price, 'uu')
-                                            # f.write( "INSERT INTO buff_record(time,goods_id,price,source) SELECT '"
-                                            # + record_time + "','" + goods_id + "','" + price + "','uu' FROM
-                                            # buff_record WHERE NOT EXISTS(SELECT * FROM buff_record WHERE time = '"
-                                            # + record_time + "' AND goods_id = '" + goods_id + "' AND price = '" +
-                                            # price + "' AND source = 'uu');\n")
-                                            f.write(
-                                                "INSERT INTO buff_record(time,goods_id,price,source)   value('" +
-                                                record_time + "','" + goods_id + "','" + price + "','uu'); \n")
-                                        elif platform == 2:
-                                            timeStamp = data[0]
-                                            timeArray = time.localtime(timeStamp)
-                                            record_time = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
-                                            price = str(data[1])
-                                            price = price[:-2] + '.' + price[-2:]
-                                            if the_lowest_price_igxe is None:
-                                                buff_sql.update_good_lowest_price(goods_id, price, 'igxe')
-                                            elif float(price) < float(the_lowest_price_igxe):
-                                                buff_sql.update_good_lowest_price(goods_id, price, 'igxe')
-                                            # f.write(
-                                            #     "INSERT INTO buff_record(time,goods_id,price,source) SELECT '" +
-                                            #     record_time + "','" + goods_id + "','" + price + "','igxe' FROM buff_record WHERE NOT EXISTS(SELECT * FROM buff_record WHERE time = '" +
-                                            #     record_time + "' AND goods_id = '" + goods_id + "' AND price = '" + price + "' AND source = 'igxe');\n")
-                                            f.write(
-                                                "INSERT INTO buff_record(time,goods_id,price,source)  value('" +
-                                                record_time + "','" + goods_id + "','" + price + "','igxe'); \n")
-                                        elif platform == 3:
-                                            timeStamp = data[0]
-                                            timeArray = time.localtime(timeStamp)
-                                            record_time = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
-                                            price = str(data[1])
-                                            price = price[:-2] + '.' + price[-2:]
-                                            if the_lowest_price_c5 is None:
-                                                buff_sql.update_good_lowest_price(goods_id, price, 'c5')
-                                            elif float(price) < float(the_lowest_price_c5):
-                                                buff_sql.update_good_lowest_price(goods_id, price, 'c5')
-                                            # f.write(
-                                            #     "INSERT INTO buff_record(time,goods_id,price,source) SELECT '" +
-                                            #     record_time + "','" + goods_id + "','" + price + "','c5' FROM buff_record WHERE NOT EXISTS(SELECT * FROM buff_record WHERE time = '" +
-                                            #     record_time + "' AND goods_id = '" + goods_id + "' AND price = '" + price + "' AND source = 'c5');\n")
-                                            f.write(
-                                                "INSERT INTO buff_record(time,goods_id,price,source) value('" +
-                                                record_time + "','" + goods_id + "','" + price + "','c5'); \n")
-                                # urls_per_thread = len(datas['data']) // 3
-                                # for i in range(3):
-                                #     start = i * urls_per_thread
-                                #     end = start + urls_per_thread if i < 3 - 1 else len(datas['data'])
-                                #     sublist = datas['data'][start:end]
-                                #     if platform == 0:
-                                #         # th = Thread(target=data_insert, args=(sublist, 'buff'))
-                                #         pass
-                                #     elif platform == 1:
-                                #         th = Thread(target=data_insert, args=(sublist, 'uu'))
-                                #     elif platform == 2:
-                                #         th = Thread(target=data_insert, args=(sublist, 'igxe'))
-                                #     elif platform == 3:
-                                #         th = Thread(target=data_insert, args=(sublist, 'c5'))
-                                #     th.start()
+                            t = Thread(target=write_sql, args=(json_data,))
+                            t.start()
+                            # urls_per_thread = len(datas['data']) // 3
+                            # for i in range(3):
+                            #     start = i * urls_per_thread
+                            #     end = start + urls_per_thread if i < 3 - 1 else len(datas['data'])
+                            #     sublist = datas['data'][start:end]
+                            #     if platform == 0:
+                            #         # th = Thread(target=data_insert, args=(sublist, 'buff'))
+                            #         pass
+                            #     elif platform == 1:
+                            #         th = Thread(target=data_insert, args=(sublist, 'uu'))
+                            #     elif platform == 2:
+                            #         th = Thread(target=data_insert, args=(sublist, 'igxe'))
+                            #     elif platform == 3:
+                            #         th = Thread(target=data_insert, args=(sublist, 'c5'))
+                            #     th.start()
             time.sleep(1)
             break
         except StaleElementReferenceException as e:
