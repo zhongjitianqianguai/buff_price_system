@@ -2,7 +2,7 @@ import json
 import threading
 import time
 from threading import Thread
-from selenium.common import StaleElementReferenceException, NoSuchElementException, TimeoutException
+from selenium.common import StaleElementReferenceException, NoSuchElementException, TimeoutException, WebDriverException
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
 from seleniumwire import webdriver
@@ -25,8 +25,8 @@ browser.set_page_load_timeout(300)
 lock = threading.Lock()
 
 
-def write_sql(json_data):
-    for datas in json_data['data']['list']:
+def write_sql(id,jsons_data):
+    for datas in jsons_data['data']['list']:
         platform = datas['platform']
         for data in datas['data']:
             if platform == 0:
@@ -37,15 +37,15 @@ def write_sql(json_data):
                 price = price[:-2] + '.' + price[-2:]  # 在price后两位前加上一个小数点
                 with lock:
                     if the_lowest_price_buff is None:
-                        buff_sql.update_good_lowest_price(goods_id, price, 'buff')
+                        buff_sql.update_good_lowest_price(id, price, 'buff')
                     elif float(price) < float(the_lowest_price_buff):
-                        buff_sql.update_good_lowest_price(goods_id, price, 'buff')
+                        buff_sql.update_good_lowest_price(id, price, 'buff')
                 # f.write(
                 #     "INSERT INTO buff_record(time,goods_id,price,source) SELECT '" +
                 #     record_time + "','" + goods_id + "','" + price + "','buff' FROM buff_record WHERE NOT EXISTS(SELECT * FROM buff_record WHERE time = '" +
                 #     record_time + "' AND goods_id = '" + goods_id + "' AND price = '" + price + "' AND source = 'buff');\n")
                 sql = "INSERT INTO buff_record(time,goods_id,price,source) value('" + record_time + "','" + goods_id + "','" + price + "','buff'); \n"
-
+                buff_sql.write_record(record_time, id, price, 'buff')
             elif platform == 1:
                 timeStamp = data[0]
                 timeArray = time.localtime(timeStamp)
@@ -54,16 +54,16 @@ def write_sql(json_data):
                 price = price[:-2] + '.' + price[-2:]
                 with lock:
                     if the_lowest_price_uu is None:
-                        buff_sql.update_good_lowest_price(goods_id, price, 'uu')
+                        buff_sql.update_good_lowest_price(id, price, 'uu')
                     elif float(price) < float(the_lowest_price_uu):
-                        buff_sql.update_good_lowest_price(goods_id, price, 'uu')
+                        buff_sql.update_good_lowest_price(id, price, 'uu')
                 # f.write( "INSERT INTO buff_record(time,goods_id,price,source) SELECT '"
                 # + record_time + "','" + goods_id + "','" + price + "','uu' FROM
                 # buff_record WHERE NOT EXISTS(SELECT * FROM buff_record WHERE time = '"
                 # + record_time + "' AND goods_id = '" + goods_id + "' AND price = '" +
                 # price + "' AND source = 'uu');\n")
                 sql = "INSERT INTO buff_record(time,goods_id,price,source) value('" + record_time + "','" + goods_id + "','" + price + "','uu'); \n"
-
+                buff_sql.write_record(record_time, id, price, 'uu')
             elif platform == 2:
                 timeStamp = data[0]
                 timeArray = time.localtime(timeStamp)
@@ -72,15 +72,15 @@ def write_sql(json_data):
                 price = price[:-2] + '.' + price[-2:]
                 with lock:
                     if the_lowest_price_igxe is None:
-                        buff_sql.update_good_lowest_price(goods_id, price, 'igxe')
+                        buff_sql.update_good_lowest_price(id, price, 'igxe')
                     elif float(price) < float(the_lowest_price_igxe):
-                        buff_sql.update_good_lowest_price(goods_id, price, 'igxe')
+                        buff_sql.update_good_lowest_price(id, price, 'igxe')
                 # f.write(
                 #     "INSERT INTO buff_record(time,goods_id,price,source) SELECT '" +
                 #     record_time + "','" + goods_id + "','" + price + "','igxe' FROM buff_record WHERE NOT EXISTS(SELECT * FROM buff_record WHERE time = '" +
                 #     record_time + "' AND goods_id = '" + goods_id + "' AND price = '" + price + "' AND source = 'igxe');\n")
                 sql = "INSERT INTO buff_record(time,goods_id,price,source) value('" + record_time + "','" + goods_id + "','" + price + "','igxe'); \n"
-
+                buff_sql.write_record(record_time, id, price, 'igxe')
             elif platform == 3:
                 timeStamp = data[0]
                 timeArray = time.localtime(timeStamp)
@@ -89,9 +89,11 @@ def write_sql(json_data):
                 price = price[:-2] + '.' + price[-2:]
                 with lock:
                     if the_lowest_price_c5 is None:
-                        buff_sql.update_good_lowest_price(goods_id, price, 'c5')
+                        buff_sql.update_good_lowest_price(id, price, 'c5')
                     elif float(price) < float(the_lowest_price_c5):
-                        buff_sql.update_good_lowest_price(goods_id, price, 'c5')
+                        buff_sql.update_good_lowest_price(id, price, 'c5')
+                    buff_sql.write_record(record_time, id, price, 'c5')
+
                 # f.write(
                 #     "INSERT INTO buff_record(time,goods_id,price,source) SELECT '" +
                 #     record_time + "','" + goods_id + "','" + price + "','c5' FROM buff_record WHERE NOT EXISTS(SELECT * FROM buff_record WHERE time = '" +
@@ -198,7 +200,7 @@ for (goods_id, trend, name, category, img_url, now_price_buff, the_lowest_price_
                             # print(len(json_data['data']['list'][0]['data']))
                             if json_data['data']['list'][0]['data'][-1][0] > 1698204471:
                                 continue
-                            t = Thread(target=write_sql, args=(json_data,))
+                            t = Thread(target=write_sql, args=(goods_id,json_data,))
                             t.start()
                             # urls_per_thread = len(datas['data']) // 3
                             # for i in range(3):
@@ -224,4 +226,11 @@ for (goods_id, trend, name, category, img_url, now_price_buff, the_lowest_price_
         except IndexError as e:
             continue
         except TimeoutException as e:
+            continue
+        except WebDriverException as e:
+            browser = webdriver.Chrome(service=Service('/usr/bin/chromedriver'), options=options)
+            browser.scopes = [
+                '.*/api/v1/goods/chart',
+            ]
+            browser.set_page_load_timeout(300)
             continue
