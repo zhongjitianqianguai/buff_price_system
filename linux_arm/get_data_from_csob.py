@@ -99,11 +99,11 @@ def write_sql(id,jsons_data):
                 #     record_time + "','" + goods_id + "','" + price + "','c5' FROM buff_record WHERE NOT EXISTS(SELECT * FROM buff_record WHERE time = '" +
                 #     record_time + "' AND goods_id = '" + goods_id + "' AND price = '" + price + "' AND source = 'c5');\n")
                 sql = "INSERT INTO buff_record(time,goods_id,price,source) value('" + record_time + "','" + goods_id + "','" + price + "','c5'); \n"
-            with lock:
-                with open('buff_record_expand.sql', 'a+') as f:
-                    all_sql = f.readlines()
-                    if sql not in all_sql:
-                        f.write(sql)
+            # with lock:
+            #     with open('buff_record_expand.sql', 'a+') as f:
+            #         all_sql = f.readlines()
+            #         if sql not in all_sql:
+            #             f.write(sql)
 
 
 # def data_insert(da, pl):
