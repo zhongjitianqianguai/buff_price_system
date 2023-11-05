@@ -1,8 +1,10 @@
 import json
 import threading
 import time
+import traceback
 from threading import Thread
 from selenium.common import StaleElementReferenceException, NoSuchElementException, TimeoutException, WebDriverException
+from selenium.webdriver import ActionChains
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
 from seleniumwire import webdriver
@@ -25,120 +27,40 @@ browser.set_page_load_timeout(300)
 lock = threading.Lock()
 
 
-def write_sql(id,jsons_data):
-    for datas in jsons_data['data']['list']:
-        platform = datas['platform']
-        for data in datas['data']:
-            if platform == 0:
-                timeStamp = data[0]
-                timeArray = time.localtime(timeStamp)
-                record_time = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
-                price = str(data[1])
-                price = price[:-2] + '.' + price[-2:]  # 在price后两位前加上一个小数点
-                with lock:
-                    if the_lowest_price_buff is None:
-                        buff_sql.update_good_lowest_price(id, price, 'buff')
-                    elif float(price) < float(the_lowest_price_buff):
-                        buff_sql.update_good_lowest_price(id, price, 'buff')
-                    buff_sql.write_record(record_time, id, price, 'buff')
-                # f.write(
-                #     "INSERT INTO buff_record(time,goods_id,price,source) SELECT '" +
-                #     record_time + "','" + goods_id + "','" + price + "','buff' FROM buff_record WHERE NOT EXISTS(SELECT * FROM buff_record WHERE time = '" +
-                #     record_time + "' AND goods_id = '" + goods_id + "' AND price = '" + price + "' AND source = 'buff');\n")
-                # sql = "INSERT INTO buff_record(time,goods_id,price,source) value('" + record_time + "','" + goods_id + "','" + price + "','buff'); \n"
-
-            elif platform == 1:
-                timeStamp = data[0]
-                timeArray = time.localtime(timeStamp)
-                record_time = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
-                price = str(data[1])
-                price = price[:-2] + '.' + price[-2:]
-                with lock:
-                    if the_lowest_price_uu is None:
-                        buff_sql.update_good_lowest_price(id, price, 'uu')
-                    elif float(price) < float(the_lowest_price_uu):
-                        buff_sql.update_good_lowest_price(id, price, 'uu')
-                    buff_sql.write_record(record_time, id, price, 'uu')
-                # f.write( "INSERT INTO buff_record(time,goods_id,price,source) SELECT '"
-                # + record_time + "','" + goods_id + "','" + price + "','uu' FROM
-                # buff_record WHERE NOT EXISTS(SELECT * FROM buff_record WHERE time = '"
-                # + record_time + "' AND goods_id = '" + goods_id + "' AND price = '" +
-                # price + "' AND source = 'uu');\n")
-                # sql = "INSERT INTO buff_record(time,goods_id,price,source) value('" + record_time + "','" + goods_id + "','" + price + "','uu'); \n"
-            elif platform == 2:
-                timeStamp = data[0]
-                timeArray = time.localtime(timeStamp)
-                record_time = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
-                price = str(data[1])
-                price = price[:-2] + '.' + price[-2:]
-                with lock:
-                    if the_lowest_price_igxe is None:
-                        buff_sql.update_good_lowest_price(id, price, 'igxe')
-                    elif float(price) < float(the_lowest_price_igxe):
-                        buff_sql.update_good_lowest_price(id, price, 'igxe')
-                    buff_sql.write_record(record_time, id, price, 'igxe')
-                    # f.write(
-                #     "INSERT INTO buff_record(time,goods_id,price,source) SELECT '" +
-                #     record_time + "','" + goods_id + "','" + price + "','igxe' FROM buff_record WHERE NOT EXISTS(SELECT * FROM buff_record WHERE time = '" +
-                #     record_time + "' AND goods_id = '" + goods_id + "' AND price = '" + price + "' AND source = 'igxe');\n")
-                # sql = "INSERT INTO buff_record(time,goods_id,price,source) value('" + record_time + "','" + goods_id + "','" + price + "','igxe'); \n"
-
-            elif platform == 3:
-                timeStamp = data[0]
-                timeArray = time.localtime(timeStamp)
-                record_time = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
-                price = str(data[1])
-                price = price[:-2] + '.' + price[-2:]
-                with lock:
-                    if the_lowest_price_c5 is None:
-                        buff_sql.update_good_lowest_price(id, price, 'c5')
-                    elif float(price) < float(the_lowest_price_c5):
-                        buff_sql.update_good_lowest_price(id, price, 'c5')
-                    buff_sql.write_record(record_time, id, price, 'c5')
-                # f.write(
-                #     "INSERT INTO buff_record(time,goods_id,price,source) SELECT '" +
-                #     record_time + "','" + goods_id + "','" + price + "','c5' FROM buff_record WHERE NOT EXISTS(SELECT * FROM buff_record WHERE time = '" +
-                #     record_time + "' AND goods_id = '" + goods_id + "' AND price = '" + price + "' AND source = 'c5');\n")
-                # sql = "INSERT INTO buff_record(time,goods_id,price,source) value('" + record_time + "','" + goods_id + "','" + price + "','c5'); \n"
-            # with lock:
-            #     with open('buff_record_expand.sql', 'a+') as f:
-            #         all_sql = f.readlines()
-            #         if sql not in all_sql:
-            #             f.write(sql)
-
-
-# def data_insert(da, pl):
-#     for d in da:
-#         timeStamp = d[0]
-#         timeArray = time.localtime(timeStamp)
-#         record_time = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
-#         price = str(d[1])
-#         price = price[:-2] + '.' + price[-2:]  # 在price后两位前加上一个小数点
-#         if pl == 'buff':
-#             if the_lowest_price_buff is not None and float(price) < the_lowest_price_buff:
-#                 buff_sql.update_good_lowest_price(goods_id, price, pl)
-#             elif the_lowest_price_buff is None:
-#                 buff_sql.update_good_lowest_price(goods_id, price, pl)
-#         elif pl == 'uu':
-#             if the_lowest_price_uu is not None and float(price) < the_lowest_price_uu:
-#                 buff_sql.update_good_lowest_price(goods_id, price, pl)
-#             elif the_lowest_price_uu is None:
-#                 buff_sql.update_good_lowest_price(goods_id, price, pl)
-#         elif pl == 'igxe':
-#             if the_lowest_price_igxe is not None and float(price) < the_lowest_price_igxe:
-#                 buff_sql.update_good_lowest_price(goods_id, price, pl)
-#             elif the_lowest_price_igxe is None:
-#                 buff_sql.update_good_lowest_price(goods_id, price, pl)
-#         elif pl == 'c5':
-#             if the_lowest_price_c5 is not None and float(price) < the_lowest_price_c5:
-#                 buff_sql.update_good_lowest_price(goods_id, price, pl)
-#             elif the_lowest_price_c5 is None:
-#                 buff_sql.update_good_lowest_price(goods_id, price, pl)
-#         buff_sql.write_record(record_time, goods_id, price, pl)
+def data_insert(id, da, pl):
+    for d in da:
+        timeStamp = d[0]
+        timeArray = time.localtime(timeStamp)
+        record_time = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
+        price = str(d[1])
+        price = price[:-2] + '.' + price[-2:]  # 在price后两位前加上一个小数点
+        if pl == 'buff':
+            if the_lowest_price_buff is not None and float(price) < the_lowest_price_buff:
+                buff_sql.update_good_lowest_price(id, price, pl)
+            elif the_lowest_price_buff is None:
+                buff_sql.update_good_lowest_price(id, price, pl)
+        elif pl == 'uu':
+            if the_lowest_price_uu is not None and float(price) < the_lowest_price_uu:
+                buff_sql.update_good_lowest_price(id, price, pl)
+            elif the_lowest_price_uu is None:
+                buff_sql.update_good_lowest_price(id, price, pl)
+        elif pl == 'igxe':
+            if the_lowest_price_igxe is not None and float(price) < the_lowest_price_igxe:
+                buff_sql.update_good_lowest_price(id, price, pl)
+            elif the_lowest_price_igxe is None:
+                buff_sql.update_good_lowest_price(id, price, pl)
+        elif pl == 'c5':
+            if the_lowest_price_c5 is not None and float(price) < the_lowest_price_c5:
+                buff_sql.update_good_lowest_price(id, price, pl)
+            elif the_lowest_price_c5 is None:
+                buff_sql.update_good_lowest_price(id, price, pl)
+        th = Thread(target=buff_sql.write_record, args=(record_time, id, price, pl))
+        th.start()
 
 
 all_goods = buff_sql.get_all_goods()
 
+first = True
 for (goods_id, trend, name, category, img_url, now_price_buff, the_lowest_price_buff, wear_tear_group,
      the_lowest_price_uu,
      the_lowest_price_igxe, the_lowest_price_c5, now_price_uu, now_price_igxe, now_price_c5,
@@ -146,15 +68,37 @@ for (goods_id, trend, name, category, img_url, now_price_buff, the_lowest_price_
     while True:
         try:
             browser.get('http://csgoob.onet4p.net/goods?name=' + name)
+            if first:
+                time.sleep(5)
+                first = False
+                browser.get('http://csgoob.onet4p.net/goods?name=' + name)
             WebDriverWait(browser, 60, 0.5).until(ec.presence_of_all_elements_located(
                 (By.XPATH, '/html/body/div[1]/div[5]/div/div[1]/div[1]/div[1]/div[3]/div[2]/div[2]/span[3]')))
-            time.sleep(3)
+            time.sleep(1)
+            ActionChains(browser).move_to_element(
+                browser.find_element(By.CLASS_NAME, 'text-lg.text-orange-400.mr-2.font-bold')).pause(0.5).perform()
+            time.sleep(1)
+            now_prices_div = browser.find_element(By.CLASS_NAME, 'ant-tooltip-inner').find_elements(By.TAG_NAME, 'div')
+            for div in now_prices_div:
+                span_text = div.find_elements(By.TAG_NAME, 'span')[1]
+                if span_text.text.split('￥')[0].replace("\n", "") == '悠悠有品:':
+                    uu_now = span_text.text.split('￥')[1].split(' ')[0]
+                    buff_sql.update_good_with_now_price_uu(goods_id, uu_now)
+                elif span_text.text.split('￥')[0].replace("\n", "") == 'IGXE:':
+                    igxe_now = span_text.text.split('￥')[1].split(' ')[0]
+                    buff_sql.update_good_with_now_price_igxe(goods_id, igxe_now)
+                elif span_text.text.split('￥')[0].replace("\n", "") == 'C5:':
+                    c5_now = span_text.text.split('￥')[1].split(' ')[0]
+                    buff_sql.update_good_with_now_price_c5(goods_id, c5_now)
+                elif span_text.text.split('￥')[0].replace("\n", "") == 'BUFF:':
+                    buff_now = span_text.text.split('￥')[1].split(' ')[0]
+                    buff_sql.update_good_with_now_price_buff(goods_id, buff_now)
             spans = browser.find_elements(By.TAG_NAME, 'span')
             for span in spans:
                 if span.text == 'Buff':
                     browser.execute_script("arguments[0].click()", span)
                     break
-            time.sleep(3)
+            time.sleep(5)
             spans = browser.find_elements(By.TAG_NAME, 'span')
 
             for span in spans:
@@ -182,6 +126,7 @@ for (goods_id, trend, name, category, img_url, now_price_buff, the_lowest_price_
             time.sleep(3)
             spans = browser.find_elements(By.TAG_NAME, 'span')
             browser.requests.clear()
+
             for span in spans:
                 if span.text == '确 认':
                     browser.execute_script("arguments[0].click()", span)
@@ -201,34 +146,59 @@ for (goods_id, trend, name, category, img_url, now_price_buff, the_lowest_price_
                             # print(len(json_data['data']['list'][0]['data']))
                             if json_data['data']['list'][0]['data'][-1][0] > 1698204471:
                                 continue
-                            t = Thread(target=write_sql, args=(goods_id,json_data,))
-                            t.start()
-                            # urls_per_thread = len(datas['data']) // 3
-                            # for i in range(3):
-                            #     start = i * urls_per_thread
-                            #     end = start + urls_per_thread if i < 3 - 1 else len(datas['data'])
-                            #     sublist = datas['data'][start:end]
-                            #     if platform == 0:
-                            #         # th = Thread(target=data_insert, args=(sublist, 'buff'))
-                            #         pass
-                            #     elif platform == 1:
-                            #         th = Thread(target=data_insert, args=(sublist, 'uu'))
-                            #     elif platform == 2:
-                            #         th = Thread(target=data_insert, args=(sublist, 'igxe'))
-                            #     elif platform == 3:
-                            #         th = Thread(target=data_insert, args=(sublist, 'c5'))
-                            #     th.start()
+                            last = json_data['data']['list'][-1]['data'][-1]
+                            timeStamp = last[0]
+                            timeArray = time.localtime(timeStamp)
+                            record_time = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
+                            price = str(last[1])
+                            price = price[:-2] + '.' + price[-2:]  # 在price后两位前加上一个小数点
+                            platform = json_data['data']['list'][-1]['platform']
+                            if platform == 0:
+                                platform = 'buff'
+                            elif platform == 1:
+                                platform = 'uu'
+                            elif platform == 2:
+                                platform = 'igxe'
+                            elif platform == 3:
+                                platform = 'c5'
+                            if buff_sql.check_record(record_time, goods_id, price, platform):
+                                continue
+                            for data in json_data['data']['list']:
+                                platform = data['platform']
+                                urls_per_thread = len(data['data']) // 10
+                                for i in range(10):
+                                    start = i * urls_per_thread
+                                    end = start + urls_per_thread if i < 10 - 1 else len(data['data'])
+                                    sublist = data['data'][start:end]
+                                    if platform == 0:
+                                        th = Thread(target=data_insert, args=(goods_id, sublist, 'buff'))
+                                    elif platform == 1:
+                                        th = Thread(target=data_insert, args=(goods_id, sublist, 'uu'))
+                                    elif platform == 2:
+                                        th = Thread(target=data_insert, args=(goods_id, sublist, 'igxe'))
+                                    elif platform == 3:
+                                        th = Thread(target=data_insert, args=(goods_id, sublist, 'c5'))
+                                    th.start()
             time.sleep(1)
             break
         except StaleElementReferenceException as e:
+            print(e)
+            print(traceback.format_exc())
             continue
         except NoSuchElementException as e:
+            print(e)
+            print(traceback.format_exc())
             continue
         except IndexError as e:
+            print(e)
+            print(traceback.format_exc())
             continue
         except TimeoutException as e:
+            print(e)
             continue
         except WebDriverException as e:
+            print(e)
+            print(traceback.format_exc())
             browser = webdriver.Chrome(service=Service('/usr/bin/chromedriver'), options=options)
             browser.scopes = [
                 '.*/api/v1/goods/chart',

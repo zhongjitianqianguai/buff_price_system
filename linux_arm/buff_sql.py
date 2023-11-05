@@ -37,6 +37,25 @@ def write_record(record_time, goods_id, price, source):
         conn.close()
 
 
+def check_record(record_time, goods_id, price, source):
+    conn = pool.connection()
+    cursor = conn.cursor()
+    try:
+        sql = """SELECT * FROM buff_record WHERE time = %s AND goods_id = %s AND price = %s AND source = %s"""
+        cursor.execute(sql, (record_time, goods_id, price, source))
+        result = cursor.fetchone()
+        if result is None:
+            return False
+        else:
+            return True
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("查询记录失败:", e)
+    finally:
+        cursor.close()
+        conn.close()
+
+
 def get_all_goods_id():
     conn = pool.connection()
     cursor = conn.cursor()
@@ -52,6 +71,25 @@ def get_all_goods_id():
     except Exception as e:
         print("错误类型:", type(e))
         print("获取所有商品id失败:", e)
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def update_good_with_now_price(goods_id, now_price_buff, now_price_uu, now_price_igxe, now_price_c5):
+    conn = pool.connection()
+    cursor = conn.cursor()
+    try:
+
+        sql = """Update buff_goods set now_price_buff = %s,now_price_uu = %s,now_price_igxe = %s,now_price_c5 = %s where goods_id =%s;"""
+        conn.ping(reconnect=True)
+        cursor.execute(sql, (now_price_buff, now_price_uu, now_price_igxe, now_price_c5, goods_id))  # 添加参数
+        conn.commit()
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("更新商品现在价格失败:", e)
+        conn.rollback()
+
     finally:
         cursor.close()
         conn.close()
@@ -231,19 +269,77 @@ def update_good_with_trend(goods_id, trend):
         conn.close()
 
 
-def change_all_goods_expected_price_div2():
+def update_good_with_now_price_buff(goods_id, now_price_buff):
     conn = pool.connection()
     cursor = conn.cursor()
     try:
 
-        sql = """UPDATE buff_goods SET expected_price = now_price_buff / 2;"""
+        sql = """Update buff_goods set now_price_buff = %s where goods_id =%s;"""
         conn.ping(reconnect=True)
-        cursor.execute(sql)  # 添加参数
+        cursor.execute(sql, (now_price_buff, goods_id))  # 添加参数
         conn.commit()
     except Exception as e:
         print("错误类型:", type(e))
-        print("改变商品预期价格为当前价格的1/2失败:", e)
+        print("更新商品现在价格失败:", e)
         conn.rollback()
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def update_good_with_now_price_uu(goods_id, now_price_uu):
+    conn = pool.connection()
+    cursor = conn.cursor()
+    try:
+
+        sql = """Update buff_goods set now_price_uu = %s where goods_id =%s;"""
+        conn.ping(reconnect=True)
+        cursor.execute(sql, (now_price_uu, goods_id))  # 添加参数
+        conn.commit()
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("更新商品现在价格失败:", e)
+        conn.rollback()
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def update_good_with_now_price_igxe(goods_id, now_price_igxe):
+    conn = pool.connection()
+    cursor = conn.cursor()
+    try:
+
+        sql = """Update buff_goods set now_price_igxe = %s where goods_id =%s;"""
+        conn.ping(reconnect=True)
+        cursor.execute(sql, (now_price_igxe, goods_id))  # 添加参数
+        conn.commit()
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("更新商品现在价格失败:", e)
+        conn.rollback()
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def update_good_with_now_price_c5(goods_id, now_price_c5):
+    conn = pool.connection()
+    cursor = conn.cursor()
+    try:
+
+        sql = """Update buff_goods set now_price_c5 = %s where goods_id =%s;"""
+        conn.ping(reconnect=True)
+        cursor.execute(sql, (now_price_c5, goods_id))  # 添加参数
+        conn.commit()
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("更新商品现在价格失败:", e)
+        conn.rollback()
+
     finally:
         cursor.close()
         conn.close()
