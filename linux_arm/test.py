@@ -19,10 +19,10 @@ import buff_mail
 
 chrome_options = Options()
 chrome_options.add_argument('--headless')
-chrome_options.add_argument('--disable-gpu')
+# chrome_options.add_argument('--disable-gpu')
 chrome_options.add_argument("window-size=1024,768")
-chrome_options.add_argument("--no-sandbox")
-chrome_options.add_argument("--shm-size=2048m")
+# chrome_options.add_argument("--no-sandbox")
+# chrome_options.add_argument("--shm-size=2048m")
 chrome_options.add_argument("--lang=zh_CN")
 cap = DesiredCapabilities.CHROME
 cap["pageLoadStrategy"] = "none"
@@ -245,28 +245,15 @@ def get_all(urls, is_24_running):
     # ip = s.getsockname()[0]
     #
     # print("IP:", ip)
-    service = Service("/usr/bin/chromedriver")
+    service = Service("../windows/webdriver/chromedriver.exe")
     # service = Service("../windows/webdriver/chromedriver.exe")
     driver = webdriver.Chrome(options=chrome_options, service=service)
     driver.implicitly_wait(6)
     thread_id = threading.current_thread().thread_id
-    shutdown_time = datetime.time(23, 55, 0)  # 每天23:55关闭线程
-    startup_time = datetime.time(7, 0, 0)  # 每天7:00启动线程
     pbar = tqdm(total=len(urls), dynamic_ncols=True, mininterval=0, position=thread_id)
     for i, url in enumerate(urls):
         all_goods_ids = buff_sql.get_all_goods_id()
-        # print("all_goods_ids:", len(all_goods_ids), "goods_id", url)
-        # now = datetime.datetime.now().time()
-        # if not is_24_running:
-        #     if startup_time <= now < shutdown_time:
-        #         thread_status = True
-        #     else:
-        #         thread_status = False
-        #     if not thread_status:
-        #         driver.quit()
-        #         break
         sleep_time = random.randint(2, 5)
-
         # start_climb_one_time = time.time()
         while True:
             try:
@@ -310,12 +297,7 @@ def get_all(urls, is_24_running):
                 name = name_elements.find_element(By.TAG_NAME, "h1").text
                 category = name_elements.text.split("类型 |")[1].split("\n")[0]
                 goods_id = driver.current_url.split('/')[-1]
-                # if not os.path.exists('txt/' + str(goods_id) + '.txt'):
-                #     f = open('txt/' + str(goods_id) + '.txt', 'w', encoding='utf-8')
-                #     f.close()
-                # with open('txt/' + str(goods_id) + '.txt', 'a+', encoding='utf-8') as f:
-                #         f.seek(0)
-                #         lines = f.readlines()
+
                 if goods_id not in all_goods_ids:
                     # f.write(str(goods_id) + ':' + str(price / 2) + '\n')
                     # f.write(f'{time_get};{name} ¥ {price}\n')
@@ -336,15 +318,10 @@ def get_all(urls, is_24_running):
                     break
                 else:
                     # print("更新商品")
+                    # start_select_time = time.time()
                     all_record = buff_sql.get_good_all_record(goods_id)
+                    # print("select time:", time.time() - start_select_time)
                     user_expect_price_list = buff_sql.get_good_expected_price(goods_id)
-                    if len(all_record) <= 1:
-                        # print("只有一条记录")
-                        # f.write(f'{time_get};{name} ¥ {price}\n')
-                        buff_sql.write_record(time_get, str(goods_id), str(price), 'buff')
-                        pbar.update(1)
-                        pbar.set_description(f"线程{thread_id}:爬取第 {i + 1}/{len(urls)}个商品中")
-                        break
                     last_price = buff_sql.get_good_last_record(goods_id)
                     one_day_price = []
                     three_day_price = []
@@ -352,7 +329,7 @@ def get_all(urls, is_24_running):
                     month_price = []
                     days = [1, 3, 7, 30]
                     # lines.pop(0)
-                    lowest_price = buff_sql.get_good_lowest_price(goods_id)
+                    lowest_price = buff_sql.get_good_lowest_price(goods_id, 'buff')
                     if lowest_price is None:
                         lowest_price = price
                     elif lowest_price > price:
@@ -375,48 +352,6 @@ def get_all(urls, is_24_running):
                         elif diff_time.days == days[3]:
                             month_price.append(
                                 record[2])
-
-                        # for line in lines:
-                        #     price_data = line.split(';')
-                        #     # 获取 当前时间并计算与文本时间差
-                        #     old_time_str = price_data[0].replace('\n', '')
-                        #     print(old_time_str)
-                        #     old_time = datetime.datetime.strptime(old_time_str, "%Y-%m-%d %H:%M:%S")
-                        #     now_time = datetime.datetime.utcnow()
-                        #     diff_time = now_time - old_time
-                        #     # # 获取对应天数的历史价格
-                        #     # if lowest_price > float(
-                        #     #         price_data[1].split('¥')[1].replace(" ", "").replace("\n", "")):
-                        #     #     lowest_price = float(
-                        #     #         price_data[1].split('¥')[1].replace(" ", "").replace("\n", ""))
-                        #     if diff_time.days == days[0]:
-                        #         one_day_price.append(
-                        #             price_data[1].split('¥')[1].replace(" ", "").replace("\n", ""))
-                        #         # print("have one day ago price")
-                        #     elif diff_time.days == days[1]:
-                        #         three_day_price.append(
-                        #             price_data[1].split('¥')[1].replace(" ", "").replace("\n", ""))
-                        #         # print("have 3 day ago price")
-                        #
-                        #     elif diff_time.days == days[2]:
-                        #         week_day_price.append(
-                        #             price_data[1].split('¥')[1].replace(" ", "").replace("\n", ""))
-                        #         # print("have 7 day ago price")
-                        #
-                        #     elif diff_time.days == days[3]:
-                        #         month_price.append(
-                        #             price_data[1].split('¥')[1].replace(" ", "").replace("\n", ""))
-                        #         # print("have 30 day ago price")
-
-                        # now = datetime.datetime.now().time()
-                        # if not is_24_running:
-                        #     if startup_time <= now < shutdown_time:
-                        #         thread_status = True
-                        #     else:
-                        #         thread_status = False
-                        #     if not thread_status:
-                        #         driver.quit()
-                        #         break
                     for temp in user_expect_price_list:
                         if price <= float(temp[0]):
                             # print( f'线程:{thread_id}:{goods_id}:{time_get} :{name} 的最低价格达到期望值, 当前价格是: {price}
@@ -465,6 +400,7 @@ def get_all(urls, is_24_running):
                                             goods_id, time_get, '1094410998@qq.com', 1)
                         week_send_mail(lowest_price, name, url, price,
                                        week_day_price)
+                        month_send_mail(lowest_price, name, url, price, month_price)
                     if not can_mail and time.localtime(time.time()).tm_hour.real == 0 and time.localtime(
                             time.time()).tm_min == 0:
                         can_mail = True
@@ -472,7 +408,7 @@ def get_all(urls, is_24_running):
                     pbar.set_description(f"线程{thread_id}:爬取第 {i + 1}/{len(urls)}个商品中")
                     break
             except StaleElementReferenceException as e:
-                # print("try to handle element is not attached to the page document in out loop")
+                print("try to handle element is not attached to the page document in out loop")
                 continue
             except OSError as e:
                 if "No space left on device" in str(e):
@@ -638,7 +574,7 @@ if __name__ == '__main__':
     startup_time = datetime.time(7, 0, 0)  # 每天7:00启动线程
     with open('../source/all.txt') as f:
         the_urls = f.readlines()
-    threads_count = 8
+    threads_count = 5
     threads_status = False
     threads = []
     if not work_24_hours:

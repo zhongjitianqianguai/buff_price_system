@@ -7,7 +7,6 @@ from io import BytesIO
 
 import fake_useragent
 import requests
-
 # ua = fake_useragent.UserAgent()
 # headers = {
 #     'User-Agent': str(ua.random),

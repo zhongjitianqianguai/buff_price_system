@@ -1,3 +1,3 @@
-import buff_sql
-
-buff_sql.write_record(1, 1, 1)
+with open('../windows/2023_12_recent_month.txt', 'r', encoding='utf-8') as f:
+    json_datas = f.readlines()
+print(len(json_datas))
