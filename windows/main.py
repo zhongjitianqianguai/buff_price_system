@@ -235,7 +235,7 @@ def month_send_mail(lowest_price, name_elements, url, price, month_price):
                                     'https://buff.163.com/goods/' + url, mail)
 
 
-def get_all(urls, is_24_running):
+def get_all(urls):
     global can_mail
     # import os
     # import socket
@@ -252,7 +252,6 @@ def get_all(urls, is_24_running):
     thread_id = threading.current_thread().thread_id
     pbar = tqdm(total=len(urls), dynamic_ncols=True, mininterval=0, position=thread_id)
     for i, url in enumerate(urls):
-        all_goods_ids = buff_sql.get_all_goods_id()
         sleep_time = random.randint(2, 5)
         # start_climb_one_time = time.time()
         while True:
@@ -295,118 +294,96 @@ def get_all(urls, is_24_running):
                 price = float(price_elements[1].text.replace("¥ ", ""))
                 name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
                 name = name_elements.find_element(By.TAG_NAME, "h1").text
-                category = name_elements.text.split("类型 |")[1].split("\n")[0]
                 goods_id = driver.current_url.split('/')[-1]
+                # print("更新商品")
+                # start_select_time = time.time()
+                all_record = buff_sql.get_good_all_record(goods_id)
+                # print("select time:", time.time() - start_select_time)
+                user_expect_price_list = buff_sql.get_good_expected_price(goods_id)
+                last_price = buff_sql.get_good_last_record(goods_id)
+                one_day_price = []
+                three_day_price = []
+                week_day_price = []
+                month_price = []
+                days = [1, 3, 7, 30]
+                lowest_price = buff_sql.get_good_lowest_price(goods_id, 'buff')
+                if lowest_price is None:
+                    lowest_price = price
+                elif lowest_price > price:
+                    lowest_price = price
+                for record in all_record:
+                    old_time_str = record[0]
+                    old_time = datetime.datetime.strptime(old_time_str, "%Y-%m-%d %H:%M:%S")
+                    now_time = datetime.datetime.utcnow()
+                    diff_time = now_time - old_time
+                    if diff_time.days == days[0]:
+                        one_day_price.append(
+                            record[2])
+                    elif diff_time.days == days[1]:
+                        three_day_price.append(
+                            record[2])
 
-                if goods_id not in all_goods_ids:
-                    # f.write(str(goods_id) + ':' + str(price / 2) + '\n')
-                    # f.write(f'{time_get};{name} ¥ {price}\n')
-                    # print("新增商品")
-                    if "金色" in name:
-                        category = "金色"
-                    elif "全息" in name:
-                        category = "全息"
-                    elif "胶囊" in name:
-                        category = "胶囊"
-                    elif "武器箱" in name:
-                        category = "武器箱"
-                    buff_sql.add_new_good(name, str(goods_id), category, img_url,
-                                          str(price), str(price))
-                    buff_sql.write_record(time_get, str(goods_id), str(price), 'buff')
-                    pbar.update(1)
-                    pbar.set_description(f"线程{thread_id}:爬取第 {i + 1}/{len(urls)}个商品中")
-                    break
-                else:
-                    # print("更新商品")
-                    # start_select_time = time.time()
-                    all_record = buff_sql.get_good_all_record(goods_id)
-                    # print("select time:", time.time() - start_select_time)
-                    user_expect_price_list = buff_sql.get_good_expected_price(goods_id)
-                    last_price = buff_sql.get_good_last_record(goods_id)
-                    one_day_price = []
-                    three_day_price = []
-                    week_day_price = []
-                    month_price = []
-                    days = [1, 3, 7, 30]
-                    # lines.pop(0)
-                    lowest_price = buff_sql.get_good_lowest_price(goods_id, 'buff')
-                    if lowest_price is None:
-                        lowest_price = price
-                    elif lowest_price > price:
-                        lowest_price = price
-                    for record in all_record:
-                        old_time_str = record[0]
-                        old_time = datetime.datetime.strptime(old_time_str, "%Y-%m-%d %H:%M:%S")
-                        now_time = datetime.datetime.utcnow()
-                        diff_time = now_time - old_time
-                        if diff_time.days == days[0]:
-                            one_day_price.append(
-                                record[2])
-                        elif diff_time.days == days[1]:
-                            three_day_price.append(
-                                record[2])
-
-                        elif diff_time.days == days[2]:
-                            week_day_price.append(
-                                record[2])
-                        elif diff_time.days == days[3]:
-                            month_price.append(
-                                record[2])
-                    for temp in user_expect_price_list:
-                        if price <= float(temp[0]):
-                            # print( f'线程:{thread_id}:{goods_id}:{time_get} :{name} 的最低价格达到期望值, 当前价格是: {price}
-                            # 历史最低价格为:{lowest_price} 爬取该商品花费时间:{time.time() - start_climb_one_time}秒')
-                            if can_mail and (time.localtime(time.time()).tm_hour.real < 1 or time.localtime(
-                                    time.time()).tm_hour.real > 7) and int(sale_count) > 20:
-                                buff_mail.send_mail(
-                                    name + '\n达到预期价格!!历史最低价格为:' + str(
-                                        lowest_price) + '预期价格为' + str(temp[0]), price,
-                                    'https://buff.163.com/goods/' + url,
-                                    buff_sql.get_user_mail_by_user_id(temp[1]))
-                            buff_sql.add_new_mail(name + '\n达到预期价格!!历史最低价格为:' + str(
-                                lowest_price) + '预期价格为' + str(temp[0]) + '当前价格是:' + str(
-                                price), goods_id, time_get, temp[1])
-                        else:
-                            pass
-                            # print(
-                            #     f'{goods_id}:{time_get} :{name} 的最低价格未达到期望值, 当前价格是: {price}历史最低价格为:{lowest_price}')
-                    if price - float(lowest_price) / float(lowest_price) < -0.3 and price < float(lowest_price):
-                        print(
-                            f'{goods_id}:{time_get} :{name} 的最低价格达到期望值, 当前价格是: {price} 历史最低价格为:{lowest_price}')
+                    elif diff_time.days == days[2]:
+                        week_day_price.append(
+                            record[2])
+                    elif diff_time.days == days[3]:
+                        month_price.append(
+                            record[2])
+                for temp in user_expect_price_list:
+                    if price <= float(temp[0]):
+                        # print( f'线程:{thread_id}:{goods_id}:{time_get} :{name} 的最低价格达到期望值, 当前价格是: {price}
+                        # 历史最低价格为:{lowest_price} 爬取该商品花费时间:{time.time() - start_climb_one_time}秒')
                         if can_mail and (time.localtime(time.time()).tm_hour.real < 1 or time.localtime(
                                 time.time()).tm_hour.real > 7) and int(sale_count) > 20:
                             buff_mail.send_mail(
-                                name + '\n历史新低价!!!!历史最低价格为:' + str(
-                                    lowest_price), price,
-                                'https://buff.163.com/goods/' + url, '1094410998@qq.com')
-                        buff_sql.add_new_mail(name + '\n历史新低价!!!!历史最低价格为:' + str(
-                            lowest_price) + '当前价格是:' + str(
-                            price), goods_id, time_get, 1)
+                                name + '\n达到预期价格!!历史最低价格为:' + str(
+                                    lowest_price) + '预期价格为' + str(temp[0]), price,
+                                'https://buff.163.com/goods/' + url,
+                                buff_sql.get_user_mail_by_user_id(temp[1]))
+                        buff_sql.add_new_mail(name + '\n达到预期价格!!历史最低价格为:' + str(
+                            lowest_price) + '预期价格为' + str(temp[0]) + '当前价格是:' + str(
+                            price), goods_id, time_get, temp[1])
+                    else:
+                        pass
+                        # print(
+                        #     f'{goods_id}:{time_get} :{name} 的最低价格未达到期望值, 当前价格是: {price}历史最低价格为:{lowest_price}')
+                if price - float(lowest_price) / float(lowest_price) < -0.3 and price < float(lowest_price):
+                    print(
+                        f'{goods_id}:{time_get} :{name} 的最低价格达到期望值, 当前价格是: {price} 历史最低价格为:{lowest_price}')
+                    if can_mail and (time.localtime(time.time()).tm_hour.real < 1 or time.localtime(
+                            time.time()).tm_hour.real > 7) and int(sale_count) > 20:
+                        buff_mail.send_mail(
+                            name + '\n历史新低价!!!!历史最低价格为:' + str(
+                                lowest_price), price,
+                            'https://buff.163.com/goods/' + url, '1094410998@qq.com')
+                    buff_sql.add_new_mail(name + '\n历史新低价!!!!历史最低价格为:' + str(
+                        lowest_price) + '当前价格是:' + str(
+                        price), goods_id, time_get, 1)
 
-                    if last_price == price:
-                        pbar.update(1)
-                        pbar.set_description(f"线程{thread_id}:爬取第 {i + 1}/{len(urls)}个商品中")
-                        break
-                    # f.write(f'{time_get};{name} ¥ {price}\n')
-                    buff_sql.write_record(time_get, str(goods_id), str(price), 'buff')
-                    buff_sql.update_good_without_trend(str(goods_id), img_url, name, price,
-                                                       lowest_price)
-                    # f.close()
-                    if can_mail and int(sale_count) > 20:  # and (time.localtime(time.time()).tm_hour.real < 1 or
-                        # time.localtime(time.time()).tm_hour.real > 7)
-                        day_send_mail(lowest_price, name, url, price, one_day_price, goods_id,
-                                      time_get, '1094410998@qq.com', 1)
-                        three_day_send_mail(lowest_price, name, url, price, three_day_price,
-                                            goods_id, time_get, '1094410998@qq.com', 1)
-                        week_send_mail(lowest_price, name, url, price,
-                                       week_day_price)
-                        month_send_mail(lowest_price, name, url, price, month_price)
-                    if not can_mail and time.localtime(time.time()).tm_hour.real == 0 and time.localtime(
-                            time.time()).tm_min == 0:
-                        can_mail = True
+                if last_price == price:
                     pbar.update(1)
                     pbar.set_description(f"线程{thread_id}:爬取第 {i + 1}/{len(urls)}个商品中")
                     break
+                # f.write(f'{time_get};{name} ¥ {price}\n')
+                buff_sql.write_record(time_get, str(goods_id), str(price), 'buff')
+                buff_sql.update_good_without_trend(str(goods_id), img_url, name, price,
+                                                   lowest_price)
+                # f.close()
+                if can_mail and int(sale_count) > 20:  # and (time.localtime(time.time()).tm_hour.real < 1 or
+                    # time.localtime(time.time()).tm_hour.real > 7)
+                    day_send_mail(lowest_price, name, url, price, one_day_price, goods_id,
+                                  time_get, '1094410998@qq.com', 1)
+                    three_day_send_mail(lowest_price, name, url, price, three_day_price,
+                                        goods_id, time_get, '1094410998@qq.com', 1)
+                    week_send_mail(lowest_price, name, url, price,
+                                   week_day_price)
+                    month_send_mail(lowest_price, name, url, price, month_price)
+                if not can_mail and time.localtime(time.time()).tm_hour.real == 0 and time.localtime(
+                        time.time()).tm_min == 0:
+                    can_mail = True
+                pbar.update(1)
+                pbar.set_description(f"线程{thread_id}:爬取第 {i + 1}/{len(urls)}个商品中")
+                break
             except StaleElementReferenceException as e:
                 print("try to handle element is not attached to the page document in out loop")
                 continue
@@ -483,6 +460,7 @@ def get_all(urls, is_24_running):
             finally:
                 time.sleep(sleep_time)
     pbar.close()
+    driver.quit()
 
 
 class MyThread(threading.Thread):
@@ -501,7 +479,7 @@ class MyThread(threading.Thread):
         while not self.stop_event.is_set():
             start_time = time.time()
             urls = [url.replace("\n", "") for url in self.urls]
-            get_all(urls, self.is_24_hours_running)
+            get_all(urls)
             end_climb_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             cost_time = (time.time() - start_time) / 60
             print(
@@ -536,67 +514,12 @@ def stop_threads(thread):
 
 
 if __name__ == '__main__':
-    # threads = []
-    # urls = []
     mail = {}
     can_mail = True
-
-    # files = os.listdir('../source')
-    # conn = pymysql.connect(
-    #     host="120.25.145.148",
-    #     port=3306,
-    #     user="homework",
-    #     passwd="root",
-    #     db="homework",
-    #     charset='utf8',
-    #     autocommit=True
-    # )
-    #
-    # with open('../source/all.txt') as f:
-    #     urls = f.readlines()
-    # get_all(urls)
-    # for file in files:
-    #     with open('../source/' + file) as f:
-    #         urls = f.readlines()
-    #     f.close()
-    #     thread = threading.Thread(target=get_all, args=([urls]))
-    #     threads.append(thread)
-    #     time.sleep(random.randint(2, 5))
-    #     thread.start()
-    #
-    # for thread in threads:
-    #     thread.join()
-    # service mariadb start
     # 设置是否24小时运行
     work_24_hours = True
-    # 设置关闭时间和启动时间
-    shutdown_time = datetime.time(23, 55, 0)  # 每天23:55关闭线程
-    startup_time = datetime.time(7, 0, 0)  # 每天7:00启动线程
-    with open('../source/all.txt') as f:
-        the_urls = f.readlines()
+    the_urls = buff_sql.get_all_goods_id()
     threads_count = 5
     threads_status = False
     threads = []
-    if not work_24_hours:
-        while True:
-            # 获取当前时间
-            now = datetime.datetime.now().time()
-            # print(now)
-            # 如果当前时间在关闭时间之后，就关闭线程
-            if startup_time <= now < shutdown_time:
-                if not threads_status:
-                    print("Startup time reached. Starting threads...")
-                    threads = start_threads(threads_count, the_urls, work_24_hours)
-                    threads_status = True
-                    print(f"set threads_status:{threads_status}")
-
-            if now >= shutdown_time:
-                if threads_status:
-                    print(f"{now}:Shutdown time reached. Stopping threads...")
-                    threads_status = False
-                    print(f"set threads_status:{threads_status}")
-                    stop_threads(threads)
-
-            time.sleep(5)
-    else:
-        start_threads(threads_count, the_urls, work_24_hours)
+    start_threads(threads_count, the_urls, work_24_hours)

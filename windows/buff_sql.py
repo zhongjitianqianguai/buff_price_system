@@ -1,7 +1,3 @@
-import threading
-
-import pymysql
-
 import pymysql
 from dbutils.pooled_db import PooledDB
 from pymysql import IntegrityError
@@ -10,7 +6,6 @@ pool = PooledDB(
     creator=pymysql,
     maxconnections=1000000,
     host='127.0.0.1',
-    # host='192.168.6.127',
     port=3306,
     user='root',
     password='jiege666',
@@ -23,13 +18,13 @@ def create_new_record_table(goods_id):
     conn = pool.connection()
     cursor = conn.cursor()
     try:
-        sql = """CREATE TABLE IF NOT EXISTS %s_record(
-        time VARCHAR(255) PRIMARY KEY,
-        goods_id VARCHAR(255) PRIMARY KEY,
-        price FLOAT PRIMARY KEY,
-        source VARCHAR(255) PRIMARY KEY
+        sql = f"""CREATE TABLE IF NOT EXISTS {goods_id}_record(
+            time VARCHAR(255),
+            price FLOAT,
+            source VARCHAR(10),
+            PRIMARY KEY (time, price, source)
         );"""
-        cursor.execute(sql,goods_id)
+        cursor.execute(sql)
         conn.commit()
     except IntegrityError:
         conn.rollback()
@@ -42,12 +37,43 @@ def create_new_record_table(goods_id):
         conn.close()
 
 
+def delete_goods_id_from_all_tables():
+    conn = pool.connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SHOW TABLES")
+        tables = cursor.fetchall()
+        for table in tables:
+            if "_record" in table[0]:
+                sql = f"ALTER TABLE {table[0]} DROP COLUMN goods_id"
+                cursor.execute(sql)
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def delete_goods_id_from_record_table(table_id):
+    conn = pool.connection()
+    cursor = conn.cursor()
+    try:
+        table_name = f"{table_id}_record"
+        sql = f"ALTER TABLE {table_name} DROP COLUMN goods_id"
+        cursor.execute(sql)
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        cursor.close()
+        conn.close()
+
+
 def write_record(record_time, goods_id, price, source):
     conn = pool.connection()
     cursor = conn.cursor()
     try:
-        sql = """INSERT INTO %s_record(time,goods_id,price,source) VALUES(%s,%s,%s,%s)"""
-        cursor.execute(sql, (int(goods_id), record_time, goods_id, price, source))
+        sql = """INSERT INTO %s_record(time,price,source) VALUES(%s,%s,%s)"""
+        cursor.execute(sql, (int(goods_id), record_time, price, source))
         conn.commit()
     except IntegrityError:
         conn.rollback()
@@ -64,7 +90,8 @@ def delete_repeat_record():
     conn = pool.connection()
     cursor = conn.cursor()
     try:
-        sql = """DELETE FROM buff_record WHERE record_id NOT IN (SELECT * FROM (SELECT MIN(record_id) FROM buff_record GROUP BY time,goods_id,price,source) AS t)"""
+        sql = """DELETE FROM buff_record WHERE record_id NOT IN (SELECT * FROM (SELECT MIN(record_id) FROM 
+        buff_record GROUP BY time,goods_id,price,source) AS t)"""
         cursor.execute(sql)
         conn.commit()
     except Exception as e:
@@ -80,7 +107,7 @@ def get_all_goods_id():
     conn = pool.connection()
     cursor = conn.cursor()
     try:
-        sql = """Select goods_id from  buff_goods;"""
+        sql = """Select goods_id from buff_goods;"""
         conn.ping(reconnect=True)
         cursor.execute(sql)  # 添加参数
         goods_ids = []
@@ -171,7 +198,7 @@ def get_all_goods():
     conn = pool.connection()
     cursor = conn.cursor()
     try:
-        sql = """Select * from  buff_goods;"""
+        sql = """Select * from buff_goods;"""
         conn.ping(reconnect=True)
         cursor.execute(sql)  # 添加参数
         return cursor.fetchall()
@@ -188,11 +215,10 @@ def get_good_all_record(goods_id):
     conn = pool.connection()
     cursor = conn.cursor()
     try:
-        sql = """Select * from  %s_record where  source='buff' order by time;"""
+        sql = """Select * from  %s_record where source='buff' order by time;"""
         conn.ping(reconnect=True)
         cursor.execute(sql, int(goods_id))  # 添加参数
         return cursor.fetchall()
-
 
     except Exception as e:
         print("错误类型:", type(e))
@@ -310,25 +336,6 @@ def update_good_with_now_price_uu(goods_id, now_price_uu):
         print("更新商品现在价格失败:", e)
         conn.rollback()
 
-    finally:
-        cursor.close()
-        conn.close()
-
-
-def check_record(record_time, goods_id, price, source):
-    conn = pool.connection()
-    cursor = conn.cursor()
-    try:
-        sql = """SELECT * FROM buff_record WHERE time = %s AND goods_id = %s AND price = %s AND source = %s"""
-        cursor.execute(sql, (record_time, goods_id, price, source))
-        result = cursor.fetchone()
-        if result is None:
-            return False
-        else:
-            return True
-    except Exception as e:
-        print("错误类型:", type(e))
-        print("查询记录失败:", e)
     finally:
         cursor.close()
         conn.close()
