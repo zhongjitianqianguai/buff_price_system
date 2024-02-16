@@ -473,3 +473,83 @@ def add_new_good(name, goods_id, category, img_url, price, the_lowest_price):
     finally:
         cursor.close()
         conn.close()
+
+
+def auto_update_the_lowest_price_buff_by_through_record_table():
+    conn = pool.connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SHOW TABLES")
+        tables = cursor.fetchall()
+        for table in tables:
+            if "_record" in table[0]:
+                goods_id = table[0].split("_")[0]
+                cursor.execute(f"SELECT MIN(price) FROM {table[0]} where source = 'buff'")
+                lowest_price = cursor.fetchone()[0]
+                cursor.execute(
+                    f"UPDATE buff_goods SET the_lowest_price_buff = {lowest_price} WHERE goods_id = {goods_id}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def auto_update_the_lowest_price_uu_by_through_record_table():
+    conn = pool.connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SHOW TABLES")
+        tables = cursor.fetchall()
+        for table in tables:
+            if "_record" in table[0]:
+                goods_id = table[0].split("_")[0]
+                cursor.execute(f"SELECT MIN(price) FROM {table[0]} where source = 'uu'")
+                lowest_price = cursor.fetchone()[0]
+                cursor.execute(
+                    f"UPDATE buff_goods SET the_lowest_price_uu = {lowest_price} WHERE goods_id = {goods_id}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def auto_update_the_lowest_price_igxe_by_through_record_table():
+    conn = pool.connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SHOW TABLES")
+        tables = cursor.fetchall()
+        for table in tables:
+            if "_record" in table[0]:
+                goods_id = table[0].split("_")[0]
+                cursor.execute(f"SELECT MIN(price) FROM {table[0]} where source = 'igxe'")
+                lowest_price = cursor.fetchone()[0]
+                cursor.execute(
+                    f"UPDATE buff_goods SET the_lowest_price_igxe = {lowest_price} WHERE goods_id = {goods_id}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def auto_update_the_lowest_price_c5_by_through_record_table():
+    conn = pool.connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SHOW TABLES")
+        tables = cursor.fetchall()
+        for table in tables:
+            if "_record" in table[0]:
+                goods_id = table[0].split("_")[0]
+                cursor.execute(f"SELECT MIN(price) FROM {table[0]} where source = 'c5'")
+                lowest_price = cursor.fetchone()[0]
+                cursor.execute(
+                    f"UPDATE buff_goods SET the_lowest_price_c5 = {lowest_price} WHERE goods_id = {goods_id}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        cursor.close()
+        conn.close()

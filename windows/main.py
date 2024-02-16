@@ -17,15 +17,14 @@ from tqdm import tqdm
 import buff_sql
 import buff_mail
 
-chrome_options = Options()
-chrome_options.add_argument('--headless')
+options = webdriver.FirefoxOptions()
+options.add_argument('--headless')
 # chrome_options.add_argument('--disable-gpu')
-chrome_options.add_argument("window-size=1024,768")
+options.add_argument("window-size=1024,768")
 # chrome_options.add_argument("--no-sandbox")
 # chrome_options.add_argument("--shm-size=2048m")
-chrome_options.add_argument("--lang=zh_CN")
-cap = DesiredCapabilities.CHROME
-cap["pageLoadStrategy"] = "none"
+options.add_argument("--lang=zh_CN")
+options.binary_location = "C:\\Program Files\\Mozilla Firefox\\firefox.exe"
 
 
 def day_send_mail(lowest_price, name_elements, url, price, one_day_price, goods_id, time, mail_addr, user_id):
@@ -245,9 +244,8 @@ def get_all(urls):
     # ip = s.getsockname()[0]
     #
     # print("IP:", ip)
-    service = Service("../windows/webdriver/chromedriver.exe")
-    # service = Service("../windows/webdriver/chromedriver.exe")
-    driver = webdriver.Chrome(options=chrome_options, service=service)
+    driver = webdriver.Firefox(service=Service('webdriver/geckodriver.exe'),
+                               options=options)
     driver.implicitly_wait(6)
     thread_id = threading.current_thread().thread_id
     pbar = tqdm(total=len(urls), dynamic_ncols=True, mininterval=0, position=thread_id)
@@ -294,7 +292,7 @@ def get_all(urls):
                 price = float(price_elements[1].text.replace("¥ ", ""))
                 name_elements = driver.find_element(By.CLASS_NAME, "detail-cont")
                 name = name_elements.find_element(By.TAG_NAME, "h1").text
-                goods_id = driver.current_url.split('/')[-1]
+                goods_id = driver.current_url.split('/')[-1].replace('#', '')
                 # print("更新商品")
                 # start_select_time = time.time()
                 all_record = buff_sql.get_good_all_record(goods_id)
@@ -318,17 +316,17 @@ def get_all(urls):
                     diff_time = now_time - old_time
                     if diff_time.days == days[0]:
                         one_day_price.append(
-                            record[2])
+                            record[1])
                     elif diff_time.days == days[1]:
                         three_day_price.append(
-                            record[2])
+                            record[1])
 
                     elif diff_time.days == days[2]:
                         week_day_price.append(
-                            record[2])
+                            record[1])
                     elif diff_time.days == days[3]:
                         month_price.append(
-                            record[2])
+                            record[1])
                 for temp in user_expect_price_list:
                     if price <= float(temp[0]):
                         # print( f'线程:{thread_id}:{goods_id}:{time_get} :{name} 的最低价格达到期望值, 当前价格是: {price}
@@ -410,7 +408,8 @@ def get_all(urls):
 
                             else:
                                 time.sleep(20)
-                            driver = webdriver.Chrome(options=chrome_options, service=service)
+                            driver = webdriver.Firefox(service=Service('webdriver/geckodriver.exe'),
+                                                       options=options)
                             driver.get('https://buff.163.com/goods/' + url)
                             sleep_time = random.randint(5, 15)
                             break
@@ -430,7 +429,8 @@ def get_all(urls):
                             crash_time = 0
                         else:
                             time.sleep(20)
-                        driver = webdriver.Chrome(options=chrome_options, service=service)
+                        driver = webdriver.Firefox(service=Service('webdriver/geckodriver.exe'),
+                                                   options=options)
                         driver.get('https://buff.163.com/goods/' + url)
                         sleep_time = random.randint(5, 15)
                         break
@@ -519,7 +519,7 @@ if __name__ == '__main__':
     # 设置是否24小时运行
     work_24_hours = True
     the_urls = buff_sql.get_all_goods_id()
-    threads_count = 5
+    threads_count = 8
     threads_status = False
     threads = []
     start_threads(threads_count, the_urls, work_24_hours)
