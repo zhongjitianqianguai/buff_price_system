@@ -76,7 +76,7 @@ def handle_json(json_data, recorded, index):
                     data_insert(goods_id, data['data'], 'c5', index)
         os.system("cls")
         with lock:
-            with open('already_record_goods_id.txt', 'a+', encoding='utf-8') as a:
+            with open('already_insert_goods_id.txt', 'a+', encoding='utf-8') as a:
                 a.write(str(goods_id) + '\n')
         print("序号", goods_id, "已完成")
     #         urls_per_thread = len(data['data']) // 100
@@ -119,7 +119,7 @@ def handle_json(json_data, recorded, index):
 
 with open('2024_2_recent_6_month.txt', 'r', encoding='utf-8') as f:
     json_datas = f.readlines()
-with open('already_record_goods_id.txt', 'r', encoding='utf-8') as f:
+with open('already_insert_goods_id.txt', 'r', encoding='utf-8') as f:
     already_record = f.readlines()
 print(len(json_datas) / 2)
 for i, json1 in enumerate(json_datas):

@@ -85,10 +85,10 @@ def get_json(goods, recorded):
                 now_price_steam, update_time) in enumerate(goods):
         if str(goods_id) + '\n' in recorded:
             pbar.update(1)
-            pbar.set_description(f"商品{name}爬取中")
+            now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+            pbar.set_description(f"{now}: 商品{name}爬取早就已经完成")
             continue
-        if '印花' not in name:
-            continue
+
         mode_change = False
         while True:
             try:
@@ -96,6 +96,12 @@ def get_json(goods, recorded):
                         category == '探员' or category == '金色' or category == '全息'):
                     if name == '音乐盒（StatTrak™） | Neck Deep - 躺平青年':
                         name = '音乐盒（StatTrak） | Neck Deep, 躺平青年'
+                    elif '印花 | 玛丽埃塔（全息）' in name:
+                        name = '印花 | 玛丽埃塔'
+                        break
+                    elif '印花 | 大家动起来（全息）' in name:
+                        name = '印花 | 大家动起来'
+                        break
                     if '—' in name:
                         name = name.replace('—', "-")
                     browser.get('https://csgoob.onet4p.net/goods?name=' + name)
@@ -110,10 +116,11 @@ def get_json(goods, recorded):
                         browser.find_elements(By.XPATH,
                                               '/html/body/div[1]/div[5]/div/div[1]/div[1]/div[2]/div/span['
                                               '1]/span/span/input')[0].send_keys(search_name)
-                        time.sleep(1)
-                        browser.find_elements(By.XPATH,
-                                              '/html/body/div[1]/div[5]/div/div[1]/div[1]/div[2]/div/span['
-                                              '1]/span/span/input')[0].send_keys('\n')
+                        time.sleep(2)
+                        browser.find_elements(By.CLASS_NAME,
+                                              'ant-btn.ant-btn-default.ant-btn-icon-only.ant-input-search-button')[
+                            2].click()
+
                         time.sleep(3)
                         search_result_names = browser.find_elements(By.CLASS_NAME,
                                                                     'w-full.h-full.text-center.flex.flex-col'
@@ -132,30 +139,37 @@ def get_json(goods, recorded):
                                                      'text-lg.text-orange-400.mr-2.font-bold')).pause(
                                 0.5).perform()
                         except TimeoutException:
+                            pbar.update(1)
+                            now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+                            pbar.set_description(f"{now}: 商品{name}爬取失败")
                             break
                         time.sleep(1)
                         break
             except StaleElementReferenceException as e:
-                print(e)
-                print(traceback.format_exc())
+                # print(e)
+                # print(traceback.format_exc())
                 continue
             except NoSuchElementException as e:
-                print(e)
-                print(traceback.format_exc())
+                # print(e)
+                # print(traceback.format_exc())
                 continue
             except IndexError as e:
-                print(e)
-                print(traceback.format_exc())
+                # print(e)
+                # print(traceback.format_exc())
                 continue
             except TimeoutException as e:
-                print(traceback.format_exc())
-                print(e)
+                # print(traceback.format_exc())
+                # print(e)
                 continue
             except WebDriverException as e:
-                print(e)
-                print(traceback.format_exc())
+                # print(e)
+                # print(traceback.format_exc())
 
                 # is_first = True
+                continue
+            except Exception as e:
+                print(e)
+                print(traceback.format_exc())
                 continue
             while True:
                 try:
@@ -171,6 +185,10 @@ def get_json(goods, recorded):
                                 category == '金色' or category == '全息'):
                             mode_change = True
                         break
+                    except Exception as e:
+                        print(e)
+                        print(traceback.format_exc())
+                        break
                     now_prices_div = browser.find_element(By.CLASS_NAME, 'ant-tooltip-inner').find_elements(By.TAG_NAME,
                                                                                                             'div')
                     if len(now_prices_div) < 2:
@@ -178,7 +196,8 @@ def get_json(goods, recorded):
                             with open('already_record.txt', 'a+', encoding='utf-8') as a:
                                 a.write(str(goods_id) + '\n')
                         pbar.update(1)
-                        pbar.set_description(f"商品{name}爬取中")
+                        now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+                        pbar.set_description(f"{now}: 商品{name}爬取中")
                         break
                     for div in now_prices_div:
                         span_text = div.find_elements(By.TAG_NAME, 'span')[1]
@@ -262,15 +281,15 @@ def get_json(goods, recorded):
                             if request.response is not None:
                                 json_str = request.response.body.decode('utf-8').replace("b'", "").replace("'", "")
                                 # print(json_str)
-                                if (
-                                        '"platform":1' in json_str or '"platform":2' in json_str or '"platform":3' in json_str
-                                        and '"platform":0' in json_str):
+                                if ('"platform":1' in json_str or '"platform":2' in json_str or '"platform":3' in
+                                        json_str and '"platform":0' in json_str):
                                     # print(json_str)
                                     json_d = json.loads(str(json_str))
                                     # len(json_d['data']['list'][0]['data'])
                                     for data in json_d['data']['list']:
                                         pl = data['platform']
                                         if pl == 0:
+                                            # print(data['goodsId'])
                                             if data['goodsId'] != str(goods_id):
                                                 # print(data['goodsId'])
                                                 # print(str(goods_id))
@@ -295,12 +314,12 @@ def get_json(goods, recorded):
                                                 #
                                                 #         elif platform == 3:
                                                 #             data_insert(goods_id, data['data'], 'c5')
-                                                os.system("cls")
+                                                # os.system("cls")
                                                 with lock:
                                                     with open('already_record.txt', 'a+', encoding='utf-8') as a:
                                                         a.write(str(goods_id) + '\n')
                                                 pbar.update(1)
-                                                pbar.set_description(f"商品{name}爬取中")
+                                                pbar.set_description(f"商品{name}爬取完成")
                                                 break
                         # last = json_d['data']['list'][-1]['data'][-1]
                         # print(last)
@@ -347,6 +366,9 @@ def get_json(goods, recorded):
 
                     # is_first = True
                     continue
+                except Exception as e:
+                    print(e)
+                    print(traceback.format_exc())
                 finally:
                     pass
             if not mode_change:
@@ -359,7 +381,7 @@ all_goods = buff_sql.get_all_goods()
 # with open('json_data_22-06_23-05_and_year.txt', 'r', encoding='utf-8') as f:
 #     json1 = f.readlines()
 # already_record = set()
-# with open('already_record_goods_id.txt', 'a+', encoding='utf-8') as f:
+# with open('already_insert_goods_id.txt', 'a+', encoding='utf-8') as f:
 #     for line in json1:
 #         json_d = json.loads(line)
 #         for data in json_d['data']['list']:
@@ -372,7 +394,7 @@ with open('already_record.txt', 'r', encoding='utf-8') as f:
 # for record in already_record:
 #     already_record[already_record.index(record)] = record.replace('\n', '')
 # print("已记录数据长度", len(json1) / 2)
-thread_count = 10
+thread_count = 5
 urls_per_thread = len(all_goods) // thread_count
 for i in range(thread_count):
     start = i * urls_per_thread

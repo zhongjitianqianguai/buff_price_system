@@ -7,7 +7,7 @@ import buff_sql
 
 driver = webdriver.Chrome(service=Service(r'webdriver/chromedriver.exe'))
 driver.set_page_load_timeout(300)
-driver.get('https://buff.163.com/market/csgo')
+driver.get('https://buff.163.com/market/csgo#game=csgo&page_num=1&itemset=set_community_33&tab=selling')
 driver.implicitly_wait(10)
 all_goods_id = buff_sql.get_all_goods_id()
 
@@ -33,7 +33,7 @@ for page in pages:
         max_page = int(max_page_element.text)
 page = 2
 if max_page > 0:
-    for i in range(1, max_page + 1):
+    for i in range(1, max_page):
         print("page: " + str(i))
         while True:
             try:
@@ -46,11 +46,11 @@ if max_page > 0:
                             price = float(
                                 li.find_element(By.TAG_NAME, "p").find_element(By.TAG_NAME, "strong").text.replace("¥ ",
                                                                                                                    ""))
-                            print("price: " + str(price))
+                            # print("price: " + str(price))
                             name = li.find_element(By.TAG_NAME, "h3").find_element(By.TAG_NAME, "a").text
-                            print("name: " + name)
+                            # print("name: " + name)
                             img_url = li.find_element(By.TAG_NAME, "img").get_attribute("src")
-                            print("image_url: " + img_url)
+                            # print("image_url: " + img_url)
                             category = ""
                             if "（全息）" in name:
                                 category = "全息"
@@ -93,33 +93,35 @@ if max_page > 0:
                                 "件在售", ""))
                             if category == "":
                                 break
-                            elif category == "步枪" and price < 10 or int(sale_count) < 25:
+                            elif category == "步枪" and price < 10 or int(sale_count) < 1:
                                 break
                             elif category == "手套" and price > 50000 or int(sale_count) < 5:
                                 break
-                            elif category == "匕首" and price > 50000 or int(sale_count) < 2:
+                            elif category == "匕首" and price > 50000 or int(sale_count) < 1:
                                 break
-                            elif category == "手枪" and price < 10 or int(sale_count) < 55:
+                            elif category == "手枪" and price < 10 or int(sale_count) < 2:
                                 break
-                            elif category == "狙击步枪" and price < 10 or int(sale_count) < 55:
+                            elif category == "狙击步枪" and price < 10 or int(sale_count) < 2:
                                 break
-                            elif category == "微型冲锋枪" and int(sale_count) < 25:
+                            elif category == "微型冲锋枪" and int(sale_count) < 2:
                                 break
-                            elif category == "机枪" and price < 20 or int(sale_count) < 50:
+                            elif category == "机枪" and price < 20 or int(sale_count) < 5:
                                 break
-                            elif category == "霰弹枪" and price < 10 or int(sale_count) < 25:
+                            elif category == "霰弹枪" and price < 10 or int(sale_count) < 2:
                                 break
-                            elif category == "金色" and int(sale_count) < 10:
+                            elif category == "金色" and int(sale_count) < 1:
                                 break
-                            elif category == "全息" and int(sale_count) < 10:
+                            elif category == "全息" and int(sale_count) < 1:
                                 break
-                            elif category == "武器箱" and int(sale_count) < 20:
+                            elif category == "武器箱" and int(sale_count) < 2:
                                 break
-                            elif category == "音乐盒" and int(sale_count) < 20:
+                            elif category == "音乐盒" and int(sale_count) < 2:
                                 break
-                            elif category == "胶囊" and int(sale_count) < 20:
+                            elif category == "胶囊" and int(sale_count) < 2:
                                 break
-                            # buff_sql.add_new_good(name, goods_id, category, img_url, price, price)
+                            buff_sql.add_new_good(name, goods_id, category, img_url, price, price)
+                            buff_sql.create_new_record_table(goods_id)
+                            print("添加 name: " + name)
                 time.sleep(2)
                 pages = driver.find_element(By.CLASS_NAME,
                                             "pager.card-pager.light-theme.simple-pagination").find_elements(By.TAG_NAME,
@@ -134,55 +136,55 @@ if max_page > 0:
                 continue
             except StaleElementReferenceException:
                 continue
-driver.find_element(By.CLASS_NAME, "icon.icon_csgo_type_customplayer").click()
-pages = driver.find_element(By.CLASS_NAME, "pager.card-pager.light-theme.simple-pagination").find_elements(By.TAG_NAME,
-                                                                                                           "li")
-for page in pages:
-    if page.text.replace("\n", "") == "下一页":
-        # Get the previous sibling element
-        max_page_element = page.find_element(By.XPATH, './preceding-sibling::*[1]')
-        max_page = int(max_page_element.text)
-page = 2
-if max_page > 0:
-    for i in range(1, max_page + 1):
-        print("page: " + str(i))
-        while True:
-            try:
-                li_cards = driver.find_element(By.CLASS_NAME, "card_csgo").find_elements(By.TAG_NAME, "li")
-                for li in li_cards:
-                    url = li.find_element(By.TAG_NAME, "a").get_attribute("href").split("?")[0]
-                    if 'page' not in url:
-                        goods_id = url.split("/")[-1]
-                        if goods_id not in all_goods_id:
-                            price = float(
-                                li.find_element(By.TAG_NAME, "p").find_element(By.TAG_NAME, "strong").text.replace("¥ ",
-                                                                                                                   ""))
-                            print("price: " + str(price))
-                            name = li.find_element(By.TAG_NAME, "h3").find_element(By.TAG_NAME, "a").text
-                            print("name: " + name)
-                            img_url = li.find_element(By.TAG_NAME, "img").get_attribute("src")
-                            print("image_url: " + img_url)
-                            category = "探员"
-                            sale_count = (li.find_element(By.TAG_NAME, "p").find_element(By.TAG_NAME,
-                                                                                         "span").text.replace("+件在售",
-                                                                                                              "")
-                            .replace(
-                                "件在售", ""))
-
-                            # buff_sql.add_new_good(name, goods_id, category, img_url, price, price)
-                time.sleep(2)
-                pages = driver.find_element(By.CLASS_NAME,
-                                            "pager.card-pager.light-theme.simple-pagination").find_elements(By.TAG_NAME,
-                                                                                                            "li")
-                for page in pages:
-                    if page.text.replace("\n", "") == "下一页":
-                        page.find_element(By.TAG_NAME, "a").click()
-                        break
-                time.sleep(3)
-                break
-            except NoSuchElementException:
-                continue
-            except StaleElementReferenceException:
-                continue
-time.sleep(3)
+# driver.find_element(By.CLASS_NAME, "icon.icon_csgo_type_customplayer").click()
+# pages = driver.find_element(By.CLASS_NAME, "pager.card-pager.light-theme.simple-pagination").find_elements(By.TAG_NAME,
+#                                                                                                            "li")
+# for page in pages:
+#     if page.text.replace("\n", "") == "下一页":
+#         # Get the previous sibling element
+#         max_page_element = page.find_element(By.XPATH, './preceding-sibling::*[1]')
+#         max_page = int(max_page_element.text)
+# page = 2
+# if max_page > 0:
+#     for i in range(1, max_page + 1):
+#         print("page: " + str(i))
+#         while True:
+#             try:
+#                 li_cards = driver.find_element(By.CLASS_NAME, "card_csgo").find_elements(By.TAG_NAME, "li")
+#                 for li in li_cards:
+#                     url = li.find_element(By.TAG_NAME, "a").get_attribute("href").split("?")[0]
+#                     if 'page' not in url:
+#                         goods_id = url.split("/")[-1]
+#                         if goods_id not in all_goods_id:
+#                             price = float(
+#                                 li.find_element(By.TAG_NAME, "p").find_element(By.TAG_NAME, "strong").text.replace("¥ ",
+#                                                                                                                    ""))
+#                             print("price: " + str(price))
+#                             name = li.find_element(By.TAG_NAME, "h3").find_element(By.TAG_NAME, "a").text
+#                             print("name: " + name)
+#                             img_url = li.find_element(By.TAG_NAME, "img").get_attribute("src")
+#                             print("image_url: " + img_url)
+#                             category = "探员"
+#                             sale_count = (li.find_element(By.TAG_NAME, "p").find_element(By.TAG_NAME,
+#                                                                                          "span").text.replace("+件在售",
+#                                                                                                               "")
+#                             .replace(
+#                                 "件在售", ""))
+#
+#                             # buff_sql.add_new_good(name, goods_id, category, img_url, price, price)
+#                 time.sleep(2)
+#                 pages = driver.find_element(By.CLASS_NAME,
+#                                             "pager.card-pager.light-theme.simple-pagination").find_elements(By.TAG_NAME,
+#                                                                                                             "li")
+#                 for page in pages:
+#                     if page.text.replace("\n", "") == "下一页":
+#                         page.find_element(By.TAG_NAME, "a").click()
+#                         break
+#                 time.sleep(3)
+#                 break
+#             except NoSuchElementException:
+#                 continue
+#             except StaleElementReferenceException:
+#                 continue
+# time.sleep(3)
 print("采集完成")
