@@ -61,7 +61,7 @@ def handle_json(json_data, recorded, index):
     if str(goods_id) + "\n" not in recorded:
         for data in json_data['data']['list']:
             platform = data['platform']
-            print(goods_id, "数据长度", len(data['data']), "序号", index, '/', len(json_datas))
+            # print(goods_id, "数据长度", len(data['data']), "序号", index, '/', len(json_datas))
             if len(data['data']) > 1:
                 if platform == 0:
                     data_insert(goods_id, data['data'], 'buff', index)
@@ -117,11 +117,18 @@ def handle_json(json_data, recorded, index):
     #     time.sleep(10)
 
 
-with open('2024_2_recent_6_month.txt', 'r', encoding='utf-8') as f:
-    json_datas = f.readlines()
-with open('already_insert_goods_id.txt', 'r', encoding='utf-8') as f:
-    already_record = f.readlines()
-print(len(json_datas) / 2)
-for i, json1 in enumerate(json_datas):
-    # Thread(target=handle_json, args=(json.loads(json1), already_record, i)).start()
-    handle_json(json.loads(json1.replace("'", "\"")), already_record, i)  # json格式所有的数据都要使用"，不能使用'，否则会报错
+def insert_data_from_csob(json_datas):
+    with open('already_insert_goods_id.txt', 'r', encoding='utf-8') as f:
+        already_record = f.readlines()
+        handle_json(json_datas, already_record, 0)  # json格式所有的数据都要使用"，不能使用'，否则会报错
+
+
+# with open('2024_7_recent_6_month.txt', 'r', encoding='utf-8') as f:
+#     json_datas = f.readlines()
+# with open('already_insert_goods_id.txt', 'r', encoding='utf-8') as f:
+#     already_record = f.readlines()
+# print(len(json_datas) / 2)
+#
+# for i, json1 in enumerate(json_datas):
+#     # Thread(target=handle_json, args=(json.loads(json1), already_record, i)).start()
+#     handle_json(json.loads(json1.replace("'", "\"")), already_record, i)  # json格式所有的数据都要使用"，不能使用'，否则会报错

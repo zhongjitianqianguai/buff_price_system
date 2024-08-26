@@ -1,6 +1,7 @@
 import pymysql
 from dbutils.pooled_db import PooledDB
 from pymysql import IntegrityError
+import buff_sql_server
 
 pool = PooledDB(
     creator=pymysql,
@@ -8,10 +9,30 @@ pool = PooledDB(
     host='127.0.0.1',
     port=3306,
     user='root',
-    password='jiege666',
+    password='root',
     database='buff_price',
     charset='utf8'
 )
+
+
+def detect_table_exist(goods_id):
+    conn = pool.connection()
+    cursor = conn.cursor()
+    try:
+        sql = f"""SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = 'buff_price' AND TABLE_NAME = 
+        '{goods_id}_record';"""
+        cursor.execute(sql)
+        temp = cursor.fetchall()
+        if temp[0][0] == 1:
+            return True
+        else:
+            return False
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("检测表是否存在失败:", e)
+    finally:
+        cursor.close()
+        conn.close()
 
 
 def create_new_record_table(goods_id):
@@ -78,6 +99,10 @@ def write_record(record_time, goods_id, price, source):
     except IntegrityError:
         conn.rollback()
     except Exception as e:
+        if "doesn't exist" in str(e):
+            create_new_record_table(goods_id)
+            write_record(record_time, goods_id, price, source)
+            return
         print("错误类型:", type(e))
         print("插入记录失败:", e)
         conn.rollback()
@@ -245,6 +270,25 @@ def get_good_expected_price(goods_id):
         conn.close()
 
 
+def get_good_goods_id_by_igxe_id(igxe_id):
+    conn = pool.connection()
+    cursor = conn.cursor()
+    try:
+        sql = """Select goods_id from  buff_goods where igxe_id=%s;"""
+        conn.ping(reconnect=True)
+        cursor.execute(sql, igxe_id)  # 添加参数
+        temp = cursor.fetchall()
+        for i in temp:
+            return i[0]
+
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("通过igxe_id获取商品id失败:", e)
+    finally:
+        cursor.close()
+        conn.close()
+
+
 def get_user_mail_by_user_id(goods_id):
     conn = pool.connection()
     cursor = conn.cursor()
@@ -296,6 +340,63 @@ def update_good_with_trend(goods_id, trend):
     except Exception as e:
         print("错误类型:", type(e))
         print("更新商品价格趋势失败:", e)
+        conn.rollback()
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def set_good_with_uu_id(goods_id, uu_id):
+    conn = pool.connection()
+    cursor = conn.cursor()
+    try:
+
+        sql = """Update buff_goods set uu_id = %s where goods_id =%s;"""
+        conn.ping(reconnect=True)
+        cursor.execute(sql, (uu_id, goods_id))  # 添加参数
+        conn.commit()
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("设置商品悠悠id失败:", e)
+        conn.rollback()
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def set_good_with_igxe_id(goods_id, igxe_id):
+    conn = pool.connection()
+    cursor = conn.cursor()
+    try:
+
+        sql = """Update buff_goods set igxe_id = %s where goods_id =%s;"""
+        conn.ping(reconnect=True)
+        cursor.execute(sql, (igxe_id, goods_id))  # 添加参数
+        conn.commit()
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("设置商品igxe_id失败:", e)
+        conn.rollback()
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def set_good_with_c5_id(goods_id, c5_id):
+    conn = pool.connection()
+    cursor = conn.cursor()
+    try:
+
+        sql = """Update buff_goods set c5_id = %s where goods_id =%s;"""
+        conn.ping(reconnect=True)
+        cursor.execute(sql, (c5_id, goods_id))  # 添加参数
+        conn.commit()
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("设置商品c5_id失败:", e)
         conn.rollback()
 
     finally:
@@ -372,6 +473,25 @@ def update_good_update_time(goods_id, update_time):
     except Exception as e:
         print("错误类型:", type(e))
         print("更新商品更新时间失败:", e)
+        conn.rollback()
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def update_csob_update_time(goods_id, update_time):
+    conn = pool.connection()
+    cursor = conn.cursor()
+    try:
+
+        sql = """Update buff_goods set cs_ob_update_time = %s where goods_id =%s;"""
+        conn.ping(reconnect=True)
+        cursor.execute(sql, (update_time, goods_id))  # 添加参数
+        conn.commit()
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("更新csob商品更新时间失败:", e)
         conn.rollback()
 
     finally:
@@ -486,8 +606,9 @@ def auto_update_the_lowest_price_buff_by_through_record_table():
                 goods_id = table[0].split("_")[0]
                 cursor.execute(f"SELECT MIN(price) FROM {table[0]} where source = 'buff'")
                 lowest_price = cursor.fetchone()[0]
-                cursor.execute(
-                    f"UPDATE buff_goods SET the_lowest_price_buff = {lowest_price} WHERE goods_id = {goods_id}")
+                if lowest_price is not None:
+                    cursor.execute(
+                        f"UPDATE buff_goods SET the_lowest_price_buff = {lowest_price} WHERE goods_id = {goods_id}")
     except Exception as e:
         print(f"An error occurred: {e}")
     finally:
@@ -506,8 +627,9 @@ def auto_update_the_lowest_price_uu_by_through_record_table():
                 goods_id = table[0].split("_")[0]
                 cursor.execute(f"SELECT MIN(price) FROM {table[0]} where source = 'uu'")
                 lowest_price = cursor.fetchone()[0]
-                cursor.execute(
-                    f"UPDATE buff_goods SET the_lowest_price_uu = {lowest_price} WHERE goods_id = {goods_id}")
+                if lowest_price is not None:
+                    cursor.execute(
+                        f"UPDATE buff_goods SET the_lowest_price_uu = {lowest_price} WHERE goods_id = {goods_id}")
     except Exception as e:
         print(f"An error occurred: {e}")
     finally:
@@ -526,8 +648,9 @@ def auto_update_the_lowest_price_igxe_by_through_record_table():
                 goods_id = table[0].split("_")[0]
                 cursor.execute(f"SELECT MIN(price) FROM {table[0]} where source = 'igxe'")
                 lowest_price = cursor.fetchone()[0]
-                cursor.execute(
-                    f"UPDATE buff_goods SET the_lowest_price_igxe = {lowest_price} WHERE goods_id = {goods_id}")
+                if lowest_price is not None:
+                    cursor.execute(
+                        f"UPDATE buff_goods SET the_lowest_price_igxe = {lowest_price} WHERE goods_id = {goods_id}")
     except Exception as e:
         print(f"An error occurred: {e}")
     finally:
@@ -546,10 +669,144 @@ def auto_update_the_lowest_price_c5_by_through_record_table():
                 goods_id = table[0].split("_")[0]
                 cursor.execute(f"SELECT MIN(price) FROM {table[0]} where source = 'c5'")
                 lowest_price = cursor.fetchone()[0]
-                cursor.execute(
-                    f"UPDATE buff_goods SET the_lowest_price_c5 = {lowest_price} WHERE goods_id = {goods_id}")
+                if lowest_price is not None:
+                    cursor.execute(
+                        f"UPDATE buff_goods SET the_lowest_price_c5 = {lowest_price} WHERE goods_id = {goods_id}")
     except Exception as e:
         print(f"An error occurred: {e}")
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_all_goods_id_igxe():
+    conn = pool.connection()
+    cursor = conn.cursor()
+    try:
+        sql = """Select igxe_id from buff_goods;"""
+        conn.ping(reconnect=True)
+        cursor.execute(sql)  # 添加参数
+        goods_ids = []
+        for good in cursor.fetchall():
+            goods_ids.append(good[0])
+        return goods_ids
+
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("获取所有商品id失败:", e)
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def update_good_with_steam_price_igxe(url, steam_price):
+    conn = pool.connection()
+    cursor = conn.cursor()
+    try:
+
+        sql = """Update buff_goods set now_price_steam = %s where igxe_id =%s;"""
+        conn.ping(reconnect=True)
+        cursor.execute(sql, (steam_price, url))  # 添加参数
+        conn.commit()
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("更新商品steam价格失败:", e)
+        conn.rollback()
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def delete_daily_record_to_only_two():
+    conn = pool.connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SHOW TABLES")
+        tables = cursor.fetchall()
+        for table in tables:
+            if "_record" in table[0]:
+                sql = f"SELECT * FROM {table[0]} WHERE source = 'buff' ORDER BY time DESC"
+                cursor.execute(sql)
+                records = cursor.fetchall()
+                if len(records) > 2:
+                    for record in records[2:]:
+                        # Use parameterized query to safely pass values
+                        sql = f"DELETE FROM {table[0]} WHERE time = %s AND price = %s AND source = 'buff'"
+                        cursor.execute(sql, (record[0], record[1]))
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def only_insert_two_into_server():
+    conn = pool.connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SHOW TABLES")
+        tables = cursor.fetchall()
+        for table in tables:
+            if "_record" in table[0]:
+                sql = f"SELECT * FROM {table[0]} WHERE source = 'buff' ORDER BY time DESC"
+                cursor.execute(sql)
+                records = cursor.fetchall()
+                if len(records) > 2:
+                    for record in records[2:]:
+                        buff_sql_server.write_record(record[0], table[0].split("_")[0], record[1], record[2])
+                else:
+                    for record in records:
+                        buff_sql_server.write_record(record[0], table[0].split("_")[0], record[1], record[2])
+                sql = f"SELECT * FROM {table[0]} WHERE source = 'uu' ORDER BY time DESC"
+                cursor.execute(sql)
+                records = cursor.fetchall()
+                if len(records) > 2:
+                    for record in records[2:]:
+                        buff_sql_server.write_record(record[0], table[0].split("_")[0], record[1], record[2])
+                else:
+                    for record in records:
+                        buff_sql_server.write_record(record[0], table[0].split("_")[0], record[1], record[2])
+                sql = f"SELECT * FROM {table[0]} WHERE source = 'igxe' ORDER BY time DESC"
+                cursor.execute(sql)
+                records = cursor.fetchall()
+                if len(records) > 2:
+                    for record in records[2:]:
+                        buff_sql_server.write_record(record[0], table[0].split("_")[0], record[1], record[2])
+                else:
+                    for record in records:
+                        buff_sql_server.write_record(record[0], table[0].split("_")[0], record[1], record[2])
+                sql = f"SELECT * FROM {table[0]} WHERE source = 'c5' ORDER BY time DESC"
+                cursor.execute(sql)
+                records = cursor.fetchall()
+                if len(records) > 2:
+                    for record in records[2:]:
+                        buff_sql_server.write_record(record[0], table[0].split("_")[0], record[1], record[2])
+                else:
+                    for record in records:
+                        buff_sql_server.write_record(record[0], table[0].split("_")[0], record[1], record[2])
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def update_good_with_lowest_price_igxe(igxe_id, now_lowest_price):
+    conn = pool.connection()
+    cursor = conn.cursor()
+    try:
+
+        sql = """Update buff_goods set the_lowest_price_igxe = %s where igxe_id =%s;"""
+        conn.ping(reconnect=True)
+        cursor.execute(sql, (now_lowest_price, igxe_id))  # 添加参数
+        conn.commit()
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("更新商品最低igxe价格失败:", e)
+        conn.rollback()
+
     finally:
         cursor.close()
         conn.close()
