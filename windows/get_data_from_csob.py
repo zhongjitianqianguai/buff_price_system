@@ -251,6 +251,7 @@ def get_json(goods):
                         else:
                             break
                     time.sleep(3)
+                    have_data = False
                     for request in browser.requests:
                         if '/api/v2/goods/chart' in request.url:
                             json_request_body = json.loads(str(request.body).replace("b'", "").replace("'", ""))
@@ -271,22 +272,22 @@ def get_json(goods):
                                 # print(len(time_stamps), len(prices))
                                 if pl == 0:
                                     pass
-                                    # with lock:
-                                    #     with open('already_record.txt', 'a+', encoding='utf-8') as a:
-                                    #         a.write(str(goods_id) + '\n')
-                                    pbar.update(1)
-                                    pbar.set_description(f"商品{name}爬取完成")
                                 elif pl == 1:
                                     buff_sql.set_good_with_uu_id(goods_id, json_goods_id)
                                 elif pl == 2:
                                     buff_sql.set_good_with_igxe_id(goods_id, json_goods_id)
                                 elif pl == 3:
                                     buff_sql.set_good_with_c5_id(goods_id, json_goods_id)
+                                have_data = True
                                 Thread(target=data_insert, args=(goods_id, time_stamps, prices, pl)).start()
                     time.sleep(1)
                     mode_change = False
                     buff_sql.update_good_update_time(goods_id, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
                     buff_sql.update_csob_update_time(goods_id, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+                    if not have_data:
+                        print(f"商品{name}没有数据")
+                    pbar.update(1)
+                    pbar.set_description(f"商品{name}爬取完成")
                     break
                 except StaleElementReferenceException as e:
                     print(e)
