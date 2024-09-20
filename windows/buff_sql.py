@@ -595,6 +595,25 @@ def add_new_good(name, goods_id, category, img_url, price, the_lowest_price):
         conn.close()
 
 
+def add_new_good_buff_dont_have(name, goods_id, category, img_url, price, the_lowest_price):
+    conn = pool.connection()
+    cursor = conn.cursor()
+    try:
+
+        sql = """Insert into buff_goods(name,goods_id,category,img_url,now_price_buff,the_lowest_price_buff) 
+        value(%s,%s,%s,%s,%s,%s);"""
+        conn.ping(reconnect=True)
+        cursor.execute(sql, (name, goods_id, category, img_url, price, the_lowest_price))  # 添加参数
+        conn.commit()
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("插入新商品失败:", e)
+        conn.rollback()
+    finally:
+        cursor.close()
+        conn.close()
+
+
 def auto_update_the_lowest_price_buff_by_through_record_table():
     conn = pool.connection()
     cursor = conn.cursor()
@@ -807,6 +826,21 @@ def update_good_with_lowest_price_igxe(igxe_id, now_lowest_price):
         print("更新商品最低igxe价格失败:", e)
         conn.rollback()
 
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def make_all_ids_not_null():
+    conn = pool.connection()
+    cursor = conn.cursor()
+    try:
+        # Update all goods_id in buff_goods to not null
+        cursor.execute("UPDATE buff_goods SET uu_id = %s WHERE uu_id IS NULL", '0')
+        cursor.execute("UPDATE buff_goods SET igxe_id = %s WHERE igxe_id IS NULL", '0')
+        cursor.execute("UPDATE buff_goods SET c5_id = %s WHERE c5_id IS NULL", '0')
+    except Exception as e:
+        print(f"An error occurred: {e}")
     finally:
         cursor.close()
         conn.close()

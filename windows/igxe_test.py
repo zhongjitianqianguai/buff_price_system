@@ -17,7 +17,7 @@ import buff_sql_server
 import buff_mail
 
 options = webdriver.FirefoxOptions()
-# options.add_argument('--headless')
+options.add_argument('--headless')
 # chrome_options.add_argument('--disable-gpu')
 # options.add_argument("window-size=1024,768")
 # chrome_options.add_argument("--no-sandbox")

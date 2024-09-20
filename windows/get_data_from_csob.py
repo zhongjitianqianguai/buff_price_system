@@ -74,77 +74,61 @@ def get_json(goods):
         del browser.requests
         while True:
             try:
-                if (not mode_change and '胶囊' in category or '武器箱' in category or '音乐盒' in category or
-                        category == '探员' or category == '金色' or category == '全息'):
+                while True:
                     if name == '音乐盒（StatTrak™） | Neck Deep - 躺平青年':
                         name = '音乐盒（StatTrak） | Neck Deep, 躺平青年'
                     elif '印花 | 玛丽埃塔（全息）' in name:
                         name = '印花 | 玛丽埃塔'
-                        break
+
                     elif '印花 | 大家动起来（全息）' in name:
                         name = '印花 | 大家动起来'
+                    elif '音乐盒（StatTrak） | Neck Deep, 躺平青年' in name:
+                        name = '音乐盒（StatTrak™） | Neck Deep - 躺平青年'
+                    elif '印花 | Hobbit（全息）| 2022年里约热内卢锦标赛' in name:
+                        name = '印花 | Hobbit（全息）| 2022年里约热内卢锦标赛'
+                    elif '印花 | iM（全息）| 2024年哥本哈根锦标赛' in name:
                         break
-                    if '—' in name:
-                        name = name.replace('—', "-")
-                    browser.get('https://csgoob.onet4p.net/goods?name=' + name)
-                    browser.get('https://csgoob.onet4p.net/goods?name=' + name)
+                    browser.get('https://csgoob.onet4p.net/search')
 
-                else:
-                    while True:
-                        if name == '音乐盒（StatTrak™） | Neck Deep - 躺平青年':
-                            name = '音乐盒（StatTrak） | Neck Deep, 躺平青年'
-                        elif '印花 | 玛丽埃塔（全息）' in name:
-                            name = '印花 | 玛丽埃塔'
-
-                        elif '印花 | 大家动起来（全息）' in name:
-                            name = '印花 | 大家动起来'
-                        elif '音乐盒（StatTrak） | Neck Deep, 躺平青年' in name:
-                            name = '音乐盒（StatTrak™） | Neck Deep - 躺平青年'
-                        elif '印花 | Hobbit（全息）| 2022年里约热内卢锦标赛' in name:
-                            name = '印花 | Hobbit（全息）| 2022年里约热内卢锦标赛'
-                        elif '印花 | iM（全息）| 2024年哥本哈根锦标赛' in name:
+                    if "(" in name and len(name.split("(")[1]) > 3:
+                        search_name = name.split("(")[0]
+                    else:
+                        search_name = name
+                    browser.find_element(By.CLASS_NAME,
+                                         'el-input.el-input--large.el-input--suffix.w-full.h-10.lg\\:h-14').find_element(
+                        By.CLASS_NAME, "el-input__inner").send_keys(
+                        search_name.replace('*', '').replace("$", "").replace('Hobbit', 'Hobbi'))
+                    time.sleep(3)
+                    if len(browser.find_elements(By.CLASS_NAME,
+                                                 'el-input__suffix-inner')) > 1:
+                        browser.find_elements(By.CLASS_NAME,
+                                              'el-input__suffix-inner')[1].click()
+                    else:
+                        continue
+                    time.sleep(3)
+                    search_result_names = browser.find_elements(By.CLASS_NAME,
+                                                                'w-full.px-3.py-3')
+                    for search_result_name in search_result_names:
+                        name_text = search_result_name.find_element(By.TAG_NAME, "a")
+                        if name_text.text == name:
+                            name_text.click()
                             break
-                        browser.get('https://csgoob.onet4p.net/search')
-
-                        if "(" in name and len(name.split("(")[1]) > 3:
-                            search_name = name.split("(")[0]
-                        else:
-                            search_name = name
-                        browser.find_element(By.CLASS_NAME,
-                                             'el-input.el-input--large.el-input--suffix.w-full.h-10.lg\\:h-14').find_element(
-                            By.CLASS_NAME, "el-input__inner").send_keys(
-                            search_name.replace('*', '').replace("$", "").replace('Hobbit', 'Hobbi'))
-                        time.sleep(3)
-                        if len(browser.find_elements(By.CLASS_NAME,
-                                                     'el-input__suffix-inner')) > 1:
-                            browser.find_elements(By.CLASS_NAME,
-                                                  'el-input__suffix-inner')[1].click()
-                        else:
-                            continue
-                        time.sleep(3)
-                        search_result_names = browser.find_elements(By.CLASS_NAME,
-                                                                    'w-full.px-3.py-3')
-                        for search_result_name in search_result_names:
-                            name_text = search_result_name.find_element(By.TAG_NAME, "a")
-                            if name_text.text == name:
-                                name_text.click()
-                                break
-                        # try:
-                        #     WebDriverWait(browser, 10, 0.5).until(ec.presence_of_all_elements_located(
-                        #         (By.CLASS_NAME, 'mt-2.lg\\:mt-4.grid.grid-cols-2.gap-2.lg\\:gap-4')))
-                        #     time.sleep(3)
-                        #     # ActionChains(browser).move_to_element(
-                        #     #     browser.find_element(By.CLASS_NAME, 'flex.items-baseline.gap-2')).pause(
-                        #     #     0.5).perform()
-                        # except TimeoutException as e:
-                        #     print(e)
-                        #     print(traceback.format_exc())
-                        #     # pbar.update(1)
-                        #     now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-                        #     # pbar.set_description(f"{now}: 商品{name}爬取失败")
-                        #     break
-                        time.sleep(1)
-                        break
+                    # try:
+                    #     WebDriverWait(browser, 10, 0.5).until(ec.presence_of_all_elements_located(
+                    #         (By.CLASS_NAME, 'mt-2.lg\\:mt-4.grid.grid-cols-2.gap-2.lg\\:gap-4')))
+                    #     time.sleep(3)
+                    #     # ActionChains(browser).move_to_element(
+                    #     #     browser.find_element(By.CLASS_NAME, 'flex.items-baseline.gap-2')).pause(
+                    #     #     0.5).perform()
+                    # except TimeoutException as e:
+                    #     print(e)
+                    #     print(traceback.format_exc())
+                    #     # pbar.update(1)
+                    #     now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+                    #     # pbar.set_description(f"{now}: 商品{name}爬取失败")
+                    #     break
+                    time.sleep(1)
+                    break
             except StaleElementReferenceException as e:
                 print(e)
                 print(traceback.format_exc())
@@ -233,7 +217,7 @@ def get_json(goods):
                                              'el-select__selected-item.el-select__placeholder').find_element(
                         By.TAG_NAME,
                         "span").text
-                            != '全部'):  #and csob_update_time is None
+                            != '全部'):  # and csob_update_time is None
                         select_icon = browser.find_element(By.CLASS_NAME, 'el-icon.el-select__caret.el-select__icon')
                         browser.execute_script("arguments[0].click()", select_icon)
                         del browser.requests
