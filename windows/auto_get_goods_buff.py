@@ -13,7 +13,7 @@ options.binary_location = "C:\\Program Files\\Mozilla Firefox\\firefox.exe"
 driver = webdriver.Firefox(service=Service('webdriver/geckodriver.exe'),
                            options=options)
 driver.set_page_load_timeout(300)
-driver.get('https://buff.163.com/market/csgo#game=csgo&page_num=1&category=sticker_tournament22&tab=selling')
+driver.get('https://buff.163.com/market/csgo#game=csgo&page_num=1&category=sticker_tournament23&tab=selling')
 driver.implicitly_wait(10)
 all_goods_id = buff_sql.get_all_goods_id()
 
@@ -22,7 +22,7 @@ time.sleep(30)
 
 bu = ["AK-47", "M4A4", "加利尔", "AUG", "SG 553", "AWP", "SSG 08", "M4A1", "SCAR-20", "G3SG1", "法玛斯"]
 knifes = ["蝴蝶刀", "M9刺刀", "爪子刀", "廓尔喀刀", "刺刀", "锯齿爪刀", "流浪者匕首", "折叠刀", "短剑", "海豹短刀",
-          "熊刀", "猎杀者匕首", "系绳匕首", "求生匕首", "弯刀", "暗影双匕", "鲍伊猎刀", "穿肠刀", "折刀"]
+          "熊刀", "猎杀者匕首", "系绳匕首", "求生匕首", "弯刀", "暗影双匕", "鲍伊猎刀", "穿肠刀", "折刀", "廓尔喀刀"]
 hands = ["手套", "运动手套", "专业手套", "摩托手套", "裹手", "狂牙手套", "九头蛇手套", "血猎手套"]
 pistols = ["沙漠之鹰", "USP 消音版", "格洛克 18 型", "P2000", "P250", "FN57", "R8 左轮手枪", "Tec-9", "双持贝瑞塔",
            "CZ75", "电击枪", "", "", "", ]
@@ -44,8 +44,10 @@ if max_page > 0:
         while True:
             try:
                 li_cards = driver.find_element(By.CLASS_NAME, "card_csgo").find_elements(By.TAG_NAME, "li")
-                for li in li_cards:
+                print(len(li_cards))
+                for index, li in enumerate(li_cards):
                     url = li.find_element(By.TAG_NAME, "a").get_attribute("href").split("?")[0]
+                    print(f"Index {index}: {url}")
                     if 'page' not in url:
                         goods_id = url.split("/")[-1]
                         if goods_id not in all_goods_id:
@@ -68,6 +70,8 @@ if max_page > 0:
                                 category = "音乐盒"
                             if "胶囊" in name:
                                 category = "胶囊"
+                            if "挂件" in name:
+                                category = "挂件"
                             for gun in bu:
                                 if gun in name:
                                     category = "步枪"
@@ -128,7 +132,7 @@ if max_page > 0:
                             buff_sql.add_new_good(name, goods_id, category, img_url, price, price)
                             buff_sql.create_new_record_table(goods_id)
                             print("添加 name: " + name)
-                time.sleep(2)
+                time.sleep(4)
                 pages = driver.find_element(By.CLASS_NAME,
                                             "pager.card-pager.light-theme.simple-pagination").find_elements(By.TAG_NAME,
                                                                                                             "li")
@@ -136,11 +140,13 @@ if max_page > 0:
                     if page.text.replace("\n", "") == "下一页":
                         page.find_element(By.TAG_NAME, "a").click()
                         break
-                time.sleep(3)
+                time.sleep(5)
                 break
             except NoSuchElementException:
+                print("NoSuchElementException")
                 continue
             except StaleElementReferenceException:
+                print("StaleElementReferenceException")
                 continue
 # driver.find_element(By.CLASS_NAME, "icon.icon_csgo_type_customplayer").click()
 # pages = driver.find_element(By.CLASS_NAME, "pager.card-pager.light-theme.simple-pagination").find_elements(By.TAG_NAME,
@@ -160,8 +166,8 @@ if max_page > 0:
 #                 for li in li_cards:
 #                     url = li.find_element(By.TAG_NAME, "a").get_attribute("href").split("?")[0]
 #                     if 'page' not in url:
-#                         goods_id = url.split("/")[-1]
-#                         if goods_id not in all_goods_id:
+#                         igxe_id = url.split("/")[-1]
+#                         if igxe_id not in all_goods_id:
 #                             price = float(
 #                                 li.find_element(By.TAG_NAME, "p").find_element(By.TAG_NAME, "strong").text.replace("¥ ",
 #                                                                                                                    ""))
@@ -177,7 +183,7 @@ if max_page > 0:
 #                             .replace(
 #                                 "件在售", ""))
 #
-#                             # buff_sql.add_new_good(name, goods_id, category, img_url, price, price)
+#                             # buff_sql.add_new_good(name, igxe_id, category, img_url, price, price)
 #                 time.sleep(2)
 #                 pages = driver.find_element(By.CLASS_NAME,
 #                                             "pager.card-pager.light-theme.simple-pagination").find_elements(By.TAG_NAME,

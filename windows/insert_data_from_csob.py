@@ -61,7 +61,7 @@ def handle_json(json_data, recorded, index):
     if str(goods_id) + "\n" not in recorded:
         for data in json_data['data']['list']:
             platform = data['platform']
-            # print(goods_id, "数据长度", len(data['data']), "序号", index, '/', len(json_datas))
+            # print(igxe_id, "数据长度", len(data['data']), "序号", index, '/', len(json_datas))
             if len(data['data']) > 1:
                 if platform == 0:
                     data_insert(goods_id, data['data'], 'buff', index)
@@ -82,35 +82,35 @@ def handle_json(json_data, recorded, index):
     #         urls_per_thread = len(data['data']) // 100
     #         for i in range(100):
     #             if platform == 0:
-    #                 if str(goods_id) + '/' + 'buff' + str(index) + ':' + str(i) + '\n' not in recorded:
+    #                 if str(igxe_id) + '/' + 'buff' + str(index) + ':' + str(i) + '\n' not in recorded:
     #                     start = i * urls_per_thread
     #                     end = start + urls_per_thread if i < 100 - 1 else len(data['data'])
     #                     sublist = data['data'][start:end]
-    #                     Thread(target=data_insert, args=(goods_id, sublist, 'buff', i, index)).start()
+    #                     Thread(target=data_insert, args=(igxe_id, sublist, 'buff', i, index)).start()
     #                 elif i == 99:
     #                     is_continue = True
     #             elif platform == 1:
-    #                 if str(goods_id) + '/' + 'uu' + str(index) + ':' + str(i) + '\n' not in recorded:
+    #                 if str(igxe_id) + '/' + 'uu' + str(index) + ':' + str(i) + '\n' not in recorded:
     #                     start = i * urls_per_thread
     #                     end = start + urls_per_thread if i < 100 - 1 else len(data['data'])
     #                     sublist = data['data'][start:end]
-    #                     Thread(target=data_insert, args=(goods_id, sublist, 'uu', i, index)).start()
+    #                     Thread(target=data_insert, args=(igxe_id, sublist, 'uu', i, index)).start()
     #                 elif i == 99:
     #                     is_continue = True
     #             elif platform == 2:
-    #                 if str(goods_id) + '/' + 'igxe' + str(index) + ':' + str(i) + '\n' not in recorded:
+    #                 if str(igxe_id) + '/' + 'igxe' + str(index) + ':' + str(i) + '\n' not in recorded:
     #                     start = i * urls_per_thread
     #                     end = start + urls_per_thread if i < 100 - 1 else len(data['data'])
     #                     sublist = data['data'][start:end]
-    #                     Thread(target=data_insert, args=(goods_id, sublist, 'igxe', i, index)).start()
+    #                     Thread(target=data_insert, args=(igxe_id, sublist, 'igxe', i, index)).start()
     #                 elif i == 99:
     #                     is_continue = True
     #             elif platform == 3:
-    #                 if str(goods_id) + '/' + 'c5' + str(index) + ':' + str(i) + '\n' not in recorded:
+    #                 if str(igxe_id) + '/' + 'c5' + str(index) + ':' + str(i) + '\n' not in recorded:
     #                     start = i * urls_per_thread
     #                     end = start + urls_per_thread if i < 100 - 1 else len(data['data'])
     #                     sublist = data['data'][start:end]
-    #                     Thread(target=data_insert, args=(goods_id, sublist, 'c5', i, index)).start()
+    #                     Thread(target=data_insert, args=(igxe_id, sublist, 'c5', i, index)).start()
     #                 elif i == 99:
     #                     is_continue = True
     # if not is_continue:

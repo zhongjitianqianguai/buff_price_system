@@ -39,7 +39,7 @@ def get_igxe():
                 now_price_c5, now_price_steam, update_time, uu_id, igxe_id, c5_id, csob_update_time) in enumerate(
         goods):
         pbar.set_description(f"爬取第 {index}/{len(goods)}商品中")
-        if igxe_id == '0' or igxe_id is None:
+        if igxe_id == '0' or igxe_id is None or igxe_id == '':
             pbar.update(1)
             continue
         sleep_time = random.randint(2, 5)
@@ -74,7 +74,7 @@ def get_igxe():
                                     buff_mail.send_mail(f"IGXE: {name} 价格低于预期",
                                                         f" 历史最低价格{the_lowest_price_igxe}，现在价格：{now_lowest_price} \n",
                                                         "IGXE",
-                                                        "1094410998@qq.com")
+                                                        "1094410998@qq.com",0)
 
                 # print(f"{time_get} {igxe_id} {steam_price} {now_lowest_price}")
                 time.sleep(sleep_time)
@@ -82,11 +82,15 @@ def get_igxe():
                 pbar.update(1)
                 break
             except NoSuchElementException as e:
-                if '暂无数据' in driver.find_element(By.CLASS_NAME, "t").text:
-                    pbar.set_description(f"爬取第 {index}/{len(igxe_id)}商品完成")
-                    pbar.update(1)
-                    # print(f"{igxe_id} 暂无数据")
-                    break
+                try:
+                    if '暂无数据' in driver.find_element(By.CLASS_NAME, "t").text:
+                        pbar.set_description(f"爬取第 {index}/{len(igxe_id)}商品完成")
+                        pbar.update(1)
+                        # print(f"{igxe_id} 暂无数据")
+                        break
+                except NoSuchElementException as e:
+                    print(f"{igxe_id} NoSuchElementException")
+                    continue
                 continue
             except TimeoutException as e:
                 print(f"{igxe_id} TimeoutException")

@@ -88,7 +88,7 @@ def get_json(goods):
                         name = '印花 | Hobbit（全息）| 2022年里约热内卢锦标赛'
                     elif '印花 | iM（全息）| 2024年哥本哈根锦标赛' in name:
                         break
-                    browser.get('https://csgoob.onet4p.net/search')
+                    browser.get('https://csgoob.com/search')
 
                     if "(" in name and len(name.split("(")[1]) > 3:
                         search_name = name.split("(")[0]

@@ -236,6 +236,63 @@ def get_all_goods():
         conn.close()
 
 
+def get_all_igxe_goods_id():
+    conn = pool.connection()
+    cursor = conn.cursor()
+    try:
+        sql = """Select igxe_id from buff_goods;"""
+        conn.ping(reconnect=True)
+        cursor.execute(sql)  # 添加参数
+        goods_ids = []
+        for good in cursor.fetchall():
+            goods_ids.append(good[0])
+        return goods_ids
+
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("获取所有商品id失败:", e)
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def add_new_good_from_igxe(name, igxe_id, category, img_url, price):
+    conn = pool.connection()
+    cursor = conn.cursor()
+    try:
+
+        sql = """Insert into buff_goods(name,igxe_id,category,img_url,now_price_igxe,goods_id) value(%s,%s,%s,%s,%s,'0');"""
+        conn.ping(reconnect=True)
+        cursor.execute(sql, (name, igxe_id, category, img_url, price))  # 添加参数
+        conn.commit()
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("插入新商品失败:", e)
+        conn.rollback()
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_goods_id_by_name(name):
+    conn = pool.connection()
+    cursor = conn.cursor()
+    try:
+        sql = """Select goods_id from  buff_goods where name=%s;"""
+        conn.ping(reconnect=True)
+        cursor.execute(sql, name)  # 添加参数
+        temp = cursor.fetchall()
+        for i in temp:
+            return i[0]
+
+    except Exception as e:
+        print("错误类型:", type(e))
+        print("通过商品名获取商品id失败:", e)
+    finally:
+        cursor.close()
+        conn.close()
+
+
 def get_good_all_record(goods_id):
     conn = pool.connection()
     cursor = conn.cursor()
@@ -844,3 +901,4 @@ def make_all_ids_not_null():
     finally:
         cursor.close()
         conn.close()
+
